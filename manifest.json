@@ -1,21 +1,10 @@
 ﻿{
-    "ManifestVersion": 2,
-    "AuthorName": "DrBibop",
-    "Name": "VRAimFix",
-    "DisplayName": "VR Aim Fix",
-    "Version": "1.0.0",
-    "Licence": "",
-    "WebsiteURL": "",
-    "Description": "The characters now properly aim towards your crosshair in VR",
-    "GameVersion": "N/A",
-    "Dependencies": ["bbepis-BepInExPack-5.3.1", "tristanmcpherson-R2API-2.5.14"],
-    "OptionalDependencies": [],
-    "Incompatibilities": [],
-    "NetworkMode": "both",
-    "PackageType": "mod",
-    "InstallMode": "managed",
-    "Loaders": [
-        "bepinex"
-    ],
-    "ExtraData": {}
+    "name": "VRAimFix",
+    "version_number": "1.0.0",
+    "website_url": "https://github.com/DrBibop/RoR2-VRAimFix",
+    "description": "This mod makes the character aim towards the crosshair in VR",
+    "dependencies": [
+        "bbepis-BepInExPack-5.3.1",
+		"tristanmcpherson-R2API-2.5.14"
+    ]
 }
