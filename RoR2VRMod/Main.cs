@@ -8,6 +8,7 @@ using System.IO;
 using System.Security;
 using System.Security.Permissions;
 using UnityEngine;
+using UnityEngine.UI;
 
 [module: UnverifiableCode]
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -18,31 +19,46 @@ namespace DrBibop
     [BepInPlugin("com.DrBibop.VRFixes", "VR Fixes", "1.0.0")]
     public class VRFixes : BaseUnityPlugin
     {
-        GameObject HUDPrefab;
-
         private void Awake()
         {
-            HUDPrefab = Resources.Load<GameObject>("prefabs/HUD.prefab");
-            if (HUDPrefab)
-            {
-                RectTransform rect = HUDPrefab.GetComponent<RectTransform>();
-                if (rect)
-                {
-                    rect.anchorMin = new Vector2(0.2f, 0.2f);
-                    rect.anchorMax = new Vector2(0.8f, 0.8f);
-                }
-                /*
-                GameObject MainUI = HUDPrefab.transform.Find("MainUIArea").gameObject;
-                if (MainUI)
-                {
-                    RectTransform rect = MainUI.GetComponent<RectTransform>();
-                    rect.wi
-                }
-                */
-            }
+            On.RoR2.UI.HUD.Awake += AdjustHUDAnchors;
             On.RoR2.CameraRigController.GetCrosshairRaycastRay += GetVRCrosshairRaycastRay;
 
             //On.RoR2.UI.MainMenu.MainMenuController.Start += EnableVR;
+        }
+
+        private void AdjustHUDAnchors(On.RoR2.UI.HUD.orig_Awake orig, RoR2.UI.HUD self)
+        {
+            orig(self);
+            
+            RectTransform mainRect = self.mainContainer.GetComponent<RectTransform>();
+            mainRect.anchorMin = new Vector2(0.2f, 0.25f);
+            mainRect.anchorMax = new Vector2(0.8f, 0.75f);
+            CanvasScaler scaler = self.canvas.gameObject.AddComponent<CanvasScaler>();
+            scaler.scaleFactor = 0.8f;
+
+            Transform uiArea = mainRect.transform.Find("MainUIArea");
+
+            if (uiArea)
+            {
+                Transform[] uiElementsToLower = new Transform[3]
+                {
+                    uiArea.Find("UpperRightCluster"),
+                    uiArea.Find("UpperLeftCluster"),
+                    uiArea.Find("TopCenterCluster")
+                };
+
+                foreach (Transform uiTransform in uiElementsToLower)
+                {
+                    if (!uiTransform)
+                        continue;
+
+                    RectTransform rect = uiTransform.GetComponent<RectTransform>();
+                    Vector3 newPos = rect.position;
+                    newPos.y -= 150;
+                    rect.position = newPos;
+                }
+            }
         }
 
         /*
@@ -117,7 +133,7 @@ namespace DrBibop
             GUI.Label(new Rect(0f, 0f, 600f, 80f), "The Unity Audio Engine has been restored, please restart the game once for it to take effect.", GUI.skin.label);
         }
     }
-    */
+    
 
     //By x753
     public static class BytePatternUtilities
@@ -181,4 +197,5 @@ namespace DrBibop
             return dst;
         }
     }
+    */
 }
