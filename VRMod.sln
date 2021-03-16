@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30907.101
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VRFixes", "RoR2VRMod\VRFixes.csproj", "{5D779ADC-2D93-41D6-8465-87B5AD985AFB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VRMod", "RoR2VRMod\VRMod.csproj", "{5D779ADC-2D93-41D6-8465-87B5AD985AFB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VREnabler", "VREnabler\VREnabler.csproj", "{885EF435-C0FE-405A-B37A-D0D037AE8E9B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{5D779ADC-2D93-41D6-8465-87B5AD985AFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D779ADC-2D93-41D6-8465-87B5AD985AFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5D779ADC-2D93-41D6-8465-87B5AD985AFB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{885EF435-C0FE-405A-B37A-D0D037AE8E9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{885EF435-C0FE-405A-B37A-D0D037AE8E9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{885EF435-C0FE-405A-B37A-D0D037AE8E9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{885EF435-C0FE-405A-B37A-D0D037AE8E9B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
