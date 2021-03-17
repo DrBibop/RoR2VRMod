@@ -1,12 +1,7 @@
 ﻿using BepInEx;
-using HarmonyLib;
 using MonoMod.Cil;
 using R2API.Utils;
 using RoR2;
-using System;
-using System.Collections;
-using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Security;
 using System.Security.Permissions;
@@ -19,7 +14,7 @@ namespace DrBibop
 {
     [NetworkCompatibility(CompatibilityLevel.NoNeedForSync)]
     [BepInDependency("com.bepis.r2api")]
-    [BepInPlugin("com.DrBibop.VRMod", "VR Mod", "1.1.0")]
+    [BepInPlugin("com.DrBibop.VRMod", "VRMod", "1.0.0")]
     public class VRMod : BaseUnityPlugin
     {
         private void Awake()

@@ -31,6 +31,13 @@ If the game keeps launching in desktop mode, try adding `-vrmode Oculus` or `-vr
 - If you're using r2modman, you can add launch options in `Settings > Debugging > Set launch parameters`.
 - If you installed the mod manually, right click the game on Steam and click on `Properties > General` to access the launch options field.
 
+### I disabled/uninstalled the VR mod and the menu looks weird.
+If you encounter a menu with a black background with a cursor leaving a trail after disabling/uninstalling the mod, try setting `-vrmode None` in the launch options.
+- If you're using r2modman, you can add launch options in `Settings > Debugging > Set launch parameters`.
+- If you installed the mod manually, right click the game on Steam and click on `Properties > General` to access the launch options field.
+
+If that doesn't fix the problem, you can verify you game file integrity on Steam. Right click the game and click on `Propreties > Local Files > Verify inegrity of game files`.
+
 ### I'm still getting problems
 You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You can also check our [issues list](https://github.com/DrBibop/RoR2VRMod/issues) to see what problems are known.
 
