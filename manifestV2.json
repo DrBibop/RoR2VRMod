@@ -1,12 +1,12 @@
 ﻿{
     "ManifestVersion": 2,
     "AuthorName": "DrBibop",
-    "Name": "DrBibop-VRFixes",
-    "DisplayName": "VRFixes",
-    "Version": "1.0.2",
-    "Licence": "",
-    "WebsiteURL": "https://github.com/DrBibop/RoR2-VRAimFix",
-    "Description": "This mod makes VR experience better with various fixes",
+    "Name": "DrBibop-VRMod",
+    "DisplayName": "VR Mod",
+    "Version": "1.0.0",
+    "Licence": "MIT",
+    "WebsiteURL": "https://github.com/DrBibop/RoR2VRMod",
+    "Description": "Play Risk of Rain 2 in virtual reality!",
     "GameVersion": "N/A",
     "Dependencies": [
 		"bbepis-BepInExPack-5.3.1",
@@ -14,7 +14,7 @@
 	],
     "OptionalDependencies": [],
     "Incompatibilities": [],
-    "NetworkMode": "both",
+    "NetworkMode": "client",
     "PackageType": "mod",
     "InstallMode": "managed",
     "Loaders": [
