@@ -1,15 +1,40 @@
-## This mod is a fix for the VR mod which is NOT INCLUDED
-Your character will now always shoot where you're looking (so, it basically follows the crosshair as it should).
-Also works well with the [first person mod](https://thunderstore.io/package/mistername/FirstPersonView/).
+# Play Risk of Rain 2 in VR!
+This mod was made possible with the joint effort of elliottate, MrPurple and me. You can contact us in our [Discord server](https://discord.gg/eQ7Fwac).
 
-The VR mod can be found [here](http://bit.ly/ror2VR).
+In addition of adding VR functionality, this mod also tweaks multiple things to enhance the VR experience.
 
-This mod will include the VR mod in the future. UI fixes are also on the way.
+Playing in VR should be possible with any Oculus or SteamVR compatible devices. Motion controls are currently not supported. A gamepad is therefore recommended.
 
-## Changelog
+# Installation
+It is recommended to use a mod manager such as [r2modman](https://thunderstore.io/package/ebkr/r2modman/) and press the "Install with Mod Manager" button. Once done, you can start the game using the "Start modded" button.
 
+For manual download, make sure to have [BepInEx](https://thunderstore.io/package/bbepis/BepInExPack/) and [R2API](https://thunderstore.io/package/tristanmcpherson/R2API/) installed. You can then download the VR mod with the "Manual Download" button and copy the `plugins` and `patchers` folder into the `BepInEx` folder.
+
+# FAQ
+### Wouldn't it be nauseating to play in VR?
+Each person has a different level of tolerance regarding motion sickness and VR. Despite that, Risk of Rain 2 was not intended to be played in VR. This means that getting motion sick is more likely, especially with high mobility characters such as Loader or Mercenary. The occasionnal camera shake also doesn't help. We plan to make the VR experience better for players in the future and feedback regarding this issue would be very appreciated.
+
+### Can I play using the VR Mod in multiplayer with my non-VR friends?
+Yes! The mod is only required for VR players. Other players do still need to have a modded client in order to have a matching game version. Make sure everybody has [BepInEx](https://thunderstore.io/package/bbepis/BepInExPack/) and [R2API](https://thunderstore.io/package/tristanmcpherson/R2API/) installed with any other mods that require to be installed on every client.
+
+### I can't press any buttons when I launch the game.
+This is likely because the game is not in focus on your PC. Make sure to click on the game window to pull it to the front. If your cursor is stuck in place, you can press the Windows key or Ctrl+Escape to unclock it and click on the game.
+
+### Why can't I see the menu?
+We're working on it! Meanwhile, you can either use the menu on your PC or open a virtual desktop in your headset if supported.
+
+### The character selection menu is too big!
+We're also working on that! The controls are still functional to navigate.
+
+### The game won't launch in VR!
+If the game keeps launching in desktop mode, try adding `-vrmode Oculus` or `-vrmode OpenVR` as a launch option depending on your device.
+- If you're using r2modman, you can add launch options in `Settings > Debugging > Set launch parameters`.
+- If you installed the mod manually, right click the game on Steam and click on `Properties > General` to access the launch options field.
+
+### I'm still getting problems
+You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You can also check our [issues list](https://github.com/DrBibop/RoR2VRMod/issues) to see what problems are known.
+
+
+# Changelog
 ### 1.0.0
-- Release
-
-### 1.0.1
-- Read me update go brrr
+Initial release of the mod.
