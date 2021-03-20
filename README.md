@@ -1,6 +1,8 @@
 # Play Risk of Rain 2 in VR!
 This mod was made possible with the joint effort of elliottate, MrPurple and me. You can contact us in our [Discord server](https://discord.gg/eQ7Fwac).
 
+![](https://thumbs.gfycat.com/UnfitAdoredBooby-size_restricted.gif)
+
 In addition of adding VR functionality, this mod also tweaks multiple things to enhance the VR experience.
 
 Playing in VR should be possible with any Oculus or SteamVR compatible devices. Motion controls are currently not supported. A gamepad is therefore recommended.

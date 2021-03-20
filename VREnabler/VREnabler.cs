@@ -1,5 +1,7 @@
 ﻿using AssetsTools.NET;
 using AssetsTools.NET.Extra;
+using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Logging;
 using Mono.Cecil;
 using System;
@@ -22,6 +24,12 @@ namespace QModManager
 
         private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("VREnabler");
 
+        private const string CONFIG_FILE_NAME = "VRMod.cfg";
+
+        private static readonly ConfigFile Config = new ConfigFile(Path.Combine(Paths.ConfigPath, CONFIG_FILE_NAME), true);
+
+        public static ConfigEntry<bool> ConfigVREnabled { get; set; }
+
         /// <summary>
         /// Called from BepInEx while patching, our entry point for patching.
         /// Do not change the method name as it is identified by BepInEx. Method must remain public.
@@ -29,12 +37,19 @@ namespace QModManager
         [Obsolete("Should not be used!", true)]
         public static void Initialize()
         {
+            ConfigVREnabled = Config.Bind<bool>(
+                "VR Settings",
+                "VR Enabled",
+                true,
+                "Instead of disabling the mod, change this setting to false to play in desktop mode."
+            );
+
             EnableVROptions(Path.Combine(ManagedPath, "../globalgamemanagers"), Path.Combine(ManagedPath, "../Plugins"));
         }
 
         private static void EnableVROptions(string assetsPath, string pluginsPath)
         {
-            Logger.LogInfo("Enabling VR...");
+            Logger.LogInfo("Setting up VR...");
 
             AssetsManager am = new AssetsManager();
             AssetsFileInstance afi = am.LoadAssetsFile(assetsPath, false);
@@ -59,7 +74,6 @@ namespace QModManager
                     if (vrArrayField is null)
                         continue;
 
-
                     AssetTypeValueField Oculus = ValueBuilder.DefaultValueFieldFromArrayTemplate(vrArrayField);
                     Oculus.GetValue().Set("Oculus");
                     AssetTypeValueField OpenVR = ValueBuilder.DefaultValueFieldFromArrayTemplate(vrArrayField);
@@ -67,7 +81,7 @@ namespace QModManager
                     AssetTypeValueField None = ValueBuilder.DefaultValueFieldFromArrayTemplate(vrArrayField);
                     None.GetValue().Set("None");
 
-                    vrArrayField.SetChildrenList(new AssetTypeValueField[] { Oculus, OpenVR, None });
+                    vrArrayField.SetChildrenList(ConfigVREnabled.Value ? new AssetTypeValueField[] { Oculus, OpenVR, None } : new AssetTypeValueField[] { None });
 
                     byte[] vrAsset;
                     using (MemoryStream memStream = new MemoryStream())
@@ -88,7 +102,7 @@ namespace QModManager
                         File.WriteAllBytes(assetsPath, memStream.ToArray());
                     }
 
-                    Logger.LogInfo("Successfully enabled VR!");
+                    Logger.LogInfo("VR Mod setup complete!");
 
                     Logger.LogInfo("Checking for VR plugins...");
 
@@ -113,7 +127,7 @@ namespace QModManager
                             hasCopied = true;
                             using (var resource = Assembly.GetExecutingAssembly().GetManifestResourceStream("VREnabler.VRPlugins." + pluginName))
                             {
-                                using (var file = new FileStream(Path.Combine(gamePluginsDirectory.FullName, pluginName), FileMode.Create, FileAccess.Write))
+                                using (var file = new FileStream(Path.Combine(gamePluginsDirectory.FullName, pluginName), FileMode.Create, FileAccess.Write, FileShare.Delete))
                                 {
                                     Logger.LogInfo("Copying " + pluginName);
                                     resource.CopyTo(file);
