@@ -8,7 +8,7 @@ In addition of adding VR functionality, this mod also tweaks multiple things to 
 
 Playing in VR should be possible with any Oculus or SteamVR compatible devices. Motion controls are currently not supported. A gamepad is therefore recommended.
 
-If you wanna support me and gain access to pre-release testing builds, you can head to my [Patreon](https://www.patreon.com/DrBibop)!
+If you want to support me and gain access to pre-release testing builds, you can head to my [Patreon](https://www.patreon.com/DrBibop)!
 
 # Installation
 It is recommended to use a mod manager such as [r2modman](https://thunderstore.io/package/ebkr/r2modman/) and press the "Install with Mod Manager" button. Once done, you can start the game using the "Start modded" button.
