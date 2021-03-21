@@ -11,6 +11,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using QModManager;
 using Mono.Cecil.Cil;
+using RoR2.UI;
 
 [module: UnverifiableCode]
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -77,6 +78,15 @@ namespace DrBibop
                 orig(self);
                 SetRenderMode(self.gameObject, hdResolution, menuPosition, menuScale);
             };
+            On.RoR2.SplashScreenController.Start += (orig, self) =>
+            {
+                orig(self);
+                Camera.main.clearFlags = CameraClearFlags.SolidColor;
+                Camera.main.backgroundColor = Color.black;
+                GameObject splash = GameObject.Find("SpashScreenCanvas");
+                if (splash)
+                    SetRenderMode(splash, hdResolution, menuPosition, menuScale);
+            };
 
             On.RoR2.GameOverController.Awake += (orig, self) =>
             {
@@ -90,12 +100,38 @@ namespace DrBibop
                 orig(self);
             };
 
-            On.RoR2.CameraRigController.Start += (orig, self) =>
-            {
-
-            };
+            On.RoR2.UI.CombatHealthBarViewer.UpdateAllHealthbarPositions += UpdateAllHealthBarPositionsVR;
+            On.RoR2.Indicator.PositionForUI += VRIndicatorPositionForUI;
 
             IL.RoR2.CameraRigController.SetCameraState += SetCameraStateIL;
+        }
+
+        private void VRIndicatorPositionForUI(On.RoR2.Indicator.orig_PositionForUI orig, Indicator self, Camera sceneCamera, Camera uiCamera)
+        {
+            if (self.targetTransform)
+            {
+                Vector3 position = self.targetTransform.position;
+                Vector3 vector = sceneCamera.WorldToScreenPoint(position);
+                Vector3 position2 = uiCamera.ScreenToWorldPoint(vector);
+                if (self.visualizerTransform != null)
+                {
+                    self.visualizerTransform.position = position2;
+                    self.visualizerTransform.localScale = 0.1f * Vector3.Distance(sceneCamera.transform.position, position) * Vector3.one;
+                }
+            }
+        }
+
+        private void UpdateAllHealthBarPositionsVR(On.RoR2.UI.CombatHealthBarViewer.orig_UpdateAllHealthbarPositions orig, RoR2.UI.CombatHealthBarViewer self, Camera sceneCam, Camera uiCam)
+        {
+            foreach (CombatHealthBarViewer.HealthBarInfo healthBarInfo in self.victimToHealthBarInfo.Values)
+            {
+                Vector3 position = healthBarInfo.sourceTransform.position;
+                position.y += healthBarInfo.verticalOffset;
+                Vector3 vector = sceneCam.WorldToScreenPoint(position);
+                Vector3 position2 = uiCam.ScreenToWorldPoint(vector);
+                healthBarInfo.healthBarRootObjectTransform.position = position2;
+                healthBarInfo.healthBarRootObjectTransform.localScale = 0.1f * Vector3.Distance(sceneCam.transform.position, position) * Vector3.one;
+            }
         }
 
         private void SetCameraStateIL(ILContext il)
