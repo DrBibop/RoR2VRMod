@@ -61,4 +61,6 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 
 ### 1.1.0
 - All menus are now visible in VR.
+- Enemy healthbars are now correctly positioned above enemies.
+- Ping icons have been pushed further away from the camera.
 - Added a config setting to disable VR.
