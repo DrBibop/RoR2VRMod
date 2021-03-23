@@ -102,103 +102,45 @@ namespace DrBibop
 
             On.RoR2.UI.CombatHealthBarViewer.UpdateAllHealthbarPositions += UpdateAllHealthBarPositionsVR;
 
-            On.RoR2.PositionIndicator.UpdatePositions += UpdatePositionsVR;
+            On.RoR2.TeleporterInteraction.Awake += AdjustTPIconSize;
+            On.RoR2.UI.PingIndicator.RebuildPing += AdjustPingIconSize;
+            On.RoR2.TeamComponent.Start += AdjustTeamIconSize;
 
             IL.RoR2.CameraRigController.SetCameraState += SetCameraStateIL;
+            IL.RoR2.PositionIndicator.UpdatePositions += ILUpdatePositions;
         }
 
-        private void UpdatePositionsVR(On.RoR2.PositionIndicator.orig_UpdatePositions orig, UICamera uiCamera)
+        private void ILUpdatePositions(ILContext il)
         {
-			Camera sceneCam = uiCamera.cameraRigController.sceneCam;
-			Camera camera = uiCamera.camera;
-			Rect pixelRect = camera.pixelRect;
-			Vector2 center = pixelRect.center;
-			pixelRect.size *= 0.95f;
-			pixelRect.center = center;
-			Vector2 center2 = pixelRect.center;
-			float num = 1f / (pixelRect.width * 0.5f);
-			float num2 = 1f / (pixelRect.height * 0.5f);
-			Quaternion rotation = uiCamera.transform.rotation;
-			CameraRigController cameraRigController = uiCamera.cameraRigController;
-			Transform y = null;
-			if (cameraRigController && cameraRigController.target)
-			{
-				CharacterBody component = cameraRigController.target.GetComponent<CharacterBody>();
-				if (component)
-				{
-					y = component.coreTransform;
-				}
-				else
-				{
-					y = cameraRigController.target.transform;
-				}
-			}
-			for (int i = 0; i < PositionIndicator.instancesList.Count; i++)
-			{
-				PositionIndicator positionIndicator = PositionIndicator.instancesList[i];
-				bool flag = false;
-				bool flag2 = false;
-				bool active = false;
-				float num3 = 0f;
-				if (PositionIndicator.cvPositionIndicatorsEnable.value)
-				{
-					Vector3 a = positionIndicator.targetTransform ? positionIndicator.targetTransform.position : positionIndicator.defaultPosition;
-					if (!positionIndicator.targetTransform || (positionIndicator.targetTransform && positionIndicator.targetTransform != y))
-					{
-						active = true;
-						Vector3 vector = sceneCam.WorldToScreenPoint(a + new Vector3(0f, positionIndicator.yOffset, 0f));
-						bool flag3 = vector.z <= 0f;
-						bool flag4 = !flag3 && pixelRect.Contains(vector);
-						if (!flag4)
-						{
-                            Vector3 center3 = new Vector3(center2.x, center2.y, 0);
-							Vector2 vector2 = vector - center3;
-							float a2 = Mathf.Abs(vector2.x * num);
-							float b = Mathf.Abs(vector2.y * num2);
-							float d = Mathf.Max(a2, b);
-							vector2 /= d;
-							vector2 *= (flag3 ? -1f : 1f);
-							vector = vector2 + center2;
-							if (positionIndicator.shouldRotateOutsideViewObject)
-							{
-								num3 = Mathf.Atan2(vector2.y, vector2.x) * 57.29578f;
-							}
-						}
-						flag = flag4;
-						flag2 = !flag4;
-						vector.z = 12.35f;
-						Vector3 position = camera.ScreenToWorldPoint(vector);
-						positionIndicator.transform.SetPositionAndRotation(position, rotation);
-                        positionIndicator.transform.localScale = 12.35f * Vector3.one;
-					}
-				}
-				if (positionIndicator.alwaysVisibleObject)
-				{
-					positionIndicator.alwaysVisibleObject.SetActive(active);
-				}
-				if (positionIndicator.insideViewObject == positionIndicator.outsideViewObject)
-				{
-					if (positionIndicator.insideViewObject)
-					{
-						positionIndicator.insideViewObject.SetActive(flag || flag2);
-					}
-				}
-				else
-				{
-					if (positionIndicator.insideViewObject)
-					{
-						positionIndicator.insideViewObject.SetActive(flag);
-					}
-					if (positionIndicator.outsideViewObject)
-					{
-						positionIndicator.outsideViewObject.SetActive(flag2);
-						if (flag2 && positionIndicator.shouldRotateOutsideViewObject)
-						{
-							positionIndicator.outsideViewObject.transform.localEulerAngles = new Vector3(0f, 0f, num3 + positionIndicator.outsideViewRotationOffset);
-						}
-					}
-				}
-			}
+            ILCursor c = new ILCursor(il);
+            c.GotoNext(
+                x => x.MatchStfld<Vector3>("z")
+                );
+
+            c.Index--;
+
+            c.Remove();
+
+            c.Emit(OpCodes.Ldc_R4, 12.25f);
+        }
+
+        private void AdjustTeamIconSize(On.RoR2.TeamComponent.orig_Start orig, TeamComponent self)
+        {
+            orig(self);
+            if (self.indicator)
+                self.indicator.transform.localScale = 12.35f * Vector3.one;
+        }
+
+        private void AdjustPingIconSize(On.RoR2.UI.PingIndicator.orig_RebuildPing orig, PingIndicator self)
+        {
+            orig(self);
+            self.positionIndicator.transform.localScale = 12.35f * Vector3.one;
+        }
+
+        private void AdjustTPIconSize(On.RoR2.TeleporterInteraction.orig_Awake orig, TeleporterInteraction self)
+        {
+            orig(self);
+            self.teleporterPositionIndicator.transform.localScale = 4 * Vector3.one;
         }
 
         private void UpdateAllHealthBarPositionsVR(On.RoR2.UI.CombatHealthBarViewer.orig_UpdateAllHealthbarPositions orig, RoR2.UI.CombatHealthBarViewer self, Camera sceneCam, Camera uiCam)
