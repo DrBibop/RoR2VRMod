@@ -9,9 +9,11 @@ using System.Security;
 using System.Security.Permissions;
 using UnityEngine;
 using UnityEngine.UI;
-using QModManager;
 using Mono.Cecil.Cil;
 using RoR2.UI;
+using BepInEx.Configuration;
+using UnityEngine.XR;
+using System.Collections;
 
 [module: UnverifiableCode]
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -35,13 +37,29 @@ namespace DrBibop
 
         private static Camera uiCamera;
 
+        private const string CONFIG_FILE_NAME = "VRMod.cfg";
+
+        private static readonly ConfigFile Config = new ConfigFile(System.IO.Path.Combine(Paths.ConfigPath, CONFIG_FILE_NAME), true);
+        public static ConfigEntry<bool> ConfigUseOculus { get; set; }
+
         private void Awake()
         {
-            if (!VREnabler.ConfigVREnabled.Value)
-                return;
+            ConfigUseOculus = Config.Bind<bool>(
+                "VR Settings",
+                "Use Oculus mode",
+                false,
+                "Launches the game in Oculus mode if you don't like using SteamVR."
+            );
 
             On.RoR2.UI.HUD.Awake += AdjustHUDAnchors;
             On.RoR2.CameraRigController.GetCrosshairRaycastRay += GetVRCrosshairRaycastRay;
+
+            On.RoR2.RoR2Application.Awake += (orig, self) =>
+            {
+                orig(self);
+                if (XRSettings.loadedDeviceName != (ConfigUseOculus.Value ? "Oculus" : "OpenVR"))
+                    StartCoroutine(SetVRDevice());
+            };
 
             On.RoR2.UI.MainMenu.BaseMainMenuScreen.OnEnter += (orig, self, controller) =>
             {
@@ -108,6 +126,14 @@ namespace DrBibop
 
             IL.RoR2.CameraRigController.SetCameraState += SetCameraStateIL;
             IL.RoR2.PositionIndicator.UpdatePositions += ILUpdatePositions;
+        }
+
+        private IEnumerator SetVRDevice()
+        {
+            XRSettings.LoadDeviceByName(ConfigUseOculus.Value ? "Oculus" : "OpenVR");
+            yield return null;
+            if (XRSettings.loadedDeviceName == (ConfigUseOculus.Value ? "Oculus" : "OpenVR"))
+                XRSettings.enabled = true;
         }
 
         private void ILUpdatePositions(ILContext il)

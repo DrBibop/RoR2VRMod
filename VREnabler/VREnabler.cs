@@ -9,9 +9,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
-namespace QModManager
+namespace VRPatcher
 {
-    //Class by MrPurple
+    //Class by MrPurple, adapted by DrBibop
 
     /// <summary>
     /// A patcher which runs ahead of UnityPlayer to enable VR in the Global Game Manager.
@@ -19,16 +19,12 @@ namespace QModManager
     public static class VREnabler
     {
         internal static string VREnablerPath => Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        internal static string GameRootPath => BepInEx.Paths.GameRootPath;
-        internal static string ManagedPath => BepInEx.Paths.ManagedPath;
+        internal static string GameRootPath => Paths.GameRootPath;
+        internal static string ManagedPath => Paths.ManagedPath;
 
         private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("VREnabler");
 
-        private const string CONFIG_FILE_NAME = "VRMod.cfg";
-
-        private static readonly ConfigFile Config = new ConfigFile(Path.Combine(Paths.ConfigPath, CONFIG_FILE_NAME), true);
-
-        public static ConfigEntry<bool> ConfigVREnabled { get; set; }
+        
 
         /// <summary>
         /// Called from BepInEx while patching, our entry point for patching.
@@ -37,72 +33,76 @@ namespace QModManager
         [Obsolete("Should not be used!", true)]
         public static void Initialize()
         {
-            ConfigVREnabled = Config.Bind<bool>(
-                "VR Settings",
-                "VR Enabled",
-                true,
-                "Instead of disabling the mod, change this setting to false to play in desktop mode."
-            );
-
-            EnableVROptions(Path.Combine(ManagedPath, "../globalgamemanagers"), Path.Combine(ManagedPath, "../Plugins"));
+            SetupVR(true);
         }
 
-        private static void EnableVROptions(string assetsPath, string pluginsPath)
+        public static void SetupVR(bool enabled = true)
         {
-            Logger.LogInfo("Setting up VR...");
+            SetupVR(Path.Combine(ManagedPath, "../globalgamemanagers"), Path.Combine(ManagedPath, "../Plugins"), enabled);
+        }
 
-            AssetsManager am = new AssetsManager();
-            AssetsFileInstance afi = am.LoadAssetsFile(assetsPath, false);
-            am.LoadClassDatabase(Path.Combine(VREnablerPath, "cldb.dat"));
-
-
-            for (int i = 0; i < afi.table.assetFileInfoCount; i++)
+        private static void SetupVR(string assetsPath, string pluginsPath, bool enabled = true)
+        {
+            AssetsManager assetsManager = new AssetsManager();
+            AssetsFileInstance assetsFileInstance = assetsManager.LoadAssetsFile(assetsPath, false, "");
+            assetsManager.LoadClassDatabase(Path.Combine(VREnablerPath, "cldb.dat"));
+            int num = 0;
+            while ((long)num < (long)((ulong)assetsFileInstance.table.assetFileInfoCount))
             {
                 try
                 {
-                    AssetFileInfoEx info = afi.table.GetAssetInfo(i);
-                    AssetTypeInstance ati = am.GetATI(afi.file, info);
-                    AssetTypeValueField baseField = ati?.GetBaseField();
-
-                    AssetTypeValueField enabledVRDevicesField = baseField?.Get("enabledVRDevices");
-
-                    if (enabledVRDevicesField is null)
-                        continue;
-
-                    AssetTypeValueField vrArrayField = enabledVRDevicesField.Get("Array");
-
-                    if (vrArrayField is null)
-                        continue;
-
-                    AssetTypeValueField Oculus = ValueBuilder.DefaultValueFieldFromArrayTemplate(vrArrayField);
-                    Oculus.GetValue().Set("Oculus");
-                    AssetTypeValueField OpenVR = ValueBuilder.DefaultValueFieldFromArrayTemplate(vrArrayField);
-                    OpenVR.GetValue().Set("OpenVR");
-                    AssetTypeValueField None = ValueBuilder.DefaultValueFieldFromArrayTemplate(vrArrayField);
-                    None.GetValue().Set("None");
-
-                    vrArrayField.SetChildrenList(ConfigVREnabled.Value ? new AssetTypeValueField[] { Oculus, OpenVR, None } : new AssetTypeValueField[] { None });
-
-                    byte[] vrAsset;
-                    using (MemoryStream memStream = new MemoryStream())
-                    using (AssetsFileWriter writer = new AssetsFileWriter(memStream))
+                    AssetFileInfoEx assetInfo = assetsFileInstance.table.GetAssetInfo((long)num);
+                    AssetTypeInstance ati = assetsManager.GetATI(assetsFileInstance.file, assetInfo, false);
+                    AssetTypeValueField assetTypeValueField = (ati != null) ? ati.GetBaseField(0) : null;
+                    AssetTypeValueField assetTypeValueField2 = (assetTypeValueField != null) ? assetTypeValueField.Get("enabledVRDevices") : null;
+                    if (assetTypeValueField2 != null)
                     {
-                        writer.bigEndian = false;
-                        baseField.Write(writer);
-                        vrAsset = memStream.ToArray();
-                    }
-
-                    List<AssetsReplacer> rep = new List<AssetsReplacer>() { new AssetsReplacerFromMemory(0, i, (int)info.curFileType, 0xFFFF, vrAsset) };
-
-                    using (MemoryStream memStream = new MemoryStream())
-                    using (AssetsFileWriter writer = new AssetsFileWriter(memStream))
-                    {
-                        afi.file.Write(writer, 0, rep, 0);
-                        afi.stream.Close();
-                        File.WriteAllBytes(assetsPath, memStream.ToArray());
+                        AssetTypeValueField assetTypeValueField3 = assetTypeValueField2.Get("Array");
+                        if (assetTypeValueField3 != null)
+                        {
+                            AssetTypeValueField assetTypeValueField4 = ValueBuilder.DefaultValueFieldFromArrayTemplate(assetTypeValueField3);
+                            assetTypeValueField4.GetValue().Set("Oculus");
+                            AssetTypeValueField assetTypeValueField5 = ValueBuilder.DefaultValueFieldFromArrayTemplate(assetTypeValueField3);
+                            assetTypeValueField5.GetValue().Set("OpenVR");
+                            AssetTypeValueField assetTypeValueField6 = ValueBuilder.DefaultValueFieldFromArrayTemplate(assetTypeValueField3);
+                            assetTypeValueField6.GetValue().Set("None");
+                            assetTypeValueField3.SetChildrenList(new AssetTypeValueField[]
+                            {
+                                assetTypeValueField6,
+                                assetTypeValueField4,
+                                assetTypeValueField5
+                            });
+                            byte[] array;
+                            using (MemoryStream memoryStream = new MemoryStream())
+                            {
+                                using (AssetsFileWriter assetsFileWriter = new AssetsFileWriter(memoryStream))
+                                {
+                                    assetsFileWriter.bigEndian = false;
+                                    AssetWriters.Write(assetTypeValueField, assetsFileWriter, 0);
+                                    array = memoryStream.ToArray();
+                                }
+                            }
+                            List<AssetsReplacer> list = new List<AssetsReplacer>
+                            {
+                                new AssetsReplacerFromMemory(0, (long)num, (int)assetInfo.curFileType, ushort.MaxValue, array)
+                            };
+                            using (MemoryStream memoryStream2 = new MemoryStream())
+                            {
+                                using (AssetsFileWriter assetsFileWriter2 = new AssetsFileWriter(memoryStream2))
+                                {
+                                    assetsFileInstance.file.Write(assetsFileWriter2, 0UL, list, 0U, null);
+                                    assetsFileInstance.stream.Close();
+                                    File.WriteAllBytes(assetsPath, memoryStream2.ToArray());
+                                }
+                            }
+                            return;
+                        }
                     }
 
                     Logger.LogInfo("VR Mod setup complete!");
+
+                    if (!enabled)
+                        return;
 
                     Logger.LogInfo("Checking for VR plugins...");
 
@@ -140,10 +140,10 @@ namespace QModManager
                         Logger.LogInfo("Successfully copied VR plugins!");
                     else
                         Logger.LogInfo("VR plugins already present");
-
                     return;
                 }
                 catch { }
+                num++;
             }
 
             Logger.LogError("VR enable location not found!");
