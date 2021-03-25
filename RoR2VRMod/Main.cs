@@ -154,7 +154,7 @@ namespace DrBibop
         {
             orig(self);
             if (self.indicator)
-                self.indicator.transform.localScale = 12.35f * Vector3.one;
+                self.indicator.transform.localScale = 2 * Vector3.one;
         }
 
         private void AdjustPingIconSize(On.RoR2.UI.PingIndicator.orig_RebuildPing orig, PingIndicator self)
