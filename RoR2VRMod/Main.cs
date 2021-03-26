@@ -1,9 +1,6 @@
 ﻿using BepInEx;
 using MonoMod.Cil;
-using R2API.Utils;
 using RoR2;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security;
 using System.Security.Permissions;
@@ -14,14 +11,15 @@ using RoR2.UI;
 using BepInEx.Configuration;
 using UnityEngine.XR;
 using System.Collections;
+using System;
+using R2API.Utils;
 
 [module: UnverifiableCode]
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
+[assembly: ManualNetworkRegistration]
 namespace DrBibop
 {
-    [NetworkCompatibility(CompatibilityLevel.NoNeedForSync)]
-    [BepInDependency("com.bepis.r2api")]
-    [BepInPlugin("com.DrBibop.VRMod", "VRMod", "1.1.0")]
+    [BepInPlugin("com.DrBibop.VRMod", "VRMod", "1.1.2")]
     public class VRMod : BaseUnityPlugin
     {
         private static readonly Vector3 menuPosition = new Vector3(0, 0, 15);
@@ -39,7 +37,7 @@ namespace DrBibop
 
         private const string CONFIG_FILE_NAME = "VRMod.cfg";
 
-        private static readonly ConfigFile Config = new ConfigFile(System.IO.Path.Combine(Paths.ConfigPath, CONFIG_FILE_NAME), true);
+        private new static readonly ConfigFile Config = new ConfigFile(System.IO.Path.Combine(Paths.ConfigPath, CONFIG_FILE_NAME), true);
         public static ConfigEntry<bool> ConfigUseOculus { get; set; }
 
         private void Awake()
@@ -243,35 +241,17 @@ namespace DrBibop
         private void AdjustHUDAnchors(On.RoR2.UI.HUD.orig_Awake orig, RoR2.UI.HUD self)
         {
             orig(self);
-            
-            RectTransform mainRect = self.mainContainer.GetComponent<RectTransform>();
-            mainRect.anchorMin = new Vector2(0.25f, 0.25f);
-            mainRect.anchorMax = new Vector2(0.75f, 0.75f);
+
+            Transform uiArea = self.mainUIPanel.transform.Find("SpringCanvas");
+
+            if (!uiArea)
+                return;
+
+            RectTransform rect = uiArea.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.25f, 0.25f);
+            rect.anchorMax = new Vector2(0.75f, 0.65f);
             CanvasScaler scaler = self.canvas.gameObject.AddComponent<CanvasScaler>();
             scaler.scaleFactor = 0.8f;
-
-            Transform uiArea = mainRect.transform.Find("MainUIArea");
-
-            if (uiArea)
-            {
-                Transform[] uiElementsToLower = new Transform[3]
-                {
-                    uiArea.Find("UpperRightCluster"),
-                    uiArea.Find("UpperLeftCluster"),
-                    uiArea.Find("TopCenterCluster")
-                };
-
-                foreach (Transform uiTransform in uiElementsToLower)
-                {
-                    if (!uiTransform)
-                        continue;
-
-                    RectTransform rect = uiTransform.GetComponent<RectTransform>();
-                    Vector3 newPos = rect.position;
-                    newPos.y -= 150;
-                    rect.position = newPos;
-                }
-            }
         }
 
         private Ray GetVRCrosshairRaycastRay(On.RoR2.CameraRigController.orig_GetCrosshairRaycastRay orig, RoR2.CameraRigController self, Vector2 crosshairOffset, Vector3 raycastStartPlanePoint)
@@ -287,4 +267,10 @@ namespace DrBibop
             return new Ray(Vector3.ProjectOnPlane(self.sceneCam.transform.position - raycastStartPlanePoint, self.sceneCam.transform.rotation * Vector3.forward) + raycastStartPlanePoint, quaternion * Vector3.forward);
         }
     }
+}
+
+namespace R2API.Utils
+{
+    [AttributeUsage(AttributeTargets.Assembly)]
+    public class ManualNetworkRegistrationAttribute : Attribute { }
 }
