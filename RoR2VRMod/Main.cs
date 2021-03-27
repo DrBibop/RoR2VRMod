@@ -242,16 +242,20 @@ namespace DrBibop
         {
             orig(self);
 
-            Transform uiArea = self.mainUIPanel.transform.Find("SpringCanvas");
-
-            if (!uiArea)
-                return;
-
-            RectTransform rect = uiArea.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0.25f, 0.25f);
-            rect.anchorMax = new Vector2(0.75f, 0.65f);
             CanvasScaler scaler = self.canvas.gameObject.AddComponent<CanvasScaler>();
             scaler.scaleFactor = 0.8f;
+
+            Transform[] uiElements = new Transform[] { 
+                self.mainUIPanel.transform.Find("SpringCanvas"),
+                self.mainContainer.transform.Find("NotificationArea") 
+            };
+
+            foreach (Transform uiElement in uiElements)
+            {
+                RectTransform rect = uiElement.GetComponent<RectTransform>();
+                rect.anchorMin = new Vector2(0.25f, 0.25f);
+                rect.anchorMax = new Vector2(0.75f, 0.65f);
+            }
         }
 
         private Ray GetVRCrosshairRaycastRay(On.RoR2.CameraRigController.orig_GetCrosshairRaycastRay orig, RoR2.CameraRigController self, Vector2 crosshairOffset, Vector3 raycastStartPlanePoint)

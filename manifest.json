@@ -1,6 +1,6 @@
 ﻿{
     "name": "VRMod",
-    "version_number": "1.1.1",
+    "version_number": "1.1.2",
     "website_url": "https://github.com/DrBibop/RoR2VRMod",
     "description": "Play Risk of Rain 2 in virtual reality!",
     "dependencies": [
