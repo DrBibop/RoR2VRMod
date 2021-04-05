@@ -13,7 +13,7 @@ If you want to support me and gain access to pre-release testing builds, you can
 # Installation
 It is recommended to use a mod manager such as [r2modman](https://thunderstore.io/package/ebkr/r2modman/) and press the "Install with Mod Manager" button. Once done, you can start the game using the "Start modded" button.
 
-For manual download, make sure to have [BepInEx](https://thunderstore.io/package/bbepis/BepInExPack/) installed. You can then download the VR mod with the "Manual Download" button and copy the `plugins` and `patchers` folder into the `BepInEx` folder.
+For manual download, make sure to have [BepInEx](https://thunderstore.io/package/bbepis/BepInExPack/), [HookGenPatcher](https://thunderstore.io/package/RiskofThunder/HookGenPatcher/) and [R2API](https://thunderstore.io/package/tristanmcpherson/R2API/) installed. You can then download the VR mod with the "Manual Download" button and copy the `plugins` and `patchers` folder into the `BepInEx` folder.
 
 # FAQ
 ### Wouldn't it be nauseating to play in VR?
@@ -23,7 +23,7 @@ Each person has a different level of tolerance regarding motion sickness and VR.
 Motion controls are currently not supported. We would love to add this in the future but it will require a lot of work and time. Meanwhile, we recommend using a gamepad such as an XBox controller.
 
 ### Can I play using the VR Mod in multiplayer with my non-VR friends?
-Yes! The mod is only required for VR players. You can even play with other vanilla players if no other mods are installed.
+Yes! The mod is only required for VR players. Your friends still need a modded client with [BepInEx](https://thunderstore.io/package/bbepis/BepInExPack/), [HookGenPatcher](https://thunderstore.io/package/RiskofThunder/HookGenPatcher/) and [R2API](https://thunderstore.io/package/tristanmcpherson/R2API/) installed.
 
 ### Why play a 3rd person game in VR?
 It honestly feels pretty great! You can still play in first person using the [First Person mod](https://thunderstore.io/package/mistername/FirstPersonView/). Keep in mind that there isn't really a way to know which way is forward using this mod. Keep your body straight and use your joystick to make large turns. We plan on implementing our own first person system that works better for VR in the future.
@@ -68,3 +68,6 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - Removed the need for launch options (this causes the game to launch in SteamVR by default).
 - Added a config setting to launch in Oculus mode.
 - Removed the "Enable VR" setting.
+
+### 1.2.0
+- Added a bindable key to recenter the HMD
