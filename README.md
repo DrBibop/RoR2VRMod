@@ -70,4 +70,8 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - Removed the "Enable VR" setting.
 
 ### 1.2.0
-- Added a bindable key to recenter the HMD
+- Added a bindable key to recenter the HMD.
+- Added HUD config settings for UI scale and anchor placements.
+- Fixed a bug that caused the map name to display too high up.
+- Re-added R2API as dependency (which also includes HookGenPatcher).
+- VR players can no longer play with vanilla players due to the R2API dependency.

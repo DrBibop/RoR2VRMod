@@ -124,18 +124,19 @@ namespace VRMod
             orig(self);
 
             CanvasScaler scaler = self.canvas.gameObject.AddComponent<CanvasScaler>();
-            scaler.scaleFactor = 0.8f;
+            scaler.scaleFactor = ModConfig.UIScale.Value;
 
             Transform[] uiElements = new Transform[] {
                 self.mainUIPanel.transform.Find("SpringCanvas"),
-                self.mainContainer.transform.Find("NotificationArea")
+                self.mainContainer.transform.Find("NotificationArea"),
+                self.mainContainer.transform.Find("MapNameCluster")
             };
 
             foreach (Transform uiElement in uiElements)
             {
                 RectTransform rect = uiElement.GetComponent<RectTransform>();
-                rect.anchorMin = new Vector2(0.25f, 0.25f);
-                rect.anchorMax = new Vector2(0.75f, 0.65f);
+                rect.anchorMin = ModConfig.AnchorMin;
+                rect.anchorMax = ModConfig.AnchorMax;
             }
         }
 
