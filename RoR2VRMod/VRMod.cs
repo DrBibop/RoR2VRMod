@@ -4,15 +4,15 @@ using System.Security.Permissions;
 using UnityEngine.XR;
 using System.Collections;
 using System;
-using R2API.Utils;
 using BepInEx.Logging;
+using R2API.Utils;
 
 [module: UnverifiableCode]
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
+[assembly: ManualNetworkRegistration]
 namespace VRMod
 {
     [BepInPlugin("com.DrBibop.VRMod", "VRMod", "1.2.0")]
-    [NetworkCompatibility(CompatibilityLevel.NoNeedForSync)]
     public class VRMod : BaseUnityPlugin
     {
         internal static ManualLogSource StaticLogger;
@@ -46,4 +46,10 @@ namespace VRMod
             }
         }
     }
+}
+
+namespace R2API.Utils
+{
+    [AttributeUsage(AttributeTargets.Assembly)]
+    public class ManualNetworkRegistrationAttribute : Attribute { }
 }

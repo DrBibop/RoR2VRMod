@@ -10,7 +10,7 @@
     "GameVersion": "N/A",
     "Dependencies": [
 		"bbepis-BepInExPack-5.3.1",
-		"tristanmcpherson-R2API-3.0.7"
+		"XoXFaby-MMHOOK_Standalone-1.0.1"
 	],
     "OptionalDependencies": [],
     "Incompatibilities": [],

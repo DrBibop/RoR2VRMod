@@ -13,7 +13,7 @@ If you want to support me and gain access to pre-release testing builds, you can
 # Installation
 It is recommended to use a mod manager such as [r2modman](https://thunderstore.io/package/ebkr/r2modman/) and press the "Install with Mod Manager" button. Once done, you can start the game using the "Start modded" button.
 
-For manual download, make sure to have [BepInEx](https://thunderstore.io/package/bbepis/BepInExPack/), [HookGenPatcher](https://thunderstore.io/package/RiskofThunder/HookGenPatcher/) and [R2API](https://thunderstore.io/package/tristanmcpherson/R2API/) installed. You can then download the VR mod with the "Manual Download" button and copy the `plugins` and `patchers` folder into the `BepInEx` folder.
+For manual download, make sure to have [BepInEx](https://thunderstore.io/package/bbepis/BepInExPack/) and [MMHOOK Standalone](https://thunderstore.io/package/XoXFaby/MMHOOK_Standalone/) installed. You can then download the VR mod with the "Manual Download" button and copy the `plugins` and `patchers` folder into the `BepInEx` folder.
 
 # FAQ
 ### Wouldn't it be nauseating to play in VR?
@@ -23,7 +23,7 @@ Each person has a different level of tolerance regarding motion sickness and VR.
 Motion controls are currently not supported. We would love to add this in the future but it will require a lot of work and time. Meanwhile, we recommend using a gamepad such as an XBox controller.
 
 ### Can I play using the VR Mod in multiplayer with my non-VR friends?
-Yes! The mod is only required for VR players. Your friends still need a modded client with [BepInEx](https://thunderstore.io/package/bbepis/BepInExPack/), [HookGenPatcher](https://thunderstore.io/package/RiskofThunder/HookGenPatcher/) and [R2API](https://thunderstore.io/package/tristanmcpherson/R2API/) installed.
+Yes! The mod is only required for VR players. You can play just fine with other vanilla players as long as you don't have any other mods that prevent you to do so.
 
 ### Why play a 3rd person game in VR?
 It honestly feels pretty great! You can still play in first person using the [First Person mod](https://thunderstore.io/package/mistername/FirstPersonView/). Keep in mind that there isn't really a way to know which way is forward using this mod. Keep your body straight and use your joystick to make large turns. We plan on implementing our own first person system that works better for VR in the future.
@@ -70,8 +70,8 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - Removed the "Enable VR" setting.
 
 ### 1.2.0
-- Added a bindable key to recenter the HMD.
+- Added a bindable key to recenter the HMD (Default: RCtrl/Dpad-Up).
 - Added HUD config settings for UI scale and anchor placements.
 - Fixed a bug that caused the map name to display too high up.
-- Re-added R2API as dependency (which also includes HookGenPatcher).
-- VR players can no longer play with vanilla players due to the R2API dependency.
+- Fixed a bug that caused the VR settings category to not appear when opening the settings menu from the pause menu.
+- Added MMHOOK Standalone as dependency (was previously included with the mod).

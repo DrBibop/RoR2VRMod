@@ -17,6 +17,12 @@ namespace VRMod
                 if (self.submenuPanelPrefab.name == "SettingsPanel")
                     SetupVRSettings(self.submenuPanelInstance);
             };
+
+            On.RoR2.UI.PauseScreenController.OpenSettingsMenu += (orig, self) =>
+            {
+                orig(self);
+                SetupVRSettings(self.submenuObject);
+            };
         }
 
         internal static void SetupVRSettings(GameObject panel)
