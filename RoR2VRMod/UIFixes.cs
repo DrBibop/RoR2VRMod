@@ -2,6 +2,7 @@
 using MonoMod.Cil;
 using RoR2;
 using RoR2.UI;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -26,13 +27,10 @@ namespace VRMod
         {
             On.RoR2.UI.HUD.Awake += AdjustHUDAnchors;
 
-            On.RoR2.TeleporterInteraction.Awake += AdjustTPIconSize;
-            On.RoR2.UI.PingIndicator.RebuildPing += AdjustPingIconSize;
-            On.RoR2.TeamComponent.Start += AdjustTeamIconSize;
-
             On.RoR2.UI.CombatHealthBarViewer.UpdateAllHealthbarPositions += UpdateAllHealthBarPositionsVR;
 
-            IL.RoR2.PositionIndicator.UpdatePositions += RemoveZReplacement;
+            On.RoR2.Indicator.PositionForUI += PositionForUIOverride;
+            On.RoR2.PositionIndicator.UpdatePositions += UpdatePositionsOverride;
 
             On.RoR2.UI.MainMenu.BaseMainMenuScreen.OnEnter += (orig, self, controller) =>
             {
@@ -84,6 +82,38 @@ namespace VRMod
                 orig(self);
                 self.gameEndReportPanelPrefab.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
             };
+        }
+
+        private static void UpdatePositionsOverride(On.RoR2.PositionIndicator.orig_UpdatePositions orig, UICamera uiCamera)
+        {
+            orig(uiCamera);
+            if (!HUD.cvHudEnable.value || !PositionIndicator.cvPositionIndicatorsEnable.value)
+                return;
+
+            foreach (PositionIndicator indicator in PositionIndicator.instancesList)
+            {
+                Vector3 position = indicator.targetTransform ? indicator.targetTransform.position : indicator.defaultPosition;
+                position.y += indicator.yOffset;
+
+                bool isPingIndicator = PingIndicator.instancesList.Exists((x) => x.positionIndicator == indicator);
+
+                indicator.transform.position = uiCamera.cameraRigController.transform.InverseTransformDirection(position - uiCamera.cameraRigController.transform.position);
+                indicator.transform.localScale = (isPingIndicator ? 1: 0.2f) * Vector3.Distance(uiCamera.cameraRigController.sceneCam.transform.position, position) * Vector3.one;
+            }
+        }
+
+        private static void PositionForUIOverride(On.RoR2.Indicator.orig_PositionForUI orig, Indicator self, Camera sceneCamera, Camera uiCamera)
+        {
+            if (self.targetTransform)
+            {
+                Vector3 position = self.targetTransform.position;
+                Vector3 vector = sceneCamera.transform.parent.InverseTransformDirection(position - sceneCamera.transform.parent.position);
+                if (self.visualizerTransform != null)
+                {
+                    self.visualizerTransform.position = vector;
+                    self.visualizerTransform.localScale = (self is EntityStates.Engi.EngiMissilePainter.Paint.EngiMissileIndicator ? 1 : 0.1f) * Vector3.Distance(sceneCamera.transform.position, position) * Vector3.one;
+                }
+            }
         }
 
         private static void SetRenderMode(GameObject uiObject, Vector2 resolution, Vector3 positionOffset, Vector3 scale)
@@ -138,39 +168,6 @@ namespace VRMod
                 rect.anchorMin = ModConfig.AnchorMin;
                 rect.anchorMax = ModConfig.AnchorMax;
             }
-        }
-
-        private static void RemoveZReplacement(ILContext il)
-        {
-            ILCursor c = new ILCursor(il);
-            c.GotoNext(
-                x => x.MatchStfld<Vector3>("z")
-                );
-
-            c.Index--;
-
-            c.Remove();
-
-            c.Emit(OpCodes.Ldc_R4, 12.25f);
-        }
-
-        private static void AdjustTeamIconSize(On.RoR2.TeamComponent.orig_Start orig, TeamComponent self)
-        {
-            orig(self);
-            if (self.indicator)
-                self.indicator.transform.localScale = 2 * Vector3.one;
-        }
-
-        private static void AdjustPingIconSize(On.RoR2.UI.PingIndicator.orig_RebuildPing orig, PingIndicator self)
-        {
-            orig(self);
-            self.positionIndicator.transform.localScale = 12.35f * Vector3.one;
-        }
-
-        private static void AdjustTPIconSize(On.RoR2.TeleporterInteraction.orig_Awake orig, TeleporterInteraction self)
-        {
-            orig(self);
-            self.teleporterPositionIndicator.transform.localScale = 4 * Vector3.one;
         }
 
         private static void UpdateAllHealthBarPositionsVR(On.RoR2.UI.CombatHealthBarViewer.orig_UpdateAllHealthbarPositions orig, RoR2.UI.CombatHealthBarViewer self, Camera sceneCam, Camera uiCam)

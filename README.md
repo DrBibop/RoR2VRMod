@@ -73,5 +73,9 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - Added a bindable key to recenter the HMD (Default: RCtrl/Dpad-Up).
 - Added HUD config settings for UI scale and anchor placements.
 - Fixed a bug that caused the map name to display too high up.
-- Fixed a bug that caused the VR settings category to not appear when opening the settings menu from the pause menu.
 - Added MMHOOK Standalone as dependency (was previously included with the mod).
+
+### 1.2.1
+- Icons no longer have a fixed distance.
+- Fixed a bug that caused icons to not correctly appear above targets.
+- Fixed targeting indicator placements (Huntress primary, Engineer missile launcher, recycler, capacitor, etc.).
