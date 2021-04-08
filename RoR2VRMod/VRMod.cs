@@ -12,7 +12,7 @@ using R2API.Utils;
 [assembly: ManualNetworkRegistration]
 namespace VRMod
 {
-    [BepInPlugin("com.DrBibop.VRMod", "VRMod", "1.2.0")]
+    [BepInPlugin("com.DrBibop.VRMod", "VRMod", "1.2.1")]
     public class VRMod : BaseUnityPlugin
     {
         internal static ManualLogSource StaticLogger;
