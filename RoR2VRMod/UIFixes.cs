@@ -55,7 +55,7 @@ namespace VRMod
             On.RoR2.UI.PauseScreenController.OnEnable += (orig, self) =>
             {
                 orig(self);
-                SetRenderMode(self.gameObject, hdResolution, menuPosition, menuScale);
+                SetRenderMode(self.gameObject, hdResolution, menuPosition, menuScale, true);
             };
             On.RoR2.UI.SimpleDialogBox.Start += (orig, self) =>
             {
@@ -97,7 +97,7 @@ namespace VRMod
 
                 bool isPingIndicator = PingIndicator.instancesList.Exists((x) => x.positionIndicator == indicator);
 
-                indicator.transform.position = uiCamera.cameraRigController.transform.InverseTransformDirection(position - uiCamera.cameraRigController.transform.position);
+                indicator.transform.position = (VRCameraWrapper.instance ? VRCameraWrapper.instance.transform : uiCamera.cameraRigController.transform).InverseTransformDirection(position - uiCamera.cameraRigController.transform.position);
                 indicator.transform.localScale = (isPingIndicator ? 1: 0.2f) * Vector3.Distance(uiCamera.cameraRigController.sceneCam.transform.position, position) * Vector3.one;
             }
         }
@@ -116,12 +116,12 @@ namespace VRMod
             }
         }
 
-        private static void SetRenderMode(GameObject uiObject, Vector2 resolution, Vector3 positionOffset, Vector3 scale)
+        private static void SetRenderMode(GameObject uiObject, Vector2 resolution, Vector3 positionOffset, Vector3 scale, bool followRotation = false)
         {
             if (!uiCamera)
             {
                 GameObject cameraObject = Camera.main.transform.parent.gameObject;
-                uiCamera = cameraObject.GetComponent<CameraRigController>().uiCam;
+                uiCamera = cameraObject.name.Contains("Wrapper") ? cameraObject.GetComponent<VRCameraWrapper>().cameraRigController.uiCam : cameraObject.GetComponent<CameraRigController>().uiCam;
             }
 
             Canvas canvas = uiObject.GetComponent<Canvas>();
@@ -134,10 +134,25 @@ namespace VRMod
                 canvas.renderMode = RenderMode.WorldSpace;
                 canvas.worldCamera = uiCamera;
 
-                if (uiObject.transform.parent)
-                    uiObject.transform.parent.position = uiCamera.transform.position + positionOffset;
+                Vector3 offset = positionOffset;
 
-                uiObject.transform.position = uiCamera.transform.position + positionOffset;
+                if (followRotation)
+                {
+                    Vector3 camRotation = new Vector3(0, uiCamera.transform.eulerAngles.y, 0);
+
+                    offset = Quaternion.Euler(camRotation) * offset;
+
+                    if (uiObject.transform.parent)
+                        uiObject.transform.parent.rotation = Quaternion.Euler(uiObject.transform.parent.eulerAngles + camRotation);
+                    else
+                        uiObject.transform.rotation = Quaternion.Euler(uiObject.transform.parent.eulerAngles + camRotation);
+
+                }
+
+                if (uiObject.transform.parent)
+                    uiObject.transform.parent.position = uiCamera.transform.position + offset;
+
+                uiObject.transform.position = uiCamera.transform.position + offset;
                 uiObject.transform.localScale = scale;
 
                 RectTransform rect = uiObject.GetComponent<RectTransform>();

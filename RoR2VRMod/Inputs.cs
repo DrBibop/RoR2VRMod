@@ -77,27 +77,36 @@ namespace VRMod
             List<UserProfile> userProfiles = UserProfile.loadedUserProfiles.Values.ToList();
             foreach (UserProfile profile in userProfiles)
             {
-                AddMissingBindingsToProfile(profile);
-
-                profile.RequestSave();
+                if (AddMissingBindingsToProfile(profile))
+                    profile.RequestSave();
             }
         }
 
-        private static void AddMissingBindingsToProfile(UserProfile profile)
+        private static bool AddMissingBindingsToProfile(UserProfile profile)
         {
+            bool hasAddedBind = false;
+
             foreach (ActionElementMap map in joystickActionElementMaps)
             {
                 List<ActionElementMap> actionElementMaps = profile.joystickMap.GetElementMaps().ToList();
                 if (!actionElementMaps.Exists((x) => x.actionId == map.actionId))
+                {
                     profile.joystickMap.AddElementMap(map);
+                    hasAddedBind = true;
+                }
             }
 
             foreach (ActionElementMap map in keyboardActionElementMaps)
             {
                 List<ActionElementMap> actionElementMaps = profile.keyboardMap.GetElementMaps().ToList();
                 if (!actionElementMaps.Exists((x) => x.actionId == map.actionId))
+                {
                     profile.keyboardMap.AddElementMap(map);
+                    hasAddedBind = true;
+                }
             }
+
+            return hasAddedBind;
         }
 
         private static void AddCustomActions(Action<UserData> orig, UserData self)

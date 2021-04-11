@@ -1,5 +1,6 @@
 ﻿using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using Rewired;
 using RoR2;
 using System.Linq;
 using UnityEngine;
@@ -8,6 +9,19 @@ namespace VRMod
 {
     internal static class CameraFixes
     {
+        private static VRCameraWrapper camWrapper;
+
+        private static float snapTurnYaw;
+
+        private static bool isTurningLeft;
+        private static bool wasTurningLeft;
+
+        private static bool isTurningRight;
+        private static bool wasTurningRight;
+
+        private static bool justTurnedLeft => isTurningLeft && !wasTurningLeft;
+        private static bool justTurnedRight => isTurningRight && !wasTurningRight;
+
         internal static void Init()
         {
             On.RoR2.MatchCamera.Awake += (orig, self) =>
@@ -17,8 +31,101 @@ namespace VRMod
             };
 
             IL.RoR2.CameraRigController.SetCameraState += RemoveFOVChange;
+            On.RoR2.CameraRigController.SetCameraState += SetCameraStateOverride;
+
+
+            if (ModConfig.FirstPerson.Value)
+            {
+                On.RoR2.Run.Update += SetBodyInvisible;
+
+                On.RoR2.CameraRigController.OnDestroy += (orig, self) =>
+                {
+                    orig(self);
+                    if (camWrapper)
+                        Object.Destroy(camWrapper.gameObject);
+                };
+            }
 
             On.RoR2.CameraRigController.GetCrosshairRaycastRay += GetVRCrosshairRaycastRay;
+        }
+
+        private static void SetBodyInvisible(On.RoR2.Run.orig_Update orig, Run self)
+        {
+            Renderer[] renderers = PlayerCharacterMasterController.instances[0]?.master?.GetBody()?.modelLocator?.modelTransform?.gameObject.GetComponentsInChildren<Renderer>(true);
+            if (renderers != null)
+            {
+                foreach (Renderer renderer in renderers)
+                {
+                    if (renderer.gameObject.activeSelf)
+                    {
+                        renderer.gameObject.SetActive(false);
+                    }
+                }
+            }
+            orig(self);
+        }
+
+        private static void SetCameraStateOverride(On.RoR2.CameraRigController.orig_SetCameraState orig, CameraRigController self, CameraState cameraState)
+        {
+            if (Run.instance && self.cameraMode == CameraRigController.CameraMode.PlayerBasic)
+            {
+                if (ModConfig.SnapTurn.Value && ModConfig.FirstPerson.Value)
+                {
+                    Player player = self.localUserViewer?.inputPlayer;
+
+                    if (player != null)
+                    {
+                        float joystickAxis = player.GetAxisRaw(16);
+                        float scrollAxis = player.GetAxisRaw(26);
+
+                        wasTurningLeft = isTurningLeft;
+                        wasTurningRight = isTurningRight;
+
+                        isTurningLeft = joystickAxis < -0.8f || scrollAxis < -0.8f;
+                        isTurningRight = joystickAxis > 0.8f || scrollAxis > 0.8f;
+
+                        if (justTurnedLeft)
+                            snapTurnYaw = (snapTurnYaw - ModConfig.SnapTurnAngle.Value) % 360;
+                        else if (justTurnedRight)
+                            snapTurnYaw = (snapTurnYaw + ModConfig.SnapTurnAngle.Value) % 360;
+
+                        cameraState.rotation = Quaternion.Euler(0, snapTurnYaw, 0);
+                    }
+                }
+                else if (ModConfig.LockedCameraPitch.Value)
+                {
+                    cameraState.rotation = Quaternion.Euler(0, self.yaw, 0);
+                }
+
+                if (ModConfig.FirstPerson.Value)
+                {
+                    if (!camWrapper)
+                    {
+                        GameObject wrapperObject = new GameObject("VR Camera Wrapper");
+                        camWrapper = wrapperObject.AddComponent<VRCameraWrapper>();
+                        camWrapper.Init(self);
+                    }
+                    camWrapper.ManualUpdate(cameraState);
+
+                    cameraState.rotation = self.sceneCam.transform.rotation;
+
+                    Vector3 pos = camWrapper.transform.position;
+
+                    if (self.targetBody)
+                    {
+                        pos = self.targetBody.transform.position;
+
+                        CapsuleCollider collider = self.targetBody.GetComponent<CapsuleCollider>();
+
+                        if (collider)
+                            pos.y += (collider.height) / 2;
+                    }
+
+                    camWrapper.transform.position = pos;
+                }
+            }
+
+            orig(self, cameraState);
         }
 
         private static void RemoveFOVChange(ILContext il)
