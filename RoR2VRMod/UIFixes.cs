@@ -97,8 +97,9 @@ namespace VRMod
 
                 bool isPingIndicator = PingIndicator.instancesList.Exists((x) => x.positionIndicator == indicator);
 
-                indicator.transform.position = (VRCameraWrapper.instance ? VRCameraWrapper.instance.transform : uiCamera.cameraRigController.transform).InverseTransformDirection(position - uiCamera.cameraRigController.transform.position);
-                indicator.transform.localScale = (isPingIndicator ? 1: 0.2f) * Vector3.Distance(uiCamera.cameraRigController.sceneCam.transform.position, position) * Vector3.one;
+                Transform rigTransform = VRCameraWrapper.instance ? VRCameraWrapper.instance.transform : uiCamera.cameraRigController.transform;
+                indicator.transform.position = rigTransform.InverseTransformDirection(position - rigTransform.position);
+                indicator.transform.localScale = (isPingIndicator ? 1: 0.2f) * Vector3.Distance(rigTransform.position, position) * Vector3.one;
             }
         }
 

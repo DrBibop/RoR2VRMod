@@ -10,7 +10,7 @@
     "GameVersion": "N/A",
     "Dependencies": [
 		"bbepis-BepInExPack-5.3.1",
-		"XoXFaby-MMHOOK_Standalone-1.0.1"
+		"RiskofThunder-HookGenPatcher-1.3.0"
 	],
     "OptionalDependencies": [],
     "Incompatibilities": [],

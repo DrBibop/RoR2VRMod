@@ -79,3 +79,11 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - Icons no longer have a fixed distance.
 - Fixed a bug that caused icons to not correctly appear above targets.
 - Fixed targeting indicator placements (Huntress primary, Engineer missile launcher, recycler, capacitor, etc.).
+
+### 1.3.0
+- Added first person config setting.
+- Added snap turn and snap turn angle config settings.
+- Added camera pitch lock config setting.
+- Removed camera recoil effects.
+- The pause menu now follows the camera rotation.
+- Changed MMHOOK dependency to HookGenPatcher.

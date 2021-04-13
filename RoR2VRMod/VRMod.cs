@@ -12,7 +12,7 @@ using R2API.Utils;
 [assembly: ManualNetworkRegistration]
 namespace VRMod
 {
-    [BepInPlugin("com.DrBibop.VRMod", "VRMod", "1.2.1")]
+    [BepInPlugin("com.DrBibop.VRMod", "VRMod", "1.3.0")]
     public class VRMod : BaseUnityPlugin
     {
         internal static ManualLogSource StaticLogger;
@@ -28,9 +28,8 @@ namespace VRMod
             UIFixes.Init();
             CameraFixes.Init();
 
-            On.RoR2.RoR2Application.OnLoad += (orig, self) =>
+            RoR2.RoR2Application.onLoad += () =>
             {
-                orig(self);
                 StartCoroutine(SetVRDevice(ModConfig.ConfigUseOculus.Value));
             };
         }

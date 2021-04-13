@@ -11,13 +11,11 @@ namespace VRMod
 
         internal static void Init()
         {
-            On.RoR2.RoR2Application.OnLoad += AddRecenterInput;
+            RoR2.RoR2Application.onLoad += AddRecenterInput;
         }
 
-        private static void AddRecenterInput(On.RoR2.RoR2Application.orig_OnLoad orig, RoR2.RoR2Application self)
+        private static void AddRecenterInput()
         {
-            orig(self);
-
             if (vrManager)
                 return;
             
