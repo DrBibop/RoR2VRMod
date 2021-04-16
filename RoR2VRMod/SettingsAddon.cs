@@ -76,18 +76,21 @@ namespace VRMod
 
             Inputs.ActionDef[] actionDefs = Inputs.actionDefs;
 
+            bool isFirst = true;
             foreach (var actionDef in actionDefs)
             {
                 if (actionDef.keyboardMap != KeyboardKeyCode.None)
-                    AddBindingSetting(actionDef, keyboardBindingSetting, instanceLayout, subPanelInstance);
+                    AddBindingSetting(actionDef, keyboardBindingSetting, instanceLayout, isFirst);
                 if (actionDef.joystickMap != Inputs.ControllerInput.None)
-                    AddBindingSetting(actionDef, controllerBindingSetting, instanceLayout, subPanelInstance);
+                    AddBindingSetting(actionDef, controllerBindingSetting, instanceLayout, isFirst);
+
+                isFirst = false;
             }
 
             return subPanelInstance;
         }
 
-        private static void AddBindingSetting(Inputs.ActionDef actionDef, GameObject settingToInstantiate, Transform panelLayout, GameObject subPanel)
+        private static void AddBindingSetting(Inputs.ActionDef actionDef, GameObject settingToInstantiate, Transform panelLayout, bool isFirst)
         {
             GameObject settingInstance = Object.Instantiate(settingToInstantiate, panelLayout);
 
@@ -98,10 +101,12 @@ namespace VRMod
 
             settingInstance.name = string.Format("SettingsEntryButton, {1} Binding ({0})", actionDef.actionName, inputBindingControl.inputSource == MPEventSystem.InputSource.MouseAndKeyboard ? "M&K" : "Gamepad");
 
-            HGButtonHistory buttonHistory = subPanel.GetComponent<HGButtonHistory>();
-
-            if (buttonHistory && !buttonHistory.lastRememberedGameObject)
-                buttonHistory.lastRememberedGameObject = settingInstance;
+            if (isFirst)
+            {
+                HGButton button = settingInstance.GetComponent<HGButton>();
+                if (button)
+                    button.defaultFallbackButton = true;
+            }
         }
 
         private static GameObject SetupHeader(Transform parent)

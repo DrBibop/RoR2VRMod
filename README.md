@@ -4,6 +4,8 @@ This mod was made possible with the joint effort of elliottate, MrPurple and me.
 
 ![](https://thumbs.gfycat.com/UnfitAdoredBooby-size_restricted.gif)
 
+![](https://thumbs.gfycat.com/PleasantImaginaryDuiker-size_restricted.gif)
+
 In addition of adding VR functionality, this mod also tweaks multiple things to enhance the VR experience.
 
 Playing in VR should be possible with any Oculus or SteamVR compatible devices. Motion controls are currently not supported. A gamepad is therefore recommended.
@@ -13,7 +15,7 @@ If you want to support me and gain access to pre-release testing builds, you can
 # Installation
 It is recommended to use a mod manager such as [r2modman](https://thunderstore.io/package/ebkr/r2modman/) and press the "Install with Mod Manager" button. Once done, you can start the game using the "Start modded" button.
 
-For manual download, make sure to have [BepInEx](https://thunderstore.io/package/bbepis/BepInExPack/) and [MMHOOK Standalone](https://thunderstore.io/package/XoXFaby/MMHOOK_Standalone/) installed. You can then download the VR mod with the "Manual Download" button and copy the `plugins` and `patchers` folder into the `BepInEx` folder.
+For manual download, make sure to have [BepInEx](https://thunderstore.io/package/bbepis/BepInExPack/) and [HookGenPatcher](https://thunderstore.io/package/RiskofThunder/HookGenPatcher/) installed. You can then download the VR mod with the "Manual Download" button and copy the `plugins` and `patchers` folder into the `BepInEx` folder.
 
 # FAQ
 ### Wouldn't it be nauseating to play in VR?
@@ -26,10 +28,10 @@ Motion controls are currently not supported. We would love to add this in the fu
 Yes! The mod is only required for VR players. You can play just fine with other vanilla players as long as you don't have any other mods that prevent you to do so.
 
 ### Why play a 3rd person game in VR?
-It honestly feels pretty great! You can still play in first person using the [First Person mod](https://thunderstore.io/package/mistername/FirstPersonView/). Keep in mind that there isn't really a way to know which way is forward using this mod. Keep your body straight and use your joystick to make large turns. We plan on implementing our own first person system that works better for VR in the future.
+It honestly feels pretty great! This mod makes you play in first person by default but you can always come back to third person using the config editor.
 
 ### I can't press any buttons when I launch the game.
-This is likely because the game is not in focus on your PC. Make sure to click on the game window to pull it to the front. If your cursor is stuck in place, you can press the Windows key or Ctrl+Escape to unclock it and click on the game.
+If you're trying to play with your motion controllers, they're not supported at the moment. Otherwise, this is likely because the game is not in focus on your PC. Make sure to click on the game window to pull it to the front. If your cursor is stuck in place, you can press the Windows key or Ctrl+Escape to unclock it and click on the game.
 
 ### The game won't launch in VR!
 If you are using SteamVR and the game launches in game theatre mode, right click the game on Steam and go to `Properties > General`. You can then turn off the "Use Desktop Game Theatre while SteamVR is active" option.
@@ -43,7 +45,7 @@ No worries! You can switch to Oculus mode in the config file.
 
 To access the config file if you downloaded the mod manually, go to your game directory and head to `BepInEx/config`. You can then edit the "VRMod.cfg" file with a text editor.
 
-### I'm still getting problems
+### I'm still getting problems.
 You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You can also check our [issues list](https://github.com/DrBibop/RoR2VRMod/issues) to see what problems are known.
 
 
