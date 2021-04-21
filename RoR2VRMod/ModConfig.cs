@@ -23,6 +23,8 @@ namespace VRMod
         internal static ConfigEntry<bool> SnapTurn { get; private set; }
         internal static ConfigEntry<float> SnapTurnAngle { get; private set; }
         internal static ConfigEntry<bool> LockedCameraPitch { get; private set; }
+        internal static ConfigEntry<bool> UseMotionControls { get; private set; }
+        internal static ConfigEntry<bool> LeftDominantHand { get; private set; }
 
         internal static void Init()
         {
@@ -92,6 +94,20 @@ namespace VRMod
                 "Locked camera pitch",
                 true,
                 "Prevents the camera from rotating vertically (cannot disable when snap turn is on)."
+            );
+
+
+            UseMotionControls = configFile.Bind<bool>(
+                "Controls",
+                "Use motion controls",
+                true,
+                "Enables motion controls for VR controllers. They act as a simple gamepad when set to false."
+            );
+            LeftDominantHand = configFile.Bind<bool>(
+                "Controls",
+                "Set left hand as dominant",
+                false,
+                "Swaps trigger and grip inputs. Primary attacks are also aimed with the left hand."
             );
         }
     }
