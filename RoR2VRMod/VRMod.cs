@@ -6,7 +6,6 @@ using System.Collections;
 using System;
 using BepInEx.Logging;
 using R2API.Utils;
-using Rewired;
 
 [module: UnverifiableCode]
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -23,22 +22,15 @@ namespace VRMod
             StaticLogger = Logger;
 
             ModConfig.Init();
-            ActionAddons.Init();
-            VRManager.Init();
+            Inputs.Init();
+            InputBehaviours.Init();
             SettingsAddon.Init();
             UIFixes.Init();
             CameraFixes.Init();
-            if (ModConfig.UseMotionControls.Value)
-            {
-                MotionControls.Init();
-                MotionControlledAbilities.Init();
-            }
 
             RoR2.RoR2Application.onLoad += () =>
             {
                 StartCoroutine(SetVRDevice(ModConfig.ConfigUseOculus.Value));
-                VRManager.Init();
-                Controllers.Init();
             };
         }
 

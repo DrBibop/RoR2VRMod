@@ -74,21 +74,23 @@ namespace VRMod
             GameObject controllerBindingSetting = subPanelToInstantiate.transform.Find("Scroll View/Viewport/VerticalLayout/SettingsEntryButton, Binding (Jump)").gameObject;
             GameObject keyboardBindingSetting = parent.Find("SettingsSubPanel, Controls (M&KB)/Scroll View/Viewport/VerticalLayout/SettingsEntryButton, Binding (Jump)").gameObject;
 
-            ActionAddons.ActionDef[] actionDefs = ActionAddons.actionDefs;
+            Inputs.ActionDef[] actionDefs = Inputs.actionDefs;
 
             bool isFirst = true;
             foreach (var actionDef in actionDefs)
             {
                 if (actionDef.keyboardMap != KeyboardKeyCode.None)
-                    AddBindingSetting(actionDef, keyboardBindingSetting, instanceLayout, ref isFirst);
-                if (actionDef.joystickMap != ActionAddons.ControllerInput.None)
-                    AddBindingSetting(actionDef, controllerBindingSetting, instanceLayout, ref isFirst);
+                    AddBindingSetting(actionDef, keyboardBindingSetting, instanceLayout, isFirst);
+                if (actionDef.joystickMap != Inputs.ControllerInput.None)
+                    AddBindingSetting(actionDef, controllerBindingSetting, instanceLayout, isFirst);
+
+                isFirst = false;
             }
 
             return subPanelInstance;
         }
 
-        private static void AddBindingSetting(ActionAddons.ActionDef actionDef, GameObject settingToInstantiate, Transform panelLayout, ref bool isFirst)
+        private static void AddBindingSetting(Inputs.ActionDef actionDef, GameObject settingToInstantiate, Transform panelLayout, bool isFirst)
         {
             GameObject settingInstance = Object.Instantiate(settingToInstantiate, panelLayout);
 
@@ -104,8 +106,6 @@ namespace VRMod
                 HGButton button = settingInstance.GetComponent<HGButton>();
                 if (button)
                     button.defaultFallbackButton = true;
-
-                isFirst = false;
             }
         }
 

@@ -11,7 +11,7 @@ using System.Reflection;
 namespace VRMod
 {
     //Thank you KingEnderBrine. Your code from ExtraSkillSlots have been greatly helpful for this part.
-    internal static class ActionAddons
+    internal static class Inputs
     {
         internal static readonly ActionDef[] actionDefs = new ActionDef[]
         {

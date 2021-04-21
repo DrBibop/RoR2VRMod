@@ -6,7 +6,6 @@ using RoR2.Networking;
 using RoR2.UI;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Rendering.PostProcessing;
 
 namespace VRMod
 {
@@ -33,7 +32,6 @@ namespace VRMod
             On.RoR2.CameraRigController.SetCameraState += SetCameraStateOverride;
 
             On.RoR2.CameraRigController.Update += CameraUpdateOverride;
-			On.RoR2.CameraRigController.Start += RemoveBlur;
 
 
             if (ModConfig.FirstPerson.Value)
@@ -51,21 +49,7 @@ namespace VRMod
             On.RoR2.CameraRigController.GetCrosshairRaycastRay += GetVRCrosshairRaycastRay;
         }
 
-        private static void RemoveBlur(On.RoR2.CameraRigController.orig_Start orig, CameraRigController self)
-        {
-			orig(self);
-
-			Transform blur = self.transform.Find("GlobalPostProcessVolume, Base");
-
-			if (blur)
-			{
-				PostProcessVolume ppVolume = blur.GetComponent<PostProcessVolume>();
-				if (ppVolume)
-					ppVolume.profile.GetSetting<DepthOfField>().active = false;
-			}
-        }
-
-        //I really didnt't want to use IL for this part... so COPYING THE WHOLE METHOD IT IS
+		//I really didnt't want to use IL for this part... so COPYING THE WHOLE METHOD IT IS
         private static void CameraUpdateOverride(On.RoR2.CameraRigController.orig_Update orig, CameraRigController self)
         {
 			if (Time.deltaTime == 0f)
@@ -450,7 +434,7 @@ namespace VRMod
 						VRCameraWrapper.instance = wrapperObject.AddComponent<VRCameraWrapper>();
 						VRCameraWrapper.instance.Init(self);
                     }
-					VRCameraWrapper.instance.UpdateRotation(cameraState);
+					VRCameraWrapper.instance.ManualUpdate(cameraState);
 
                     cameraState.rotation = self.sceneCam.transform.rotation;
 
@@ -500,11 +484,6 @@ namespace VRMod
 
         private static Ray GetVRCrosshairRaycastRay(On.RoR2.CameraRigController.orig_GetCrosshairRaycastRay orig, RoR2.CameraRigController self, Vector2 crosshairOffset, Vector3 raycastStartPlanePoint)
         {
-			if (MotionControls.HandsReady)
-            {
-				return MotionControls.GetHandRay();
-            }
-
             if (!self.sceneCam)
             {
                 return default(Ray);
