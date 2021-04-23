@@ -6,7 +6,6 @@ using System.Collections;
 using System;
 using BepInEx.Logging;
 using R2API.Utils;
-using Rewired;
 
 [module: UnverifiableCode]
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]

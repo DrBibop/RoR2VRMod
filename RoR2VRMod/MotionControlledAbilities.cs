@@ -1,5 +1,6 @@
-﻿using RoR2;
-using RoR2.Audio;
+﻿using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using RoR2;
 using RoR2.Projectile;
 using System;
 using UnityEngine;
@@ -12,98 +13,142 @@ namespace VRMod
     {
         private static CharacterBody localBody;
 
-        private static bool scaleDownNextEffect = false;
+        private static bool preventBowPull = false;
+
         internal static void Init()
         {
-            On.EntityStates.Commando.CommandoWeapon.FirePistol2.FireBullet += CheckPistolBulletMuzzle;
+            IL.RoR2.PlayerCharacterMasterController.FixedUpdate += SprintBreakDirection;
 
             On.EntityStates.GenericBulletBaseState.GenerateBulletAttack += CheckGenericBulletMuzzle;
-
             On.EntityStates.GenericProjectileBaseState.FireProjectile += FireProjectileOverride;
 
-            On.RoR2.EffectManager.SpawnEffect_EffectIndex_EffectData_bool += SpawnEffectOverride;
+            On.EntityStates.Commando.CommandoWeapon.FirePistol2.FireBullet += CheckPistolBulletMuzzle;
+            On.EntityStates.Commando.CommandoWeapon.FireBarrage.FireBullet += PlayBarrageShootAnimation;
+            On.EntityStates.Commando.CommandoWeapon.FireFMJ.PlayAnimation += PlayFMJShootAnimation;
 
-            On.RoR2.EffectManager.SimpleMuzzleFlash += ReduceMuzzleFlash;
+            On.EntityStates.Huntress.BlinkState.GetBlinkVector += GetNonDominantVector;
+            On.EntityStates.Huntress.HuntressWeapon.FireSeekingArrow.OnEnter += AnimatePrimaryBowPull;
+            On.EntityStates.Huntress.HuntressWeapon.FireSeekingArrow.FireOrbArrow += AnimatePrimaryBowShoot;
+            On.EntityStates.Huntress.HuntressWeapon.FireSeekingArrow.OnExit += PreventBowPull;
+            On.EntityStates.Huntress.BaseArrowBarrage.OnEnter += AnimateBarrageBowPull;
+            On.EntityStates.Huntress.BaseArrowBarrage.HandlePrimaryAttack += AnimateBarrageBowShoot;
+            On.EntityStates.Huntress.AimArrowSnipe.HandlePrimaryAttack += AnimateSnipeBow;
+
+            On.EntityStates.Mage.Weapon.Flamethrower.FireGauntlet += DestroyOffHandEffect;
         }
 
-        private static void ReduceMuzzleFlash(On.RoR2.EffectManager.orig_SimpleMuzzleFlash orig, GameObject effectPrefab, GameObject obj, string muzzleName, bool transmit)
+        private static void AnimateSnipeBow(On.EntityStates.Huntress.AimArrowSnipe.orig_HandlePrimaryAttack orig, EntityStates.Huntress.AimArrowSnipe self)
         {
-            if (IsLocalPlayer(obj.GetComponent<CharacterBody>()))
+            orig(self);
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
             {
-                scaleDownNextEffect = true;
-                orig(effectPrefab, obj, muzzleName, transmit);
-                //scaleDownNextEffect = false;
-                return;
+                GetHandAnimator(true).SetTrigger("Primary");
+
+                if (self.primarySkillSlot.stock > 0)
+                    GetHandAnimator(true).SetTrigger("Pull");
             }
-            orig(effectPrefab, obj, muzzleName, transmit);
         }
 
-        private static void SpawnEffectOverride(On.RoR2.EffectManager.orig_SpawnEffect_EffectIndex_EffectData_bool orig, EffectIndex effectIndex, EffectData effectData, bool transmit)
+        private static void AnimateBarrageBowShoot(On.EntityStates.Huntress.BaseArrowBarrage.orig_HandlePrimaryAttack orig, EntityStates.Huntress.BaseArrowBarrage self)
         {
-            if (transmit)
+            orig(self);
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
             {
-                EffectManager.TransmitEffect(effectIndex, effectData, null);
-                if (NetworkServer.active)
-                {
-                    return;
-                }
-            }
-            if (NetworkClient.active)
-            {
-                if (effectData.networkSoundEventIndex != NetworkSoundEventIndex.Invalid)
-                {
-                    PointSoundManager.EmitSoundLocal(NetworkSoundEventCatalog.GetAkIdFromNetworkSoundEventIndex(effectData.networkSoundEventIndex), effectData.origin);
-                }
-                EffectDef effectDef = EffectCatalog.GetEffectDef(effectIndex);
-                if (effectDef == null)
-                {
-                    return;
-                }
-                string spawnSoundEventName = effectDef.spawnSoundEventName;
-                if (!string.IsNullOrEmpty(spawnSoundEventName))
-                {
-                    PointSoundManager.EmitSoundLocal((AkEventIdArg)spawnSoundEventName, effectData.origin);
-                }
-                SurfaceDef surfaceDef = SurfaceDefCatalog.GetSurfaceDef(effectData.surfaceDefIndex);
-                if (surfaceDef != null)
-                {
-                    string impactSoundString = surfaceDef.impactSoundString;
-                    if (!string.IsNullOrEmpty(impactSoundString))
-                    {
-                        PointSoundManager.EmitSoundLocal((AkEventIdArg)impactSoundString, effectData.origin);
-                    }
-                }
-                if (!VFXBudget.CanAffordSpawn(effectDef.prefabVfxAttributes))
-                {
-                    return;
-                }
-                if (effectDef.cullMethod != null && !effectDef.cullMethod(effectData))
-                {
-                    return;
-                }
-                scaleDownNextEffect = true;
-                if (scaleDownNextEffect)
-                {
-                    effectData.scale = 0.5f;
-                }
-                EffectData effectData2 = effectData.Clone();
-                GameObject effectInstance = UnityEngine.Object.Instantiate<GameObject>(effectDef.prefab, effectData2.origin, effectData2.rotation);
-                if (effectInstance)
-                {
-                    EffectComponent component = effectInstance.GetComponent<EffectComponent>();
-                    if (component)
-                    {
-                        if (scaleDownNextEffect)
-                        {
-                            VRMod.StaticLogger.LogInfo("PEW");
-                            component.applyScale = true;
-                        }
-                        component.effectData = effectData2.Clone();
-                    }
-                }
+                GetHandAnimator(true).SetTrigger("Primary");
             }
         }
 
+        private static void AnimateBarrageBowPull(On.EntityStates.Huntress.BaseArrowBarrage.orig_OnEnter orig, EntityStates.Huntress.BaseArrowBarrage self)
+        {
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                GetHandAnimator(true).SetTrigger("Pull");
+            }
+            orig(self);
+        }
+
+        private static void PreventBowPull(On.EntityStates.Huntress.HuntressWeapon.FireSeekingArrow.orig_OnExit orig, EntityStates.Huntress.HuntressWeapon.FireSeekingArrow self)
+        {
+            preventBowPull = true;
+            orig(self);
+            preventBowPull = false;
+        }
+
+        private static void AnimatePrimaryBowShoot(On.EntityStates.Huntress.HuntressWeapon.FireSeekingArrow.orig_FireOrbArrow orig, EntityStates.Huntress.HuntressWeapon.FireSeekingArrow self)
+        {
+            int firedCount = self.firedArrowCount;
+            orig(self);
+            if (self.firedArrowCount <= firedCount) return;
+
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                GetHandAnimator(true).SetTrigger("Primary");
+
+                if (!preventBowPull && self.firedArrowCount < self.maxArrowCount)
+                    GetHandAnimator(true).SetTrigger("Pull");
+            }
+        }
+
+        private static void AnimatePrimaryBowPull(On.EntityStates.Huntress.HuntressWeapon.FireSeekingArrow.orig_OnEnter orig, EntityStates.Huntress.HuntressWeapon.FireSeekingArrow self)
+        {
+            if(IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                GetHandAnimator(true).SetTrigger("Pull");
+            }
+            orig(self);
+        }
+
+        private static void SprintBreakDirection(ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
+
+            c.GotoNext(
+                x => x.MatchLdarg(0),
+                x => x.MatchLdfld<PlayerCharacterMasterController>("bodyInputs"),
+                x => x.MatchCallvirt<InputBankTest>("get_aimDirection")
+                );
+
+            c.RemoveRange(4);
+
+            c.Emit(OpCodes.Ldloc_S, (byte)11);
+            c.EmitDelegate<Func<CameraRigController, Vector3>>((rig) =>
+                {
+                    return rig.sceneCam.transform.forward;
+                }
+            );
+            c.Emit(OpCodes.Stloc_S, (byte)13);
+        }
+
+        private static Vector3 GetNonDominantVector(On.EntityStates.Huntress.BlinkState.orig_GetBlinkVector orig, EntityStates.Huntress.BlinkState self)
+        {
+            return GetHandRay(false).direction;
+        }
+
+        private static void PlayFMJShootAnimation(On.EntityStates.Commando.CommandoWeapon.FireFMJ.orig_PlayAnimation orig, EntityStates.Commando.CommandoWeapon.FireFMJ self, float duration)
+        {
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                GetHandAnimator(false).SetTrigger("Primary");
+            }
+            orig(self, duration);
+        }
+
+        private static void PlayBarrageShootAnimation(On.EntityStates.Commando.CommandoWeapon.FireBarrage.orig_FireBullet orig, EntityStates.Commando.CommandoWeapon.FireBarrage self)
+        {
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                GetHandAnimator(true).SetTrigger("Primary");
+            }
+            orig(self);
+        }
+
+        private static void DestroyOffHandEffect(On.EntityStates.Mage.Weapon.Flamethrower.orig_FireGauntlet orig, EntityStates.Mage.Weapon.Flamethrower self, string muzzleString)
+        {
+            orig(self, muzzleString);
+
+            if (self.leftFlamethrowerTransform)
+                GameObject.Destroy(self.leftFlamethrowerTransform.gameObject);
+        }
         private static void FireProjectileOverride(On.EntityStates.GenericProjectileBaseState.orig_FireProjectile orig, EntityStates.GenericProjectileBaseState self)
         {
             if (!IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
@@ -117,7 +162,7 @@ namespace VRMod
 
             if (self.isAuthority)
             {
-                Ray aimRay = self.targetMuzzle.Contains("Left") ? GetHandRay(HandSide.NonDominant) : self.GetAimRay();
+                Ray aimRay = self.targetMuzzle.Contains("Left") ? GetHandRay(false) : self.GetAimRay();
                 aimRay = self.ModifyProjectileAimRay(aimRay);
                 aimRay.direction = Util.ApplySpread(aimRay.direction, self.minSpread, self.maxSpread, 1f, 1f, 0f, self.projectilePitchBonus);
                 ProjectileManager.instance.FireProjectile(self.projectilePrefab, aimRay.origin, Util.QuaternionSafeLookRotation(aimRay.direction), self.gameObject, self.damageStat * self.damageCoefficient, self.force, Util.CheckRoll(self.critStat, self.characterBody.master), DamageColorIndex.Default, null, -1f);
@@ -129,7 +174,21 @@ namespace VRMod
             if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
             {
                 if (self.muzzleName.Contains("Left"))
-                    aimRay = GetHandRay(HandSide.NonDominant);
+                {
+                    aimRay = GetHandRay(false);
+
+                    Animator animator = GetHandAnimator(false);
+
+                    if (animator)
+                        animator.SetTrigger("Primary");
+                }
+                else
+                {
+                    Animator animator = GetHandAnimator(true);
+
+                    if (animator)
+                        animator.SetTrigger("Primary");
+                }
             }
 
             return orig(self, aimRay);
@@ -140,7 +199,21 @@ namespace VRMod
             if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
             {
                 if (targetMuzzle.Contains("Left"))
-                    self.aimRay = GetHandRay(HandSide.NonDominant);
+                {
+                    self.aimRay = GetHandRay(false);
+
+                    Animator animator = GetHandAnimator(false);
+
+                    if (animator)
+                        animator.SetTrigger("Primary");
+                }
+                else
+                {
+                    Animator animator = GetHandAnimator(true);
+
+                    if (animator)
+                        animator.SetTrigger("Primary");
+                }
             }
 
             orig(self, targetMuzzle);

@@ -2,34 +2,32 @@
 
 namespace VRMod
 {
-    public class Hand : MonoBehaviour
+    internal class Hand : MonoBehaviour
     {
-        public Transform aimOrigin;
+        [SerializeField]
+        internal HandType handType;
 
-        public HandType handType;
+        [SerializeField]
+        internal Transform muzzle;
+
+        [SerializeField]
+        internal string bodyName;
+
+        [SerializeField]
+        internal bool useRay;
+
+        internal Animator animator { get; private set; }
+
+        private void Awake()
+        {
+            animator = GetComponent<Animator>();
+        }
     }
 
-    public enum HandType
+    internal enum HandType
     {
-        Pointer,
-        Commando,
-        HuntressBow,
-        HuntressHand,
-        BanditRifle,
-        BanditRevolver,
-        MULTNail,
-        MULTRebar,
-        MULTScrap,
-        MULTSaw,
-        MULTHand,
-        Engi,
-        Arti,
-        MercSword,
-        MercHand,
-        Rex,
-        Loader,
-        Acrid,
-        CaptainShotgun,
-        CaptainHand
+        Both,
+        Dominant,
+        NonDominant
     }
 }

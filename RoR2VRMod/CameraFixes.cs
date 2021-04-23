@@ -502,7 +502,7 @@ namespace VRMod
         {
 			if (MotionControls.HandsReady)
             {
-				return MotionControls.GetHandRay();
+				return MotionControls.GetHandRay(true);
             }
 
             if (!self.sceneCam)

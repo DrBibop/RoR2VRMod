@@ -1,182 +1,154 @@
 ﻿using RoR2;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.XR;
 
 namespace VRMod
 {
-    internal class MotionControls
+    public class MotionControls
     {
-        private static GameObject handPrefab;
+        internal static bool HandsReady => dominantHand != null && nonDominantHand != null && dominantHand.currentHand != null && nonDominantHand.currentHand != null;
 
-        private static HandSelector leftHand;
-        private static HandSelector rightHand;
-
-        internal static bool HandsReady => leftHand != null && rightHand != null && leftHand.currentHand != null && rightHand.currentHand != null;
+        private static GameObject handSelectorPrefab;
 
         private static HandSelector dominantHand;
         private static HandSelector nonDominantHand;
+
+        private static List<GameObject> handPrefabs = new List<GameObject>();
 
         internal static void Init()
         {
             On.RoR2.CameraRigController.Start += SetupVRHands;
 
-            RoR2.PauseManager.onPauseStartGlobal += () =>
-            {
-                SetHandPair(HandPair.Pointer);
-            };
+            RoR2.PauseManager.onPauseStartGlobal += ResetToPointer;
 
             RoR2.PauseManager.onPauseEndGlobal += () =>
             {
                 CharacterBody body = LocalUserManager.GetFirstLocalUser().cachedBody;
                 if (body)
-                    SetHandPairFromCharacterName(body.name);
+                    SetHandPair(body.name.Substring(0, body.name.IndexOf("Body")));
             };
+
+            AssetBundle assetBundle = AssetBundle.LoadFromMemory(Properties.Resources.vrmodassets);
+
+            List<GameObject> prefabs = new List<GameObject>()
+            {
+                assetBundle.LoadAsset<GameObject>("CommandoPistol"),
+                assetBundle.LoadAsset<GameObject>("HuntressBow"),
+                assetBundle.LoadAsset<GameObject>("HuntressHand")
+            };
+
+            handSelectorPrefab = assetBundle.LoadAsset<GameObject>("VRHand");
+
+            foreach (GameObject prefab in prefabs)
+            {
+                AddHandPrefab(prefab);
+            }
         }
 
-        private static void SetHandPairFromCharacterName(string characterName)
+        /// <summary>
+        /// Add a hand prefab to be instanciated when the matching body is being used by the local player.
+        /// </summary>
+        /// <param name="handPrefab">The hand prefab from your asset bundle.</param>
+        public static void AddHandPrefab(GameObject handPrefab)
         {
-            string name = characterName;
-            if (name.Contains("Body")) name = name.Substring(0, characterName.IndexOf("Body"));
-
-            VRMod.StaticLogger.LogInfo(characterName);
-
-            switch (name)
+            if (!handPrefab)
             {
-                case "Huntress":
-                    SetHandPair(HandPair.Huntress);
-                    break;
-                case "Bandit2":
-                    SetHandPair(HandPair.Bandit);
-                    break;
-                case "HAND":
-                    SetHandPair(HandPair.MULT);
-                    break;
-                case "Engi":
-                    SetHandPair(HandPair.Engi);
-                    break;
-                case "Mage":
-                    SetHandPair(HandPair.Arti);
-                    break;
-                case "Merc":
-                    SetHandPair(HandPair.Merc);
-                    break;
-                case "Treebot":
-                    SetHandPair(HandPair.Rex);
-                    break;
-                case "Loader":
-                    SetHandPair(HandPair.Loader);
-                    break;
-                case "Croco":
-                    SetHandPair(HandPair.Acrid);
-                    break;
-                case "Captain":
-                    SetHandPair(HandPair.Captain);
-                    break;
-                default:
-                    SetHandPair(HandPair.Commando);
-                    break;
+                throw new ArgumentNullException("VR Mod: Cannot add null as a hand prefab.");
             }
+
+            Hand handComponent = handPrefab.GetComponent<Hand>();
+
+            if (!handComponent)
+            {
+                throw new ArgumentException("VR Mod: The prefab is missing a Hand component and cannot be added as a hand prefab.");
+            }
+
+            if (handPrefabs.Exists((x) => CheckPrefabMatch(handComponent, x)))
+            {
+                throw new ArgumentException("VR Mod: A hand with the same body name and hand type has already been added. Make sure to only add one hand of type \'Both\' or one \'Dominant\' and \'Non-Dominant\' hand for the same body.");
+            }
+
+            handPrefabs.Add(handPrefab);
+        }
+
+        /// <summary>
+        /// Returns the animator component of the chosen hand.
+        /// </summary>
+        /// <param name="dominant">Return the component of the dominant or non-dominant hand.</param>
+        /// <returns></returns>
+        public static Animator GetHandAnimator(bool dominant)
+        {
+            if (!HandsReady)
+                throw new NullReferenceException("VR Mod: Cannot retrieve the animator of a hand that doesn't exist.");
+
+            return (dominant ? dominantHand : nonDominantHand).currentHand.animator;
+        }
+
+        /// <summary>
+        /// Returns the generated ray from the chosen hand's muzzle.
+        /// </summary>
+        /// <param name="dominant">Return the ray of the dominant or non-dominant hand.</param>
+        /// <returns></returns>
+        public static Ray GetHandRay(bool dominant)
+        {
+            if (!HandsReady)
+                throw new NullReferenceException("VR Mod: Cannot retrieve the ray of a hand that doesn't exist.");
+
+            return (dominant ? dominantHand : nonDominantHand).GetRay();
+        }
+
+        private static bool CheckPrefabMatch(Hand hand, GameObject prefab)
+        {
+            Hand prefabHand = prefab.GetComponent<Hand>();
+
+            return hand.bodyName == prefabHand.bodyName && (prefabHand.handType == HandType.Both || hand.handType == HandType.Both || prefabHand.handType == hand.handType);
         }
 
         private static void SetupVRHands(On.RoR2.CameraRigController.orig_Start orig, RoR2.CameraRigController self)
         {
             orig(self);
 
-            if (!handPrefab)
-            {
-                AssetBundle assetBundle = AssetBundle.LoadFromMemory(Properties.Resources.vrmodassets);
-
-                handPrefab = assetBundle.LoadAsset<GameObject>("VRHand");
-            }
-
-            leftHand = GameObject.Instantiate(handPrefab).GetComponent<HandSelector>();
+            HandSelector leftHand = GameObject.Instantiate(handSelectorPrefab).GetComponent<HandSelector>();
             leftHand.SetXRNode(XRNode.LeftHand);
             Vector3 mirroredScale = leftHand.transform.localScale;
             mirroredScale.x = -mirroredScale.x;
             leftHand.transform.localScale = mirroredScale;
 
-            rightHand = GameObject.Instantiate(handPrefab).GetComponent<HandSelector>();
+            HandSelector rightHand = GameObject.Instantiate(handSelectorPrefab).GetComponent<HandSelector>();
             rightHand.SetXRNode(XRNode.RightHand);
 
-            dominantHand = rightHand;
-            nonDominantHand = leftHand;
+            dominantHand = ModConfig.LeftDominantHand.Value ? leftHand : rightHand;
+            nonDominantHand = ModConfig.LeftDominantHand.Value ? rightHand : leftHand;
 
-            leftHand.ShowRay(true);
-            rightHand.ShowRay(true);
+            dominantHand.SetPrefabs(handPrefabs.Where((x) => CheckDominance(x, true)).ToList());
+            nonDominantHand.SetPrefabs(handPrefabs.Where((x) => CheckDominance(x, false)).ToList());
 
             CharacterBody localBody = LocalUserManager.GetFirstLocalUser().cachedBody;
             if (localBody)
-                SetHandPairFromCharacterName(localBody.name);
-            else
-                SetHandPair(HandPair.Pointer);
+                SetHandPair(localBody.name.Substring(0, localBody.name.IndexOf("Body")));
         }
 
-        internal static void SetHandPair(HandPair handPair)
+        private static bool CheckDominance(GameObject prefab, bool dominant)
         {
-            if (handPair != HandPair.Pointer)
-                handPair = HandPair.Commando;
+            Hand hand = prefab.GetComponent<Hand>();
 
-            switch(handPair)
-            {
-                case HandPair.Pointer:
-                    leftHand.SetCurrentHand(HandType.Pointer);
-                    rightHand.SetCurrentHand(HandType.Pointer);
-                    break;
-                case HandPair.Commando:
-                    leftHand.SetCurrentHand(HandType.Commando);
-                    rightHand.SetCurrentHand(HandType.Commando);
-                    break;
-                case HandPair.Huntress:
-                    leftHand.SetCurrentHand(HandType.HuntressHand);
-                    rightHand.SetCurrentHand(HandType.HuntressBow);
-                    break;
-                case HandPair.Bandit:
-                    leftHand.SetCurrentHand(HandType.BanditRevolver);
-                    rightHand.SetCurrentHand(HandType.BanditRifle);
-                    break;
-                case HandPair.MULT:
-                    leftHand.SetCurrentHand(HandType.MULTHand);
-                    rightHand.SetCurrentHand(HandType.MULTNail);
-                    break;
-                case HandPair.Engi:
-                    leftHand.SetCurrentHand(HandType.Engi);
-                    rightHand.SetCurrentHand(HandType.Engi);
-                    break;
-                case HandPair.Arti:
-                    leftHand.SetCurrentHand(HandType.Arti);
-                    rightHand.SetCurrentHand(HandType.Arti);
-                    break;
-                case HandPair.Merc:
-                    leftHand.SetCurrentHand(HandType.MercHand);
-                    rightHand.SetCurrentHand(HandType.MercSword);
-                    break;
-                case HandPair.Rex:
-                    leftHand.SetCurrentHand(HandType.Rex);
-                    rightHand.SetCurrentHand(HandType.Rex);
-                    break;
-                case HandPair.Loader:
-                    leftHand.SetCurrentHand(HandType.Loader);
-                    rightHand.SetCurrentHand(HandType.Loader);
-                    break;
-                case HandPair.Acrid:
-                    leftHand.SetCurrentHand(HandType.Acrid);
-                    rightHand.SetCurrentHand(HandType.Acrid);
-                    break;
-                case HandPair.Captain:
-                    leftHand.SetCurrentHand(HandType.CaptainHand);
-                    rightHand.SetCurrentHand(HandType.CaptainShotgun);
-                    break;
-            }
+            return hand.handType == HandType.Both || (dominant == (hand.handType == HandType.Dominant));
+        }
 
-            if (handPair == HandPair.Pointer)
-                return;
+        internal static void SetHandPair(string bodyName)
+        {
+            if (!HandsReady) return;
+
+            dominantHand.SetCurrentHand(bodyName);
+            nonDominantHand.SetCurrentHand(bodyName);
 
             CharacterBody localBody = LocalUserManager.GetFirstLocalUser().cachedBody;
             if (localBody)
             {
-                localBody.aimOriginTransform = dominantHand.currentHand.aimOrigin;
+                localBody.aimOriginTransform = dominantHand.currentHand.muzzle;
 
                 ChildLocator childLocator = localBody.modelLocator.modelTransform.GetComponent<ChildLocator>();
 
@@ -187,64 +159,19 @@ namespace VRMod
                         if (childLocator.transformPairs[i].name.Contains("Muzzle"))
                         {
                             if (childLocator.transformPairs[i].name.Contains("Left"))
-                                childLocator.transformPairs[i].transform = nonDominantHand.currentHand.aimOrigin;
+                                childLocator.transformPairs[i].transform = nonDominantHand.currentHand.muzzle;
                             else if (!childLocator.transformPairs[i].name.Contains("Center"))
-                                childLocator.transformPairs[i].transform = dominantHand.currentHand.aimOrigin;
+                                childLocator.transformPairs[i].transform = dominantHand.currentHand.muzzle;
                         }
                     }
                 }
             }
         }
 
-        internal static Ray GetHandRay(HandSide handSide = HandSide.Dominant)
+        internal static void ResetToPointer()
         {
-            HandSelector selectedHand;
-            switch (handSide)
-            {
-                case HandSide.Left:
-                    selectedHand = leftHand;
-                    break;
-                case HandSide.Right:
-                    selectedHand = rightHand;
-                    break;
-                case HandSide.NonDominant:
-                    selectedHand = nonDominantHand;
-                    break;
-                default:
-                    selectedHand = dominantHand;
-                    break;
-            }
-
-            return GetHandRay(selectedHand);
-        }
-
-        internal static Ray GetHandRay(HandSelector hand)
-        {
-            return new Ray(hand.currentHand.aimOrigin.position, hand.currentHand.aimOrigin.forward);
-        }
-
-        internal enum HandPair
-        {
-            Pointer,
-            Commando,
-            Huntress,
-            Bandit,
-            MULT,
-            Engi,
-            Arti,
-            Merc,
-            Rex,
-            Loader,
-            Acrid,
-            Captain
-        }
-
-        internal enum HandSide
-        {
-            Left,
-            Right,
-            Dominant,
-            NonDominant
+            dominantHand.ResetToPointer();
+            nonDominantHand.ResetToPointer();
         }
     }
 }
