@@ -21,16 +21,27 @@ namespace VRMod
         private static readonly Vector2 menuResolution = new Vector2(1500, 1000);
         private static readonly Vector2 hdResolution = new Vector2(1920, 1080);
 
-        private static Camera uiCamera;
+        private static Camera cachedUICam;
+
+        private static Vector3 camRotation = Vector3.zero;
+
+        private static Image cachedSprintIcon;
+        private static Color originalSprintIconColor;
 
         internal static void Init()
         {
-            On.RoR2.UI.HUD.Awake += AdjustHUDAnchors;
+            On.RoR2.UI.HUD.Awake += AdjustHUD;
 
             On.RoR2.UI.CombatHealthBarViewer.UpdateAllHealthbarPositions += UpdateAllHealthBarPositionsVR;
 
             On.RoR2.Indicator.PositionForUI += PositionForUIOverride;
             On.RoR2.PositionIndicator.UpdatePositions += UpdatePositionsOverride;
+
+            if (ModConfig.FirstPerson.Value)
+            {
+                On.RoR2.CharacterBody.OnSprintStart += SetSprintIconColor;
+                On.RoR2.CharacterBody.OnSprintStop += ResetSprintIconColor;
+            }
 
             On.RoR2.UI.MainMenu.BaseMainMenuScreen.OnEnter += (orig, self, controller) =>
             {
@@ -55,12 +66,18 @@ namespace VRMod
             On.RoR2.UI.PauseScreenController.OnEnable += (orig, self) =>
             {
                 orig(self);
+                if (!cachedUICam)
+                {
+                    GameObject cameraObject = Camera.main.transform.parent.gameObject;
+                    cachedUICam = cameraObject.name.Contains("Wrapper") ? cameraObject.GetComponent<VRCameraWrapper>().cameraRigController.uiCam : cameraObject.GetComponent<CameraRigController>().uiCam;
+                }
+                camRotation = new Vector3(0, cachedUICam.transform.eulerAngles.y, 0);
                 SetRenderMode(self.gameObject, hdResolution, menuPosition, menuScale, true);
             };
             On.RoR2.UI.SimpleDialogBox.Start += (orig, self) =>
             {
                 orig(self);
-                SetRenderMode(self.transform.root.gameObject, hdResolution, menuPosition, menuScale);
+                SetRenderMode(self.transform.root.gameObject, hdResolution, menuPosition, menuScale, PauseManager.isPaused);
             };
             On.RoR2.UI.GameEndReportPanelController.Awake += (orig, self) =>
             {
@@ -82,6 +99,44 @@ namespace VRMod
                 orig(self);
                 self.gameEndReportPanelPrefab.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
             };
+        }
+
+        private static void ResetSprintIconColor(On.RoR2.CharacterBody.orig_OnSprintStop orig, CharacterBody self)
+        {
+            if (self == LocalUserManager.GetFirstLocalUser().cachedBody)
+            {
+                if (cachedSprintIcon)
+                    cachedSprintIcon.color = originalSprintIconColor;
+            }
+
+            orig(self);
+        }
+
+        private static void SetSprintIconColor(On.RoR2.CharacterBody.orig_OnSprintStart orig, CharacterBody self)
+        {
+            if (self == LocalUserManager.GetFirstLocalUser().cachedBody)
+            {
+                if (!cachedSprintIcon)
+                {
+                    Transform iconTransform = LocalUserManager.GetFirstLocalUser().cameraRigController.hud.mainUIPanel.transform.Find("SpringCanvas/BottomRightCluster/Scaler/SprintCluster/SprintIcon");
+                    if (iconTransform)
+                    {
+                        Image sprintIcon = iconTransform.GetComponent<Image>();
+
+                        if (sprintIcon)
+                            cachedSprintIcon = sprintIcon;
+                    }
+                }
+
+                if (cachedSprintIcon)
+                {
+                    originalSprintIconColor = cachedSprintIcon.color;
+
+                    cachedSprintIcon.color = Color.yellow;
+                }
+            }
+
+            orig(self);
         }
 
         private static void UpdatePositionsOverride(On.RoR2.PositionIndicator.orig_UpdatePositions orig, UICamera uiCamera)
@@ -108,10 +163,12 @@ namespace VRMod
             if (self.targetTransform)
             {
                 Vector3 position = self.targetTransform.position;
+                
                 Vector3 vector = sceneCamera.transform.parent.InverseTransformDirection(position - sceneCamera.transform.parent.position);
                 if (self.visualizerTransform != null)
                 {
                     self.visualizerTransform.position = vector;
+                    self.visualizerTransform.rotation = Quaternion.Euler(position - sceneCamera.transform.position);
                     self.visualizerTransform.localScale = (self is EntityStates.Engi.EngiMissilePainter.Paint.EngiMissileIndicator ? 1 : 0.1f) * Vector3.Distance(sceneCamera.transform.position, position) * Vector3.one;
                 }
             }
@@ -119,10 +176,10 @@ namespace VRMod
 
         private static void SetRenderMode(GameObject uiObject, Vector2 resolution, Vector3 positionOffset, Vector3 scale, bool followRotation = false)
         {
-            if (!uiCamera)
+            if (!cachedUICam)
             {
                 GameObject cameraObject = Camera.main.transform.parent.gameObject;
-                uiCamera = cameraObject.name.Contains("Wrapper") ? cameraObject.GetComponent<VRCameraWrapper>().cameraRigController.uiCam : cameraObject.GetComponent<CameraRigController>().uiCam;
+                cachedUICam = cameraObject.name.Contains("Wrapper") ? cameraObject.GetComponent<VRCameraWrapper>().cameraRigController.uiCam : cameraObject.GetComponent<CameraRigController>().uiCam;
             }
 
             Canvas canvas = uiObject.GetComponent<Canvas>();
@@ -133,27 +190,25 @@ namespace VRMod
                     canvas.renderMode = RenderMode.ScreenSpaceOverlay;
 
                 canvas.renderMode = RenderMode.WorldSpace;
-                canvas.worldCamera = uiCamera;
+                canvas.worldCamera = cachedUICam;
 
                 Vector3 offset = positionOffset;
 
                 if (followRotation)
                 {
-                    Vector3 camRotation = new Vector3(0, uiCamera.transform.eulerAngles.y, 0);
-
                     offset = Quaternion.Euler(camRotation) * offset;
 
-                    if (uiObject.transform.parent)
+                    if (uiObject.transform.root != uiObject.transform)
                         uiObject.transform.parent.rotation = Quaternion.Euler(uiObject.transform.parent.eulerAngles + camRotation);
                     else
-                        uiObject.transform.rotation = Quaternion.Euler(uiObject.transform.parent.eulerAngles + camRotation);
+                        uiObject.transform.rotation = Quaternion.Euler(uiObject.transform.eulerAngles + camRotation);
 
                 }
 
                 if (uiObject.transform.parent)
-                    uiObject.transform.parent.position = uiCamera.transform.position + offset;
+                    uiObject.transform.parent.position = cachedUICam.transform.position + offset;
 
-                uiObject.transform.position = uiCamera.transform.position + offset;
+                uiObject.transform.position = cachedUICam.transform.position + offset;
                 uiObject.transform.localScale = scale;
 
                 RectTransform rect = uiObject.GetComponent<RectTransform>();
@@ -165,9 +220,20 @@ namespace VRMod
             }
         }
 
-        private static void AdjustHUDAnchors(On.RoR2.UI.HUD.orig_Awake orig, RoR2.UI.HUD self)
+        private static void AdjustHUD(On.RoR2.UI.HUD.orig_Awake orig, RoR2.UI.HUD self)
         {
             orig(self);
+
+            if (ModConfig.UseMotionControls.Value)
+            {
+                CrosshairManager crosshairManager = self.GetComponent<CrosshairManager>();
+
+                if (crosshairManager)
+                {
+                    crosshairManager.container.gameObject.SetActive(false);
+                    crosshairManager.hitmarker.gameObject.SetActive(false);
+                }
+            }
 
             CanvasScaler scaler = self.canvas.gameObject.AddComponent<CanvasScaler>();
             scaler.scaleFactor = ModConfig.UIScale.Value;

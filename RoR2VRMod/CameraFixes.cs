@@ -112,7 +112,7 @@ namespace VRMod
 				float num2 = userProfile.stickLookSensitivity * CameraRigController.aimStickGlobalScale.value * 45f;
 				Vector2 vector = new Vector2(player.GetAxisRaw(ModConfig.SnapTurn.Value ? 26 : 2), player.GetAxisRaw(3));
 				Vector2 vector2 = new Vector2(player.GetAxisRaw(16), player.GetAxisRaw(17));
-				if (ModConfig.SnapTurn.Value || ModConfig.LockedCameraPitch.Value)
+				if (ModConfig.LockedCameraPitch.Value)
                 {
 					vector2.y = 0;
                 }
@@ -228,14 +228,14 @@ namespace VRMod
 					isTurningLeft = vector.x < -0.8f || vector2.x < -0.8f;
 					isTurningRight = vector.x > 0.8f || vector2.x > 0.8f;
 
-					num14 = 0;
+					num14 = 0f;
 
 					if (justTurnedLeft)
 						num14 = -ModConfig.SnapTurnAngle.Value;
 					else if (justTurnedRight)
 						num14 = ModConfig.SnapTurnAngle.Value;
 
-					num15 = 0;
+					num15 = 0f;
                 }
 			}
 			else
@@ -502,7 +502,7 @@ namespace VRMod
         {
 			if (MotionControls.HandsReady)
             {
-				return MotionControls.GetHandRay(true);
+				return MotionControls.GetHandRayByDominance(true);
             }
 
             if (!self.sceneCam)

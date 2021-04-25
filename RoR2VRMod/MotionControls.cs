@@ -33,18 +33,21 @@ namespace VRMod
 
             AssetBundle assetBundle = AssetBundle.LoadFromMemory(Properties.Resources.vrmodassets);
 
-            List<GameObject> prefabs = new List<GameObject>()
-            {
-                assetBundle.LoadAsset<GameObject>("CommandoPistol"),
-                assetBundle.LoadAsset<GameObject>("HuntressBow"),
-                assetBundle.LoadAsset<GameObject>("HuntressHand")
-            };
-
             handSelectorPrefab = assetBundle.LoadAsset<GameObject>("VRHand");
 
-            foreach (GameObject prefab in prefabs)
+            string[] prefabNames = new string[]
             {
-                AddHandPrefab(prefab);
+                "CommandoPistol",
+                "HuntressBow",
+                "HuntressHand"
+            };
+
+            foreach (string prefabName in prefabNames)
+            {
+                GameObject prefab = assetBundle.LoadAsset<GameObject>(prefabName);
+
+                if (prefab)
+                    AddHandPrefab(prefab);
             }
         }
 
@@ -88,16 +91,34 @@ namespace VRMod
         }
 
         /// <summary>
-        /// Returns the generated ray from the chosen hand's muzzle.
+        /// Returns the generated ray from the chosen hand's muzzle by hand dominance.
         /// </summary>
         /// <param name="dominant">Return the ray of the dominant or non-dominant hand.</param>
         /// <returns></returns>
-        public static Ray GetHandRay(bool dominant)
+        public static Ray GetHandRayByDominance(bool dominant)
         {
             if (!HandsReady)
                 throw new NullReferenceException("VR Mod: Cannot retrieve the ray of a hand that doesn't exist.");
 
             return (dominant ? dominantHand : nonDominantHand).GetRay();
+        }
+
+        /// <summary>
+        /// Returns the muzzle transform from the chosen hand.
+        /// </summary>
+        /// <param name="dominant"></param>
+        /// <returns>Return the muzzle of the dominant or non-dominant hand.</returns>
+        public static Transform GetHandMuzzle(bool dominant)
+        {
+            if (!HandsReady)
+                throw new NullReferenceException("VR Mod: Cannot retrieve the muzzle of a hand that doesn't exist.");
+
+            return (dominant ? dominantHand : nonDominantHand).currentHand.muzzle;
+        }
+
+        internal static Ray GetHandRayBySide(bool left)
+        {
+            return (left == ModConfig.LeftDominantHand.Value ? dominantHand : nonDominantHand).GetRay();
         }
 
         private static bool CheckPrefabMatch(Hand hand, GameObject prefab)
@@ -110,6 +131,8 @@ namespace VRMod
         private static void SetupVRHands(On.RoR2.CameraRigController.orig_Start orig, RoR2.CameraRigController self)
         {
             orig(self);
+
+            if (!Run.instance) return;
 
             HandSelector leftHand = GameObject.Instantiate(handSelectorPrefab).GetComponent<HandSelector>();
             leftHand.SetXRNode(XRNode.LeftHand);
@@ -127,8 +150,19 @@ namespace VRMod
             nonDominantHand.SetPrefabs(handPrefabs.Where((x) => CheckDominance(x, false)).ToList());
 
             CharacterBody localBody = LocalUserManager.GetFirstLocalUser().cachedBody;
+
+            RoR2Application.onFixedUpdate += CheckForLocalBody;
+        }
+
+        private static void CheckForLocalBody()
+        {
+            CharacterBody localBody = LocalUserManager.GetFirstLocalUser().cachedBody;
             if (localBody)
+            {
+                RoR2Application.onFixedUpdate -= CheckForLocalBody;
+                VRMod.StaticLogger.LogInfo(String.Format("Local cached body \'{0}\' found. Applying hand pair.", localBody.name));
                 SetHandPair(localBody.name.Substring(0, localBody.name.IndexOf("Body")));
+            }
         }
 
         private static bool CheckDominance(GameObject prefab, bool dominant)
@@ -156,11 +190,12 @@ namespace VRMod
                 {
                     for (int i = 0; i < childLocator.transformPairs.Length; i++)
                     {
-                        if (childLocator.transformPairs[i].name.Contains("Muzzle"))
+                        string name = childLocator.transformPairs[i].name;
+                        if (name.Contains("Muzzle"))
                         {
-                            if (childLocator.transformPairs[i].name.Contains("Left"))
+                            if (name.Contains("Left") || name == "DualWieldMuzzleR")
                                 childLocator.transformPairs[i].transform = nonDominantHand.currentHand.muzzle;
-                            else if (!childLocator.transformPairs[i].name.Contains("Center"))
+                            else if (!name.Contains("Center"))
                                 childLocator.transformPairs[i].transform = dominantHand.currentHand.muzzle;
                         }
                     }

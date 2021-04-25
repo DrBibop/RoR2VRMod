@@ -79,7 +79,7 @@ namespace VRMod
             SnapTurn = configFile.Bind<bool>(
                 "Controls",
                 "Snap turn",
-                false,
+                true,
                 "TRUE: Rotate the camera in increments (unavailable in third person).  FALSE: Smooth camera rotation."
             );
             SnapTurnAngle = configFile.Bind<float>(
@@ -107,8 +107,16 @@ namespace VRMod
                 "Controls",
                 "Set left hand as dominant",
                 false,
-                "Swaps trigger and grip inputs. Primary attacks are also aimed with the left hand."
+                "Swaps trigger and grip inputs. The aiming hand for each skill is also swapped."
             );
+
+            if (!FirstPerson.Value)
+                UseMotionControls.Value = false;
+
+            if (SnapTurn.Value || UseMotionControls.Value)
+                LockedCameraPitch.Value = true;
+
+
         }
     }
 }

@@ -34,6 +34,12 @@ namespace VRMod
             transform.localPosition = InputTracking.GetLocalPosition(xrNode);
             transform.localRotation = InputTracking.GetLocalRotation(xrNode);
 
+            if (!ModConfig.ConfigUseOculus.Value)
+            {
+                transform.Rotate(new Vector3(35, 0, 0), Space.Self);
+                transform.Translate(new Vector3(0, -0.04f, -0.02f), Space.Self);
+            }
+
             if (currentHand && ray.gameObject.activeSelf)
             {
                 ray.SetPosition(0, currentHand.muzzle.position);

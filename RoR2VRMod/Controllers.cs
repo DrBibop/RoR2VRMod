@@ -6,6 +6,7 @@ using RoR2.UI;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using VRMod.ControllerMappings;
 
 namespace VRMod
 {
@@ -15,10 +16,8 @@ namespace VRMod
         private static CustomControllerMap vrDefaultMap;
         private static CustomControllerMap vrUIMap;
 
-        private static int leftJoystickId = -1;
-        private static int rightJoystickId = -1;
+        private static GenericVRMap controllerMap;
 
-        private static bool debug = false;
         private static bool isUsingOculusDevice = false;
         private static bool isUsingMotionControls = false;
 
@@ -83,8 +82,8 @@ namespace VRMod
                 new ActionElementMap(1 , ControllerElementType.Axis  , 1 , Pole.Positive, AxisRange.Full, false),
                 new ActionElementMap(16, ControllerElementType.Axis  , 2 , Pole.Positive, AxisRange.Full, false),
                 new ActionElementMap(17, ControllerElementType.Axis  , 3 , Pole.Positive, AxisRange.Full, false),
-                new ActionElementMap(4 , ControllerElementType.Button, 9 , Pole.Positive, AxisRange.Full, false),
-                new ActionElementMap(5 , ControllerElementType.Button, 11, Pole.Positive, AxisRange.Full, false),
+                new ActionElementMap(4 , ControllerElementType.Button, 11 , Pole.Positive, AxisRange.Full, false),
+                new ActionElementMap(5 , ControllerElementType.Button, 9, Pole.Positive, AxisRange.Full, false),
                 new ActionElementMap(6 , ControllerElementType.Button, 8 , Pole.Positive, AxisRange.Full, false),
                 new ActionElementMap(7 , ControllerElementType.Button, (ModConfig.LeftDominantHand.Value ? 4 : 5) , Pole.Positive, AxisRange.Positive, false),
                 new ActionElementMap(8 , ControllerElementType.Button, (ModConfig.LeftDominantHand.Value ? 5 : 4) , Pole.Positive, AxisRange.Positive, false),
@@ -263,29 +262,16 @@ namespace VRMod
 
         private static void Update()
         {
-            var localUsers = LocalUserManager.localUsersList;
+            LocalUser localUser = LocalUserManager.GetFirstLocalUser();
 
-            foreach (LocalUser user in localUsers)
+            if (localUser != null)
             {
-                AddVRController(user.inputPlayer);
-            }
-
-            var eventSystems = MPEventSystemManager.eventSystems.Values;
-
-            foreach (MPEventSystem eventSystem in eventSystems)
-            {
-                AddVRController(eventSystem.player);
-            }
-
-            var networkUsers = NetworkUser.instancesList;
-
-            foreach (NetworkUser user in networkUsers)
-            {
-                AddVRController(user.inputPlayer);
+                if (AddVRController(localUser.inputPlayer))
+                    RoR2Application.onUpdate -= Update;
             }
         }
 
-        internal static void AddVRController(Player inputPlayer)
+        internal static bool AddVRController(Player inputPlayer)
         {
             if (!inputPlayer.controllers.ContainsController(vrControllers))
             {
@@ -304,51 +290,91 @@ namespace VRMod
                 if (!vrUIMap.enabled)
                     vrUIMap.enabled = true;
             }
+
+            return inputPlayer.controllers.ContainsController(vrControllers) && inputPlayer.controllers.maps.GetAllMaps(ControllerType.Custom).ToList().Count >= 2;
         }
 
         private static void UpdateVRInputs()
         {
             string[] joyNames = Input.GetJoystickNames();
-            if (leftJoystickId == -1 || rightJoystickId == -1 || !joyNames[leftJoystickId].Contains("Left") || !joyNames[rightJoystickId].Contains("Right"))
+            if (controllerMap == null|| !controllerMap.CheckJoyNames(joyNames))
             {
-                leftJoystickId = -1;
-                rightJoystickId = -1;
+                int leftJoystickId = -1;
+                int rightJoystickId = -1;
                 for (int i = 0; i < joyNames.Length; i++)
                 {
-                    if (joyNames[i].Contains("Left"))
+                    string joyName = joyNames[i].ToLower();
+                    if (joyName.Contains("left"))
                     {
                         leftJoystickId = i;
-                        if (joyNames[i].Contains("Oculus"))
-                            isUsingOculusDevice = true;
                     }
 
-                    if (joyNames[i].Contains("Right"))
+                    if (joyName.Contains("right"))
                     {
                         rightJoystickId = i;
-                        if (joyNames[i].Contains("Oculus"))
-                            isUsingOculusDevice = true;
                     }
                 }
 
                 if (leftJoystickId == -1 || rightJoystickId == -1) return;
+
+                SelectMapFromName(joyNames[leftJoystickId].ToLower(), leftJoystickId, rightJoystickId);
             }
 
-            vrControllers.SetAxisValue(0, UnityInputHelper.GetJoystickAxisRawValueByJoystickIndex(leftJoystickId, 0));
-            vrControllers.SetAxisValue(1, UnityInputHelper.GetJoystickAxisRawValueByJoystickIndex(leftJoystickId, 1));
-            vrControllers.SetAxisValue(2, UnityInputHelper.GetJoystickAxisRawValueByJoystickIndex(rightJoystickId, 3));
-            vrControllers.SetAxisValue(3, UnityInputHelper.GetJoystickAxisRawValueByJoystickIndex(rightJoystickId, 4));
-            vrControllers.SetAxisValue(4, UnityInputHelper.GetJoystickAxisRawValueByJoystickIndex(leftJoystickId, 8));
-            vrControllers.SetAxisValue(5, UnityInputHelper.GetJoystickAxisRawValueByJoystickIndex(rightJoystickId, 9));
-            vrControllers.SetAxisValue(6, UnityInputHelper.GetJoystickAxisRawValueByJoystickIndex(leftJoystickId, 10));
-            vrControllers.SetAxisValue(7, UnityInputHelper.GetJoystickAxisRawValueByJoystickIndex(rightJoystickId, 11));
+            vrControllers.SetAxisValue(0, controllerMap.GetLeftJoyX());
+            vrControllers.SetAxisValue(1, controllerMap.GetLeftJoyY());
+            vrControllers.SetAxisValue(2, controllerMap.GetRightJoyX());
+            vrControllers.SetAxisValue(3, controllerMap.GetRightJoyY());
+            vrControllers.SetAxisValue(4, controllerMap.GetLeftTrigger());
+            vrControllers.SetAxisValue(5, controllerMap.GetRightTrigger());
+            vrControllers.SetAxisValue(6, controllerMap.GetLeftGrip());
+            vrControllers.SetAxisValue(7, controllerMap.GetRightGrip());
 
-
-            vrControllers.SetButtonValue(0, UnityInputHelper.GetJoystickButtonValueByJoystickIndex(leftJoystickId, (isUsingOculusDevice && !ModConfig.ConfigUseOculus.Value ? 3 : 2)));
-            vrControllers.SetButtonValue(1, UnityInputHelper.GetJoystickButtonValueByJoystickIndex(rightJoystickId, (isUsingOculusDevice && !ModConfig.ConfigUseOculus.Value ? 1 : 0)));
-            vrControllers.SetButtonValue(2, UnityInputHelper.GetJoystickButtonValueByJoystickIndex(leftJoystickId, (isUsingOculusDevice && !ModConfig.ConfigUseOculus.Value ? 2 : 3)));
-            vrControllers.SetButtonValue(3, UnityInputHelper.GetJoystickButtonValueByJoystickIndex(rightJoystickId, (isUsingOculusDevice && !ModConfig.ConfigUseOculus.Value ? 0 : 1)));
-            vrControllers.SetButtonValue(4, UnityInputHelper.GetJoystickButtonValueByJoystickIndex(leftJoystickId, 8));
-            vrControllers.SetButtonValue(5, UnityInputHelper.GetJoystickButtonValueByJoystickIndex(rightJoystickId, 9));
+            vrControllers.SetButtonValue(0, controllerMap.GetLeftPrimary());
+            vrControllers.SetButtonValue(1, controllerMap.GetRightPrimary());
+            vrControllers.SetButtonValue(2, controllerMap.GetLeftSecondary());
+            vrControllers.SetButtonValue(3, controllerMap.GetRightSecondary());
+            vrControllers.SetButtonValue(4, controllerMap.GetLeftJoyPress());
+            vrControllers.SetButtonValue(5, controllerMap.GetRightJoyPress());
         }
+
+        private static void SelectMapFromName(string name, int leftID, int rightID)
+        {
+            if (controllerMap != null && controllerMap.cachedName == name)
+            {
+                controllerMap.SetJoystickIDs(leftID, rightID);
+                return;
+            }
+
+            if (!ModConfig.ConfigUseOculus.Value)
+            {
+                if (name.Contains("rift"))
+                {
+                    controllerMap = new RiftOpenVRMap(leftID, rightID, name);
+                    return;
+                }
+
+                if (name.Contains("vive"))
+                {
+                    controllerMap = new ViveMap(leftID, rightID, name);
+                    return;
+                }
+
+                if (name.Contains("windows"))
+                {
+                    controllerMap = new TrackpadWMRMap(leftID, rightID, name);
+                    return;
+                }
+            }
+
+            controllerMap = new GenericVRMap(leftID, rightID, name);
+        }
+    }
+
+    internal enum ControllerModel
+    {
+        RiftTouch,
+        QuestTouch,
+        Vive,
+        Knuckles
     }
 }
