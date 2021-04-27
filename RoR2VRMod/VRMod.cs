@@ -6,6 +6,8 @@ using System.Collections;
 using System;
 using BepInEx.Logging;
 using R2API.Utils;
+using RoR2;
+using UnityEngine;
 
 [module: UnverifiableCode]
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -17,9 +19,13 @@ namespace VRMod
     {
         internal static ManualLogSource StaticLogger;
 
+        internal static AssetBundle VRAssetBundle;
+
         private void Awake()
         {
             StaticLogger = Logger;
+
+            VRAssetBundle = AssetBundle.LoadFromMemory(Properties.Resources.vrmodassets);
 
             ModConfig.Init();
             ActionAddons.Init();
@@ -29,6 +35,7 @@ namespace VRMod
             CameraFixes.Init();
             if (ModConfig.UseMotionControls.Value)
             {
+                RoR2.RoR2Application.isModded = true;
                 MotionControls.Init();
                 MotionControlledAbilities.Init();
             }

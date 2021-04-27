@@ -3,8 +3,10 @@ using Rewired.Data;
 using Rewired.Data.Mapping;
 using RoR2;
 using RoR2.UI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using VRMod.ControllerMappings;
 
@@ -18,26 +20,9 @@ namespace VRMod
 
         private static GenericVRMap controllerMap;
 
-        private static bool isUsingOculusDevice = false;
         private static bool isUsingMotionControls = false;
 
-        private static Dictionary<int, string> MapIcons = new Dictionary<int, string>()
-        {
-            { 0, "<sprite=\"tmpsprSteamGlyphs\" name=\"texSteamGlyphs_78\">" },
-            { 1, "<sprite=\"tmpsprSteamGlyphs\" name=\"texSteamGlyphs_78\">" },
-            { 2, "<sprite=\"tmpsprSteamGlyphs\" name=\"texSteamGlyphs_80\">" },
-            { 3, "<sprite=\"tmpsprSteamGlyphs\" name=\"texSteamGlyphs_80\">" },
-            { 4, "<sprite=\"tmpsprSteamGlyphs\" name=\"texSteamGlyphs_110\">" },
-            { 5, "<sprite=\"tmpsprSteamGlyphs\" name=\"texSteamGlyphs_112\">" },
-            { 6, "<sprite=\"tmpsprSteamGlyphs\" name=\"texSteamGlyphs_12\">" },
-            { 7, "<sprite=\"tmpsprSteamGlyphs\" name=\"texSteamGlyphs_13\">" },
-            { 8, "<sprite=\"tmpsprSteamGlyphs\" name=\"texSteamGlyphs_7\">" },
-            { 9, "<sprite=\"tmpsprSteamGlyphs\" name=\"texSteamGlyphs_0\">" },
-            { 10, "<sprite=\"tmpsprSteamGlyphs\" name=\"texSteamGlyphs_8\">" },
-            { 11, "<sprite=\"tmpsprSteamGlyphs\" name=\"texSteamGlyphs_1\">" },
-            { 12, "<sprite=\"tmpsprSteamGlyphs\" name=\"texSteamGlyphs_77\">" },
-            { 13, "<sprite=\"tmpsprSteamGlyphs\" name=\"texSteamGlyphs_79\">" }
-        };
+        private static TMP_SpriteAsset glyphsSpriteAsset;
 
         internal static void Init()
         {
@@ -49,7 +34,46 @@ namespace VRMod
 
             On.RoR2.Glyphs.GetGlyphString_MPEventSystem_string_AxisRange_InputSource += GetCustomGlyphString;
 
+            On.RoR2.InputBindingDisplayController.Awake += ApplySpriteAsset;
+
+            On.RoR2.UI.ContextManager.Awake += ApplyContextSpriteAsset;
+
+            On.RoR2.UI.InputBindingControl.Awake += DisableControllerBinds;
+
             SetupControllerInputs();
+
+            glyphsSpriteAsset = VRMod.VRAssetBundle.LoadAsset<TMP_SpriteAsset>("sprVRGlyphs");
+        }
+
+        private static void DisableControllerBinds(On.RoR2.UI.InputBindingControl.orig_Awake orig, InputBindingControl self)
+        {
+            orig(self);
+
+            if (ModConfig.UseMotionControls.Value && self.inputSource == MPEventSystem.InputSource.Gamepad)
+            {
+                self.button.interactable = false;
+                self.button = null;
+            }
+        }
+
+        private static void ApplyContextSpriteAsset(On.RoR2.UI.ContextManager.orig_Awake orig, ContextManager self)
+        {
+            orig(self);
+
+            if (self.glyphTMP && glyphsSpriteAsset)
+            {
+                self.glyphTMP.spriteAsset = glyphsSpriteAsset;
+            }
+        }
+
+        private static void ApplySpriteAsset(On.RoR2.InputBindingDisplayController.orig_Awake orig, InputBindingDisplayController self)
+        {
+            orig(self);
+
+            if (self.guiLabel && glyphsSpriteAsset)
+            {
+                self.guiLabel.spriteAsset = glyphsSpriteAsset;
+            }
         }
 
         private static void SetupControllerInputs()
@@ -102,7 +126,7 @@ namespace VRMod
             {
                 return "UNKNOWN";
             }
-            if (isUsingMotionControls && vrControllers != null)
+            if (currentInputSource == MPEventSystem.InputSource.Gamepad && isUsingMotionControls && vrControllers != null)
             {
                 Glyphs.resultsList.Clear();
                 eventSystem.player.controllers.maps.GetElementMapsWithAction(ControllerType.Custom, vrControllers.id, actionName, false, Glyphs.resultsList);
@@ -111,7 +135,7 @@ namespace VRMod
                 {
                     ActionElementMap displayedMap = Glyphs.resultsList.First();
                     string result;
-                    if (MapIcons.TryGetValue(displayedMap.elementIdentifierId, out result))
+                    if (controllerMap.mapGlyphs.TryGetValue(displayedMap.elementIdentifierId, out result))
                     {
                         return result;
                     }
@@ -366,15 +390,7 @@ namespace VRMod
                 }
             }
 
-            controllerMap = new GenericVRMap(leftID, rightID, name);
+            controllerMap = new GenericVRMap(leftID, rightID, name, true);
         }
-    }
-
-    internal enum ControllerModel
-    {
-        RiftTouch,
-        QuestTouch,
-        Vive,
-        Knuckles
     }
 }

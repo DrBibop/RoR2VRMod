@@ -1,4 +1,5 @@
 ﻿using Rewired;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace VRMod.ControllerMappings
@@ -10,6 +11,24 @@ namespace VRMod.ControllerMappings
         internal ViveMap(int leftID, int rightID, string name) : base(leftID, rightID, name) 
         {
             leftTouchpadDoublePress = new DoublePressButton(leftID, 8);
+
+            mapGlyphs = new Dictionary<int, string>()
+                {
+                    { 0, "<sprite name=\"texVRGlyphs_LTouch\">" },
+                    { 1, "<sprite name=\"texVRGlyphs_LTouch\">" },
+                    { 2, "<sprite name=\"texVRGlyphs_RTouchHor\">" },
+                    { 3, "<sprite name=\"texVRGlyphs_RTouchHor\">" },
+                    { 4, "<sprite name=\"texVRGlyphs_LTrigger\">" },
+                    { 5, "<sprite name=\"texVRGlyphs_RTrigger\">" },
+                    { 6, "<sprite name=\"texVRGlyphs_LGrip\">" },
+                    { 7, "<sprite name=\"texVRGlyphs_RGrip\">" },
+                    { 8, "<sprite name=\"texVRGlyphs_LTouchPress2\">" },
+                    { 9, "<sprite name=\"texVRGlyphs_RTouchDown\">" },
+                    { 10, "<sprite name=\"texVRGlyphs_LMenu\">" },
+                    { 11, "<sprite name=\"texVRGlyphs_RTouchUp\">" },
+                    { 12, "<sprite name=\"texVRGlyphs_LTouchPress\">" },
+                    { 13, "<sprite name=\"texVRGlyphs_RMenu\">" }
+                };
         }
 
         internal override float GetRightJoyX()

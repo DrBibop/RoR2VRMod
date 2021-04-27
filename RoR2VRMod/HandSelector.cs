@@ -118,7 +118,7 @@ namespace VRMod
                 return Vector3.zero;
 
             RaycastHit hitInfo;
-            if (Physics.Raycast(GetRay(), out hitInfo, 300))
+            if (Physics.Raycast(GetRay(), out hitInfo, 300, LayerMask.GetMask("Ragdoll")))
             {
                 return hitInfo.point;
             }

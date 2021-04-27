@@ -1,7 +1,7 @@
 ﻿using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using On.EntityStates;
 using RoR2;
-using RoR2.Projectile;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,11 +16,34 @@ namespace VRMod
 
         private static bool preventBowPull = false;
 
+        private static Vector3 abilityDirection = Vector3.zero;
+
         private static List<Type> nonDominantHandStateTypes = new List<Type>()
         {
             typeof(EntityStates.Commando.CommandoWeapon.FireFMJ),
+            typeof(EntityStates.Bandit2.Weapon.Bandit2FireShiv),
             typeof(EntityStates.Toolbot.AimStunDrone),
-            typeof(EntityStates.Mage.Weapon.PrepWall)
+            typeof(EntityStates.Engi.EngiWeapon.FireMines),
+            typeof(EntityStates.Engi.EngiWeapon.FireSpiderMine),
+            typeof(EntityStates.Engi.EngiWeapon.FireBubbleShield),
+            typeof(EntityStates.Mage.Weapon.PrepWall),
+            typeof(EntityStates.Mage.Weapon.ThrowNovabomb),
+            typeof(EntityStates.Mage.Weapon.ThrowIcebomb),
+            typeof(EntityStates.Merc.PrepAssaulter2),
+            typeof(EntityStates.Merc.FocusedAssaultPrep),
+            typeof(EntityStates.Treebot.Weapon.AimMortar2),
+            typeof(EntityStates.Treebot.Weapon.AimMortarRain),
+            typeof(EntityStates.Treebot.Weapon.FireSonicBoom),
+            typeof(EntityStates.Treebot.Weapon.FirePlantSonicBoom),
+            typeof(EntityStates.Loader.SwingChargedFist),
+            typeof(EntityStates.Loader.SwingZapFist),
+            typeof(EntityStates.Loader.FireHook),
+            typeof(EntityStates.Loader.FireYankHook),
+            typeof(EntityStates.Croco.FireSpit),
+            typeof(EntityStates.Croco.Bite),
+            typeof(EntityStates.Croco.Leap),
+            typeof(EntityStates.Croco.ChainableLeap),
+            typeof(EntityStates.Captain.Weapon.FireTazer)
         };
 
         private static Dictionary<Type, bool> forceAimRaySideTypes = new Dictionary<Type, bool>()
@@ -35,11 +58,10 @@ namespace VRMod
             On.RoR2.PlayerCharacterMasterController.CheckPinging += PingFromHand;
             On.RoR2.CameraRigController.ModifyAimRayIfApplicable += CancelModifyIfLocal;
             On.RoR2.EquipmentSlot.GetAimRay += GetLeftAimRay;
-
             On.EntityStates.BaseState.GetAimRay += EditAimray;
-            On.EntityStates.GenericBulletBaseState.GenerateBulletAttack += CheckGenericBulletMuzzle;
-            On.EntityStates.GenericProjectileBaseState.FireProjectile += FireProjectileOverride;
+            On.EntityStates.GenericBulletBaseState.GenerateBulletAttack += ChangeShotgunMuzzle;
 
+            On.EntityStates.GenericProjectileBaseState.FireProjectile += SetFMJMuzzle;
             On.EntityStates.Commando.CommandoWeapon.FirePistol2.FireBullet += CheckPistolBulletMuzzle;
             On.EntityStates.Commando.CommandoWeapon.FireBarrage.FireBullet += PlayBarrageShootAnimation;
             On.EntityStates.Commando.CommandoWeapon.FireFMJ.PlayAnimation += PlayFMJShootAnimation;
@@ -53,12 +75,133 @@ namespace VRMod
             On.EntityStates.Huntress.AimArrowSnipe.HandlePrimaryAttack += AnimateSnipeBow;
             On.EntityStates.Huntress.BaseArrowBarrage.OnExit += HideArrowCluster;
 
+            On.EntityStates.Bandit2.Weapon.SlashBlade.OnEnter += ChangeSlashDirection;
+
             On.EntityStates.Toolbot.BaseNailgunState.FireBullet += SetNailgunMuzzle;
             On.EntityStates.Toolbot.FireGrenadeLauncher.OnEnter += SetScrapMuzzle;
             On.EntityStates.Toolbot.FireSpear.FireBullet += SetRebarMuzzle;
             IL.EntityStates.Toolbot.RecoverAimStunDrone.OnEnter += SetGrenadeMuzzle;
 
+            On.EntityStates.Engi.EngiWeapon.FireGrenades.FireGrenade += RemoveMuzzleFlash;
+
+            On.EntityStates.Mage.Weapon.FireFireBolt.FireGauntlet += SetFireboltMuzzle;
             On.EntityStates.Mage.Weapon.Flamethrower.FireGauntlet += DestroyOffHandEffect;
+
+            On.EntityStates.Merc.WhirlwindBase.OnEnter += ChangeWhirlwindDirection;
+            On.EntityStates.Merc.WhirlwindBase.FixedUpdate += ForceWhirlwindDirection;
+            On.EntityStates.Merc.Uppercut.OnEnter += ChangeUppercutDirection;
+            On.EntityStates.Merc.Assaulter2.OnEnter += ForceDashDirection;
+            On.EntityStates.Merc.FocusedAssaultDash.OnEnter += ForceFocusedDashDirection;
+
+            On.EntityStates.Croco.Bite.OnEnter += ChangeBiteDirection;
+
+            On.EntityStates.Captain.Weapon.FireTazer.OnEnter += ChangeTazerMuzzle;
+        }
+
+        private static void ChangeTazerMuzzle(On.EntityStates.Captain.Weapon.FireTazer.orig_OnEnter orig, EntityStates.Captain.Weapon.FireTazer self)
+        {
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                EntityStates.Captain.Weapon.FireTazer.targetMuzzle = "MuzzleLeft";
+            }
+
+            orig(self);
+        }
+
+        private static void ChangeBiteDirection(On.EntityStates.Croco.Bite.orig_OnEnter orig, EntityStates.Croco.Bite self)
+        {
+            orig(self);
+
+            if (!IsLocalPlayer(self.outer.GetComponent<CharacterBody>())) return;
+
+            self.swingEffectMuzzleString = "MuzzleHandL";
+        }
+
+        private static void ForceDashDirection(On.EntityStates.Merc.Assaulter2.orig_OnEnter orig, EntityStates.Merc.Assaulter2 self)
+        {
+            orig(self);
+
+            if (!IsLocalPlayer(self.outer.GetComponent<CharacterBody>())) return;
+
+            self.dashVector = GetHandMuzzle(false).forward;
+        }
+
+        private static void ForceFocusedDashDirection(On.EntityStates.Merc.FocusedAssaultDash.orig_OnEnter orig, EntityStates.Merc.FocusedAssaultDash self)
+        {
+            orig(self);
+
+            if (!IsLocalPlayer(self.outer.GetComponent<CharacterBody>())) return;
+
+            self.dashVector = GetHandMuzzle(false).forward;
+        }
+
+        private static void ForceWhirlwindDirection(On.EntityStates.Merc.WhirlwindBase.orig_FixedUpdate orig, EntityStates.Merc.WhirlwindBase self)
+        {
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                if (self.characterDirection)
+                    self.characterDirection.forward = abilityDirection;
+            }
+
+            orig(self);
+        }
+
+        private static void ChangeSlashDirection(On.EntityStates.Bandit2.Weapon.SlashBlade.orig_OnEnter orig, EntityStates.Bandit2.Weapon.SlashBlade self)
+        {
+            orig(self);
+
+            if (!IsLocalPlayer(self.outer.GetComponent<CharacterBody>())) return;
+
+            abilityDirection = GetHandMuzzle(false).forward;
+
+            if (self.characterDirection)
+                self.characterDirection.forward = abilityDirection;
+        }
+
+        private static void ChangeUppercutDirection(On.EntityStates.Merc.Uppercut.orig_OnEnter orig, EntityStates.Merc.Uppercut self)
+        {
+            orig(self);
+
+            if (!IsLocalPlayer(self.outer.GetComponent<CharacterBody>())) return;
+
+            abilityDirection = GetHandMuzzle(false).forward;
+
+            if (self.characterDirection)
+                self.characterDirection.forward = abilityDirection;
+        }
+
+        private static void ChangeWhirlwindDirection(On.EntityStates.Merc.WhirlwindBase.orig_OnEnter orig, EntityStates.Merc.WhirlwindBase self)
+        {
+            orig(self);
+
+            if (!IsLocalPlayer(self.outer.GetComponent<CharacterBody>())) return;
+
+            abilityDirection = GetHandMuzzle(false).forward;
+
+            if (self.characterDirection)
+                self.characterDirection.forward = abilityDirection;
+        }
+
+        private static void SetFireboltMuzzle(On.EntityStates.Mage.Weapon.FireFireBolt.orig_FireGauntlet orig, EntityStates.Mage.Weapon.FireFireBolt self)
+        {
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+                self.muzzleString = "MuzzleRight";
+
+            orig(self);
+        }
+
+        private static void RemoveMuzzleFlash(On.EntityStates.Engi.EngiWeapon.FireGrenades.orig_FireGrenade orig, EntityStates.Engi.EngiWeapon.FireGrenades self, string targetMuzzle)
+        {
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                GameObject prefab = EntityStates.Engi.EngiWeapon.FireGrenades.effectPrefab;
+                EntityStates.Engi.EngiWeapon.FireGrenades.effectPrefab = null;
+                orig(self, targetMuzzle);
+                EntityStates.Engi.EngiWeapon.FireGrenades.effectPrefab = prefab;
+                return;
+            }
+
+            orig(self, targetMuzzle);
         }
 
         private static Ray GetLeftAimRay(On.RoR2.EquipmentSlot.orig_GetAimRay orig, EquipmentSlot self)
@@ -294,7 +437,7 @@ namespace VRMod
             if (self.leftFlamethrowerTransform)
                 GameObject.Destroy(self.leftFlamethrowerTransform.gameObject);
         }
-        private static void FireProjectileOverride(On.EntityStates.GenericProjectileBaseState.orig_FireProjectile orig, EntityStates.GenericProjectileBaseState self)
+        private static void SetFMJMuzzle(On.EntityStates.GenericProjectileBaseState.orig_FireProjectile orig, EntityStates.GenericProjectileBaseState self)
         {
             if (!IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
             {
@@ -304,24 +447,14 @@ namespace VRMod
             orig(self);
         }
 
-        private static BulletAttack CheckGenericBulletMuzzle(On.EntityStates.GenericBulletBaseState.orig_GenerateBulletAttack orig, EntityStates.GenericBulletBaseState self, Ray aimRay)
+        private static BulletAttack ChangeShotgunMuzzle(On.EntityStates.GenericBulletBaseState.orig_GenerateBulletAttack orig, EntityStates.GenericBulletBaseState self, Ray aimRay)
         {
             if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()) && self is EntityStates.Commando.CommandoWeapon.FireShotgunBlast)
             {
-                if (self.muzzleName.Contains("Left"))
-                {
-                    Animator animator = GetHandAnimator(false);
+                Animator animator = GetHandAnimator(!self.muzzleName.Contains("Left"));
 
-                    if (animator)
-                        animator.SetTrigger("Primary");
-                }
-                else
-                {
-                    Animator animator = GetHandAnimator(true);
-
-                    if (animator)
-                        animator.SetTrigger("Primary");
-                }
+                if (animator)
+                    animator.SetTrigger("Primary");
             }
 
             return orig(self, aimRay);

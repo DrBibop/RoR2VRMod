@@ -82,7 +82,13 @@ namespace VRMod
             On.RoR2.UI.GameEndReportPanelController.Awake += (orig, self) =>
             {
                 orig(self);
-                SetRenderMode(self.gameObject, hdResolution, menuPosition, menuScale);
+                if (!cachedUICam)
+                {
+                    GameObject cameraObject = Camera.main.transform.parent.gameObject;
+                    cachedUICam = cameraObject.name.Contains("Wrapper") ? cameraObject.GetComponent<VRCameraWrapper>().cameraRigController.uiCam : cameraObject.GetComponent<CameraRigController>().uiCam;
+                }
+                camRotation = new Vector3(0, cachedUICam.transform.eulerAngles.y, 0);
+                SetRenderMode(self.gameObject, hdResolution, menuPosition, menuScale, true);
             };
             On.RoR2.SplashScreenController.Start += (orig, self) =>
             {
@@ -168,7 +174,7 @@ namespace VRMod
                 if (self.visualizerTransform != null)
                 {
                     self.visualizerTransform.position = vector;
-                    self.visualizerTransform.rotation = Quaternion.Euler(position - sceneCamera.transform.position);
+                    self.visualizerTransform.rotation = Quaternion.LookRotation((uiCamera.transform.position - vector).normalized);
                     self.visualizerTransform.localScale = (self is EntityStates.Engi.EngiMissilePainter.Paint.EngiMissileIndicator ? 1 : 0.1f) * Vector3.Distance(sceneCamera.transform.position, position) * Vector3.one;
                 }
             }

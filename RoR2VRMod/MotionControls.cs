@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.XR;
 
@@ -31,9 +32,7 @@ namespace VRMod
                     SetHandPair(body.name.Substring(0, body.name.IndexOf("Body")));
             };
 
-            AssetBundle assetBundle = AssetBundle.LoadFromMemory(Properties.Resources.vrmodassets);
-
-            handSelectorPrefab = assetBundle.LoadAsset<GameObject>("VRHand");
+            handSelectorPrefab = VRMod.VRAssetBundle.LoadAsset<GameObject>("VRHand");
 
             string[] prefabNames = new string[]
             {
@@ -44,7 +43,7 @@ namespace VRMod
 
             foreach (string prefabName in prefabNames)
             {
-                GameObject prefab = assetBundle.LoadAsset<GameObject>(prefabName);
+                GameObject prefab = VRMod.VRAssetBundle.LoadAsset<GameObject>(prefabName);
 
                 if (prefab)
                     AddHandPrefab(prefab);
@@ -149,8 +148,6 @@ namespace VRMod
             dominantHand.SetPrefabs(handPrefabs.Where((x) => CheckDominance(x, true)).ToList());
             nonDominantHand.SetPrefabs(handPrefabs.Where((x) => CheckDominance(x, false)).ToList());
 
-            CharacterBody localBody = LocalUserManager.GetFirstLocalUser().cachedBody;
-
             RoR2Application.onFixedUpdate += CheckForLocalBody;
         }
 
@@ -188,15 +185,29 @@ namespace VRMod
 
                 if (childLocator)
                 {
+                    if (bodyName == "Captain")
+                    {
+                        List<ChildLocator.NameTransformPair> transformPairList = childLocator.transformPairs.ToList();
+                        transformPairList.Add(new ChildLocator.NameTransformPair() { name = "MuzzleLeft", transform = nonDominantHand.currentHand.muzzle });
+                        childLocator.transformPairs = transformPairList.ToArray();
+                    }
                     for (int i = 0; i < childLocator.transformPairs.Length; i++)
                     {
                         string name = childLocator.transformPairs[i].name;
                         if (name.Contains("Muzzle"))
                         {
-                            if (name.Contains("Left") || name == "DualWieldMuzzleR")
-                                childLocator.transformPairs[i].transform = nonDominantHand.currentHand.muzzle;
-                            else if (!name.Contains("Center"))
-                                childLocator.transformPairs[i].transform = dominantHand.currentHand.muzzle;
+                            if (bodyName == "Engi")
+                            {
+                                if (name.Contains("Center"))
+                                    childLocator.transformPairs[i].transform = nonDominantHand.currentHand.muzzle;
+                            }
+                            else
+                            {
+                                if (name.Contains("Left") || name.Contains("HandL") || name == "DualWieldMuzzleR" || (bodyName == "Mage" && name.Contains("Between")))
+                                    childLocator.transformPairs[i].transform = nonDominantHand.currentHand.muzzle;
+                                else if (!name.Contains("Center"))
+                                    childLocator.transformPairs[i].transform = dominantHand.currentHand.muzzle;
+                            }
                         }
                     }
                 }

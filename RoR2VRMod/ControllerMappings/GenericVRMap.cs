@@ -1,4 +1,5 @@
 ﻿using Rewired;
+using System.Collections.Generic;
 
 namespace VRMod.ControllerMappings
 {
@@ -9,12 +10,33 @@ namespace VRMod.ControllerMappings
 
         internal bool Ready => leftJoyID != -1 && rightJoyID != -1;
 
+        internal Dictionary<int, string> mapGlyphs;
+
         internal string cachedName { get; private set; }
 
-        private bool subscribedUpdate;
-
-        internal GenericVRMap(int leftID, int rightID, string name)
+        internal GenericVRMap(int leftID, int rightID, string name, bool useDefaultGlyphs = false)
         {
+            if (useDefaultGlyphs)
+            {
+                mapGlyphs = new Dictionary<int, string>()
+                {
+                    { 0, "<sprite name=\"texVRGlyphs_LStick\">" },
+                    { 1, "<sprite name=\"texVRGlyphs_LStick\">" },
+                    { 2, "<sprite name=\"texVRGlyphs_RStick\">" },
+                    { 3, "<sprite name=\"texVRGlyphs_RStick\">" },
+                    { 4, "<sprite name=\"texVRGlyphs_LTrigger\">" },
+                    { 5, "<sprite name=\"texVRGlyphs_RTrigger\">" },
+                    { 6, "<sprite name=\"texVRGlyphs_LGrip\">" },
+                    { 7, "<sprite name=\"texVRGlyphs_RGrip\">" },
+                    { 8, "<sprite name=\"texVRGlyphs_LPrimary\">" },
+                    { 9, "<sprite name=\"texVRGlyphs_RPrimary\">" },
+                    { 10, "<sprite name=\"texVRGlyphs_LSecondary\">" },
+                    { 11, "<sprite name=\"texVRGlyphs_RSecondary\">" },
+                    { 12, "<sprite name=\"texVRGlyphs_LStickPress\">" },
+                    { 13, "<sprite name=\"texVRGlyphs_RStickPress\">" }
+                };
+            }
+
             SetJoystickIDs(leftID, rightID);
             cachedName = name;
         }
