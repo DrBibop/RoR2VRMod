@@ -43,7 +43,8 @@ namespace VRMod
             typeof(EntityStates.Croco.Bite),
             typeof(EntityStates.Croco.Leap),
             typeof(EntityStates.Croco.ChainableLeap),
-            typeof(EntityStates.Captain.Weapon.FireTazer)
+            typeof(EntityStates.Captain.Weapon.FireTazer),
+            typeof(EntityStates.GlobalSkills.LunarNeedle.ThrowLunarSecondary)
         };
 
         private static Dictionary<Type, bool> forceAimRaySideTypes = new Dictionary<Type, bool>()

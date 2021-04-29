@@ -2,9 +2,9 @@
 
 namespace VRMod.ControllerMappings
 {
-    internal class RiftOpenVRMap : GenericVRMap
+    internal class GenericOpenVRMap : GenericVRMap
     {
-        internal RiftOpenVRMap(int leftID, int rightID, string name) : base(leftID, rightID, name) { }
+        internal GenericOpenVRMap(int leftID, int rightID, string name) : base(leftID, rightID, name) { }
 
         internal override bool GetLeftPrimary()
         {

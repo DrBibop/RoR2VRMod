@@ -32,6 +32,13 @@ namespace VRMod
                     SetHandPair(body.name.Substring(0, body.name.IndexOf("Body")));
             };
 
+            On.RoR2.CharacterMaster.TransformBody += (orig, self, bodyName) =>
+            {
+                orig(self, bodyName);
+                if (bodyName.Contains("Heretic"))
+                    SetHandPair(bodyName.Substring(0, bodyName.IndexOf("Body")));
+            };
+
             handSelectorPrefab = VRMod.VRAssetBundle.LoadAsset<GameObject>("VRHand");
 
             string[] prefabNames = new string[]

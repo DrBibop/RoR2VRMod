@@ -21,6 +21,7 @@ namespace VRMod
         private static GenericVRMap controllerMap;
 
         private static bool isUsingMotionControls = false;
+        private static bool hasRecentered = false;
 
         private static TMP_SpriteAsset glyphsSpriteAsset;
 
@@ -40,9 +41,42 @@ namespace VRMod
 
             On.RoR2.UI.InputBindingControl.Awake += DisableControllerBinds;
 
+            On.RoR2.UI.MainMenu.MainMenuController.Start += ShowRecenterDialog;
+
             SetupControllerInputs();
 
             glyphsSpriteAsset = VRMod.VRAssetBundle.LoadAsset<TMP_SpriteAsset>("sprVRGlyphs");
+        }
+
+        private static void ShowRecenterDialog(On.RoR2.UI.MainMenu.MainMenuController.orig_Start orig, RoR2.UI.MainMenu.MainMenuController self)
+        {
+            orig(self);
+
+            if (hasRecentered || !isUsingMotionControls) return;
+
+            hasRecentered = true;
+
+            string glyphString;
+            if (controllerMap.mapGlyphs.TryGetValue(13, out glyphString))
+            {
+                SimpleDialogBox dialogBox = SimpleDialogBox.Create(null);
+                dialogBox.headerToken = new SimpleDialogBox.TokenParamsPair()
+                {
+                    token = "Recenter",
+                    formatParams = null
+                };
+
+                if (glyphsSpriteAsset)
+                    dialogBox.descriptionLabel.spriteAsset = glyphsSpriteAsset;
+
+                dialogBox.descriptionToken = new SimpleDialogBox.TokenParamsPair()
+                {
+                    token = "Use {0} to recenter your HMD.",
+                    formatParams = new object[] { glyphString }
+                };
+
+                dialogBox.AddCancelButton(CommonLanguageTokens.ok, Array.Empty<object>());
+            }
         }
 
         private static void DisableControllerBinds(On.RoR2.UI.InputBindingControl.orig_Awake orig, InputBindingControl self)
@@ -371,12 +405,6 @@ namespace VRMod
 
             if (!ModConfig.ConfigUseOculus.Value)
             {
-                if (name.Contains("rift"))
-                {
-                    controllerMap = new RiftOpenVRMap(leftID, rightID, name);
-                    return;
-                }
-
                 if (name.Contains("vive"))
                 {
                     controllerMap = new ViveMap(leftID, rightID, name);
@@ -388,6 +416,9 @@ namespace VRMod
                     controllerMap = new TrackpadWMRMap(leftID, rightID, name);
                     return;
                 }
+
+                controllerMap = new GenericOpenVRMap(leftID, rightID, name);
+                return;
             }
 
             controllerMap = new GenericVRMap(leftID, rightID, name, true);
