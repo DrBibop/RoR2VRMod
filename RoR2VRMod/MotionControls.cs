@@ -23,6 +23,7 @@ namespace VRMod
         {
             On.RoR2.CameraRigController.Start += SetupVRHands;
 
+            /*
             RoR2.PauseManager.onPauseStartGlobal += ResetToPointer;
 
             RoR2.PauseManager.onPauseEndGlobal += () =>
@@ -31,6 +32,7 @@ namespace VRMod
                 if (body)
                     SetHandPair(body.name.Substring(0, body.name.IndexOf("Body")));
             };
+            */
 
             On.RoR2.CharacterMaster.TransformBody += (orig, self, bodyName) =>
             {
@@ -39,13 +41,26 @@ namespace VRMod
                     SetHandPair(bodyName.Substring(0, bodyName.IndexOf("Body")));
             };
 
+            On.RoR2.CharacterModel.UpdateMaterials += UpdateHandMaterials;
+
             handSelectorPrefab = VRMod.VRAssetBundle.LoadAsset<GameObject>("VRHand");
 
             string[] prefabNames = new string[]
             {
                 "CommandoPistol",
                 "HuntressBow",
-                "HuntressHand"
+                "HuntressHand",
+                "BanditRifle",
+                "BanditHand",
+                "MULTHand",
+                "EngiHand",
+                "ArtiHand",
+                "MercHand",
+                "RexHand",
+                "LoaderHand",
+                "AcridHand",
+                "CaptainHand",
+                "HereticWing"
             };
 
             foreach (string prefabName in prefabNames)
@@ -54,6 +69,28 @@ namespace VRMod
 
                 if (prefab)
                     AddHandPrefab(prefab);
+            }
+        }
+
+        private static void UpdateHandMaterials(On.RoR2.CharacterModel.orig_UpdateMaterials orig, CharacterModel self)
+        {
+            orig(self);
+
+            if (!HandsReady) return;
+
+            LocalUser localUser = LocalUserManager.GetFirstLocalUser();
+
+            if (localUser != null && self.body == localUser.cachedBody && self.visibility != VisibilityLevel.Invisible)
+            {
+                foreach (CharacterModel.RendererInfo rendererInfo in dominantHand.currentHand.rendererInfos)
+                {
+                    self.UpdateRendererMaterials(rendererInfo.renderer, rendererInfo.defaultMaterial, rendererInfo.ignoreOverlays);
+                }
+
+                foreach (CharacterModel.RendererInfo rendererInfo in nonDominantHand.currentHand.rendererInfos)
+                {
+                    self.UpdateRendererMaterials(rendererInfo.renderer, rendererInfo.defaultMaterial, rendererInfo.ignoreOverlays);
+                }
             }
         }
 
@@ -119,7 +156,7 @@ namespace VRMod
             if (!HandsReady)
                 throw new NullReferenceException("VR Mod: Cannot retrieve the muzzle of a hand that doesn't exist.");
 
-            return (dominant ? dominantHand : nonDominantHand).currentHand.muzzle;
+            return (dominant ? dominantHand : nonDominantHand).currentHand.currentMuzzle.transform;
         }
 
         internal static Ray GetHandRayBySide(bool left)
@@ -165,7 +202,7 @@ namespace VRMod
             {
                 RoR2Application.onFixedUpdate -= CheckForLocalBody;
                 VRMod.StaticLogger.LogInfo(String.Format("Local cached body \'{0}\' found. Applying hand pair.", localBody.name));
-                SetHandPair(localBody.name.Substring(0, localBody.name.IndexOf("Body")));
+                SetHandPair(localBody.name.Substring(0, localBody.name.IndexOf("(Clone)")));
             }
         }
 
@@ -186,35 +223,62 @@ namespace VRMod
             CharacterBody localBody = LocalUserManager.GetFirstLocalUser().cachedBody;
             if (localBody)
             {
-                localBody.aimOriginTransform = dominantHand.currentHand.muzzle;
+                localBody.aimOriginTransform = dominantHand.currentHand.currentMuzzle.transform;
 
                 ChildLocator childLocator = localBody.modelLocator.modelTransform.GetComponent<ChildLocator>();
 
                 if (childLocator)
                 {
-                    if (bodyName == "Captain")
+                    List<ChildLocator.NameTransformPair> transformPairList = childLocator.transformPairs.ToList();
+
+                    if (!transformPairList.Exists((x) => x.name == "CurrentDominantMuzzle"))
                     {
-                        List<ChildLocator.NameTransformPair> transformPairList = childLocator.transformPairs.ToList();
-                        transformPairList.Add(new ChildLocator.NameTransformPair() { name = "MuzzleLeft", transform = nonDominantHand.currentHand.muzzle });
+                        transformPairList.Add(new ChildLocator.NameTransformPair() { name = "CurrentDominantMuzzle", transform = dominantHand.currentHand.currentMuzzle.transform });
+                        transformPairList.Add(new ChildLocator.NameTransformPair() { name = "CurrentNonDominantMuzzle", transform = nonDominantHand.currentHand.currentMuzzle.transform });
                         childLocator.transformPairs = transformPairList.ToArray();
                     }
-                    for (int i = 0; i < childLocator.transformPairs.Length; i++)
+
+                    foreach (Muzzle muzzle in dominantHand.currentHand.muzzles)
                     {
-                        string name = childLocator.transformPairs[i].name;
-                        if (name.Contains("Muzzle"))
+                        for (int i = 0; i < childLocator.transformPairs.Length; i++)
                         {
-                            if (bodyName == "Engi")
+                            if (muzzle.entriesToReplaceIfDominant.Contains(childLocator.transformPairs[i].name))
                             {
-                                if (name.Contains("Center"))
-                                    childLocator.transformPairs[i].transform = nonDominantHand.currentHand.muzzle;
+                                childLocator.transformPairs[i].transform = muzzle.transform;
                             }
-                            else
+                        }
+
+                        transformPairList = childLocator.transformPairs.ToList();
+
+                        string pairName = muzzle.transform.name + "_Dominant";
+
+                        if (!transformPairList.Exists((x) => x.name == pairName))
+                        {
+                            transformPairList.Add(new ChildLocator.NameTransformPair() { name = pairName, transform = muzzle.transform });
+
+                            childLocator.transformPairs = transformPairList.ToArray();
+                        }
+                    }
+
+                    foreach (Muzzle muzzle in nonDominantHand.currentHand.muzzles)
+                    {
+                        for (int i = 0; i < childLocator.transformPairs.Length; i++)
+                        {
+                            if (muzzle.entriesToReplaceIfNonDominant.Contains(childLocator.transformPairs[i].name))
                             {
-                                if (name.Contains("Left") || name.Contains("HandL") || name == "DualWieldMuzzleR" || (bodyName == "Mage" && name.Contains("Between")))
-                                    childLocator.transformPairs[i].transform = nonDominantHand.currentHand.muzzle;
-                                else if (!name.Contains("Center"))
-                                    childLocator.transformPairs[i].transform = dominantHand.currentHand.muzzle;
+                                childLocator.transformPairs[i].transform = muzzle.transform;
                             }
+                        }
+
+                        transformPairList = childLocator.transformPairs.ToList();
+
+                        string pairName = muzzle.transform.name + "_NonDominant";
+
+                        if (!transformPairList.Exists((x) => x.name == pairName))
+                        {
+                            transformPairList.Add(new ChildLocator.NameTransformPair() { name = pairName, transform = muzzle.transform });
+
+                            childLocator.transformPairs = transformPairList.ToArray();
                         }
                     }
                 }

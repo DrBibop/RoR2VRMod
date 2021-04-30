@@ -2,9 +2,9 @@
 
 namespace VRMod.ControllerMappings
 {
-    internal class GenericOpenVRMap : GenericVRMap
+    internal class ReverbG2Map : GenericVRMap
     {
-        internal GenericOpenVRMap(int leftID, int rightID, string name) : base(leftID, rightID, name, true) { }
+        internal ReverbG2Map(int leftID, int rightID, string name) : base(leftID, rightID, name, true) { }
 
         internal override bool GetLeftPrimary()
         {
@@ -23,7 +23,7 @@ namespace VRMod.ControllerMappings
 
         internal override bool GetRightSecondary()
         {
-            return UnityInputHelper.GetJoystickButtonValueByJoystickIndex(rightJoyID, 0);
+            return UnityInputHelper.GetJoystickButtonValueByJoystickIndex(rightJoyID, 17);
         }
     }
 }

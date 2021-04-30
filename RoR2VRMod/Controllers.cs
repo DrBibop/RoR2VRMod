@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.XR;
 using VRMod.ControllerMappings;
 
 namespace VRMod
@@ -408,6 +409,12 @@ namespace VRMod
                 if (name.Contains("vive"))
                 {
                     controllerMap = new ViveMap(leftID, rightID, name);
+                    return;
+                }
+
+                if (name.Contains("0x066a"))
+                {
+                    controllerMap = new ReverbG2Map(leftID, rightID, name);
                     return;
                 }
 

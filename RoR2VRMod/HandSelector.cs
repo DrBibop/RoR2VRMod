@@ -34,7 +34,7 @@ namespace VRMod
             transform.localPosition = InputTracking.GetLocalPosition(xrNode);
             transform.localRotation = InputTracking.GetLocalRotation(xrNode);
 
-            if (!ModConfig.ConfigUseOculus.Value)
+            if (XRSettings.loadedDeviceName == "OpenVR")
             {
                 transform.Rotate(new Vector3(35, 0, 0), Space.Self);
                 transform.Translate(new Vector3(0, -0.04f, -0.02f), Space.Self);
@@ -42,7 +42,7 @@ namespace VRMod
 
             if (currentHand && ray.gameObject.activeSelf)
             {
-                ray.SetPosition(0, currentHand.muzzle.position);
+                ray.SetPosition(0, currentHand.currentMuzzle.transform.position);
                 ray.SetPosition(1, GetRayHitPosition());
             }
         }
@@ -80,7 +80,7 @@ namespace VRMod
                 }
             }
 
-            VRMod.StaticLogger.LogWarning(string.Format("Could not find hand with name \'{0}\'. Using default pointers.", bodyName));
+            VRMod.StaticLogger.LogWarning(string.Format("Could not find hand with name \'{0}\'. Using default pointer.", bodyName));
         }
 
         internal void SetXRNode(XRNode node)
@@ -98,7 +98,8 @@ namespace VRMod
 
         internal Ray GetRay()
         {
-            return new Ray(currentHand.muzzle.position, currentHand.muzzle.forward);
+            Transform muzzle = currentHand.currentMuzzle.transform;
+            return new Ray(muzzle.position, muzzle.forward);
         }
 
         private void SetCurrentHand(Hand hand)
@@ -122,7 +123,9 @@ namespace VRMod
             {
                 return hitInfo.point;
             }
-            return currentHand.muzzle.transform.position + (currentHand.muzzle.transform.forward * 300);
+
+            Transform muzzle = currentHand.currentMuzzle.transform;
+            return muzzle.position + (muzzle.forward * 300);
         }
     }
 }
