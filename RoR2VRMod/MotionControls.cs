@@ -2,8 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.XR;
 
 namespace VRMod
@@ -19,6 +19,13 @@ namespace VRMod
 
         private static List<GameObject> handPrefabs = new List<GameObject>();
 
+        private static Image cachedSprintIcon;
+        private static Color originalSprintIconColor;
+
+        public delegate void SetHandPairEventHandler(CharacterBody body);
+
+        public static SetHandPairEventHandler onHandPairSet;
+
         internal static void Init()
         {
             On.RoR2.CameraRigController.Start += SetupVRHands;
@@ -33,6 +40,9 @@ namespace VRMod
                     SetHandPair(body.name.Substring(0, body.name.IndexOf("Body")));
             };
             */
+            On.RoR2.CharacterBody.OnSprintStart += OnSprintStart;
+
+            On.RoR2.CharacterBody.OnSprintStop += OnSprintStop;
 
             On.RoR2.CharacterMaster.TransformBody += (orig, self, bodyName) =>
             {
@@ -52,7 +62,8 @@ namespace VRMod
                 "HuntressHand",
                 "BanditRifle",
                 "BanditHand",
-                "MULTHand",
+                "MULTTools",
+                "MULTTools2",
                 "EngiHand",
                 "ArtiHand",
                 "MercHand",
@@ -70,6 +81,54 @@ namespace VRMod
                 if (prefab)
                     AddHandPrefab(prefab);
             }
+        }
+
+        private static void OnSprintStop(On.RoR2.CharacterBody.orig_OnSprintStop orig, CharacterBody self)
+        {
+            if (self == LocalUserManager.GetFirstLocalUser().cachedBody)
+            {
+                if (cachedSprintIcon)
+                    cachedSprintIcon.color = originalSprintIconColor;
+            }
+
+            if (self.name.Contains("Bandit2"))
+            {
+                GetHandAnimator(true).SetBool("IsSprinting", false);
+            }
+
+            orig(self);
+        }
+
+        private static void OnSprintStart(On.RoR2.CharacterBody.orig_OnSprintStart orig, CharacterBody self)
+        {
+            if (self == LocalUserManager.GetFirstLocalUser().cachedBody)
+            {
+                if (!cachedSprintIcon)
+                {
+                    Transform iconTransform = LocalUserManager.GetFirstLocalUser().cameraRigController.hud.mainUIPanel.transform.Find("SpringCanvas/BottomRightCluster/Scaler/SprintCluster/SprintIcon");
+                    if (iconTransform)
+                    {
+                        Image sprintIcon = iconTransform.GetComponent<Image>();
+
+                        if (sprintIcon)
+                            cachedSprintIcon = sprintIcon;
+                    }
+                }
+
+                if (cachedSprintIcon)
+                {
+                    originalSprintIconColor = cachedSprintIcon.color;
+
+                    cachedSprintIcon.color = Color.yellow;
+                }
+            }
+
+            if (self.name.Contains("Bandit2"))
+            {
+                GetHandAnimator(true).SetBool("IsSprinting", true);
+            }
+
+            orig(self);
         }
 
         private static void UpdateHandMaterials(On.RoR2.CharacterModel.orig_UpdateMaterials orig, CharacterModel self)
@@ -147,16 +206,31 @@ namespace VRMod
         }
 
         /// <summary>
-        /// Returns the muzzle transform from the chosen hand.
+        /// Returns the current muzzle transform from the chosen hand.
         /// </summary>
         /// <param name="dominant"></param>
         /// <returns>Return the muzzle of the dominant or non-dominant hand.</returns>
-        public static Transform GetHandMuzzle(bool dominant)
+        public static Transform GetHandCurrentMuzzle(bool dominant)
         {
             if (!HandsReady)
                 throw new NullReferenceException("VR Mod: Cannot retrieve the muzzle of a hand that doesn't exist.");
 
             return (dominant ? dominantHand : nonDominantHand).currentHand.currentMuzzle.transform;
+        }
+
+        /// <summary>
+        /// Returns the muzzle transform at a certain index from the chosen hand.
+        /// </summary>
+        /// <param name="dominant"></param>
+        /// <returns>Return the muzzle of the dominant or non-dominant hand.</returns>
+        public static Transform GetHandMuzzleByIndex(bool dominant, int index)
+        {
+            if (!HandsReady)
+                throw new NullReferenceException("Cannot retrieve the muzzle of a hand that doesn't exist.");
+
+            Muzzle[] muzzles = (dominant ? dominantHand : nonDominantHand).currentHand.muzzles;
+
+            return muzzles[index].transform;
         }
 
         internal static Ray GetHandRayBySide(bool left)
@@ -178,19 +252,22 @@ namespace VRMod
             if (!Run.instance) return;
 
             HandSelector leftHand = GameObject.Instantiate(handSelectorPrefab).GetComponent<HandSelector>();
-            leftHand.SetXRNode(XRNode.LeftHand);
+            leftHand.xrNode = XRNode.LeftHand;
             Vector3 mirroredScale = leftHand.transform.localScale;
             mirroredScale.x = -mirroredScale.x;
             leftHand.transform.localScale = mirroredScale;
 
             HandSelector rightHand = GameObject.Instantiate(handSelectorPrefab).GetComponent<HandSelector>();
-            rightHand.SetXRNode(XRNode.RightHand);
+            rightHand.xrNode = XRNode.RightHand;
 
             dominantHand = ModConfig.LeftDominantHand.Value ? leftHand : rightHand;
             nonDominantHand = ModConfig.LeftDominantHand.Value ? rightHand : leftHand;
 
             dominantHand.SetPrefabs(handPrefabs.Where((x) => CheckDominance(x, true)).ToList());
             nonDominantHand.SetPrefabs(handPrefabs.Where((x) => CheckDominance(x, false)).ToList());
+
+            dominantHand.oppositeHand = nonDominantHand;
+            nonDominantHand.oppositeHand = dominantHand;
 
             RoR2Application.onFixedUpdate += CheckForLocalBody;
         }
@@ -282,6 +359,9 @@ namespace VRMod
                         }
                     }
                 }
+
+                if (onHandPairSet != null)
+                    onHandPairSet(localBody);
             }
         }
 

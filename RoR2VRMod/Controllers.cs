@@ -105,9 +105,13 @@ namespace VRMod
         {
             orig(self);
 
-            if (self.guiLabel && glyphsSpriteAsset)
+            if (glyphsSpriteAsset)
             {
-                self.guiLabel.spriteAsset = glyphsSpriteAsset;
+                if (self.guiLabel)
+                    self.guiLabel.spriteAsset = glyphsSpriteAsset;
+
+                if (self.label)
+                    self.label.spriteAsset = glyphsSpriteAsset;
             }
         }
 

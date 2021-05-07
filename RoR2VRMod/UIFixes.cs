@@ -1,8 +1,7 @@
-﻿using Mono.Cecil.Cil;
-using MonoMod.Cil;
-using RoR2;
+﻿using RoR2;
 using RoR2.UI;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -25,8 +24,24 @@ namespace VRMod
 
         private static Vector3 camRotation = Vector3.zero;
 
-        private static Image cachedSprintIcon;
-        private static Color originalSprintIconColor;
+        private static List<Type> vignetteAbilities = new List<Type>()
+        {
+            typeof(EntityStates.Commando.DodgeState),
+            typeof(EntityStates.Commando.SlideState),
+            typeof(EntityStates.Huntress.BlinkState),
+            typeof(EntityStates.Huntress.MiniBlinkState),
+            typeof(EntityStates.Toolbot.ToolbotDash),
+            typeof(EntityStates.Mage.FlyUpState),
+            typeof(EntityStates.Merc.Assaulter2),
+            typeof(EntityStates.Merc.EvisDash),
+            typeof(EntityStates.Merc.FocusedAssaultDash),
+            typeof(EntityStates.Merc.EvisDash),
+            typeof(EntityStates.Loader.SwingChargedFist),
+            typeof(EntityStates.Loader.SwingZapFist),
+            typeof(EntityStates.Loader.GroundSlam),
+            typeof(EntityStates.Croco.Leap),
+            typeof(EntityStates.Croco.ChainableLeap)
+        };
 
         internal static void Init()
         {
@@ -36,12 +51,6 @@ namespace VRMod
 
             On.RoR2.Indicator.PositionForUI += PositionForUIOverride;
             On.RoR2.PositionIndicator.UpdatePositions += UpdatePositionsOverride;
-
-            if (ModConfig.FirstPerson.Value)
-            {
-                On.RoR2.CharacterBody.OnSprintStart += SetSprintIconColor;
-                On.RoR2.CharacterBody.OnSprintStop += ResetSprintIconColor;
-            }
 
             On.RoR2.UI.MainMenu.BaseMainMenuScreen.OnEnter += (orig, self, controller) =>
             {
@@ -107,44 +116,6 @@ namespace VRMod
             };
         }
 
-        private static void ResetSprintIconColor(On.RoR2.CharacterBody.orig_OnSprintStop orig, CharacterBody self)
-        {
-            if (self == LocalUserManager.GetFirstLocalUser().cachedBody)
-            {
-                if (cachedSprintIcon)
-                    cachedSprintIcon.color = originalSprintIconColor;
-            }
-
-            orig(self);
-        }
-
-        private static void SetSprintIconColor(On.RoR2.CharacterBody.orig_OnSprintStart orig, CharacterBody self)
-        {
-            if (self == LocalUserManager.GetFirstLocalUser().cachedBody)
-            {
-                if (!cachedSprintIcon)
-                {
-                    Transform iconTransform = LocalUserManager.GetFirstLocalUser().cameraRigController.hud.mainUIPanel.transform.Find("SpringCanvas/BottomRightCluster/Scaler/SprintCluster/SprintIcon");
-                    if (iconTransform)
-                    {
-                        Image sprintIcon = iconTransform.GetComponent<Image>();
-
-                        if (sprintIcon)
-                            cachedSprintIcon = sprintIcon;
-                    }
-                }
-
-                if (cachedSprintIcon)
-                {
-                    originalSprintIconColor = cachedSprintIcon.color;
-
-                    cachedSprintIcon.color = Color.yellow;
-                }
-            }
-
-            orig(self);
-        }
-
         private static void UpdatePositionsOverride(On.RoR2.PositionIndicator.orig_UpdatePositions orig, UICamera uiCamera)
         {
             orig(uiCamera);
@@ -174,7 +145,7 @@ namespace VRMod
                 if (self.visualizerTransform != null)
                 {
                     self.visualizerTransform.position = vector;
-                    self.visualizerTransform.rotation = Quaternion.LookRotation((uiCamera.transform.position - vector).normalized);
+                    self.visualizerTransform.rotation = Quaternion.LookRotation((vector - uiCamera.transform.position).normalized);
                     self.visualizerTransform.localScale = (self is EntityStates.Engi.EngiMissilePainter.Paint.EngiMissileIndicator ? 1 : 0.1f) * Vector3.Distance(sceneCamera.transform.position, position) * Vector3.one;
                 }
             }

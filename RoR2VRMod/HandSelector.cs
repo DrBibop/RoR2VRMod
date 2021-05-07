@@ -13,11 +13,15 @@ namespace VRMod
         [SerializeField]
         private Hand pointerHand;
 
-        private List<GameObject> handPrefabs;
-
         internal Hand currentHand { get; private set; }
 
-        private XRNode xrNode;
+        internal XRNode xrNode;
+
+        internal HandSelector oppositeHand;
+
+        internal bool forceRay;
+
+        private List<GameObject> handPrefabs;
 
         private List<Hand> instantiatedHands = new List<Hand>();
 
@@ -39,8 +43,23 @@ namespace VRMod
                 transform.Rotate(new Vector3(35, 0, 0), Space.Self);
                 transform.Translate(new Vector3(0, -0.04f, -0.02f), Space.Self);
             }
+        }
 
-            if (currentHand && ray.gameObject.activeSelf)
+        private void LateUpdate()
+        {
+            if (!currentHand) return;
+
+            if (!forceRay)
+            {
+                if (ray.gameObject.activeSelf != currentHand.useRay)
+                    ray.gameObject.SetActive(currentHand.useRay);
+            }
+            else if (!ray.gameObject.activeSelf)
+            {
+                ray.gameObject.SetActive(true);
+            }
+
+            if (ray.gameObject.activeSelf)
             {
                 ray.SetPosition(0, currentHand.currentMuzzle.transform.position);
                 ray.SetPosition(1, GetRayHitPosition());
@@ -81,11 +100,6 @@ namespace VRMod
             }
 
             VRMod.StaticLogger.LogWarning(string.Format("Could not find hand with name \'{0}\'. Using default pointer.", bodyName));
-        }
-
-        internal void SetXRNode(XRNode node)
-        {
-            xrNode = node;
         }
 
         internal void SetPrefabs(List<GameObject> prefabs)

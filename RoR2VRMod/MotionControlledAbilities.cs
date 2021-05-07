@@ -2,6 +2,7 @@
 using MonoMod.Cil;
 using RoR2;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
@@ -48,9 +49,22 @@ namespace VRMod
 
         private static Dictionary<Type, bool> forceAimRaySideTypes = new Dictionary<Type, bool>()
         {
-            { typeof(RoR2.PingerController), false },
-            { typeof(RoR2.InteractionDriver), false }
+            { typeof(PingerController), false },
+            { typeof(InteractionDriver), false }
         };
+
+        private static string[] multPrimarySkills = new string[]
+        {
+            "Hand",
+            "FireNailgun",
+            "FireSpear",
+            "FireGrenadeLauncher",
+            "FireBuzzsaw"
+        };
+
+        private static Run.FixedTimeStamp halfTime;
+
+        private static bool hasSwapped;
 
         internal static void Init()
         {
@@ -59,16 +73,17 @@ namespace VRMod
             On.RoR2.CameraRigController.ModifyAimRayIfApplicable += CancelModifyIfLocal;
             On.RoR2.EquipmentSlot.GetAimRay += GetLeftAimRay;
             On.EntityStates.BaseState.GetAimRay += EditAimray;
-            On.EntityStates.GenericBulletBaseState.GenerateBulletAttack += ChangeShotgunMuzzle;
 
+            On.EntityStates.GenericBulletBaseState.GenerateBulletAttack += ChangeShotgunMuzzle;
             On.EntityStates.GenericProjectileBaseState.FireProjectile += SetFMJMuzzle;
             On.EntityStates.Commando.CommandoWeapon.FirePistol2.FireBullet += CheckPistolBulletMuzzle;
             On.EntityStates.Commando.CommandoWeapon.FireBarrage.FireBullet += PlayBarrageShootAnimation;
             On.EntityStates.Commando.CommandoWeapon.FireFMJ.PlayAnimation += PlayFMJShootAnimation;
 
-            On.EntityStates.Huntress.HuntressWeapon.FireSeekingArrow.OnEnter += AnimatePrimaryBowPull;
             On.EntityStates.Huntress.HuntressWeapon.FireSeekingArrow.FireOrbArrow += AnimatePrimaryBowShoot;
             On.EntityStates.Huntress.HuntressWeapon.FireSeekingArrow.OnExit += PreventBowPull;
+            On.EntityStates.Huntress.HuntressWeapon.ThrowGlaive.OnEnter += DeleteEffect;
+            On.EntityStates.Huntress.HuntressWeapon.ThrowGlaive.FireOrbGlaive += AnimateGlaiveThrow;
             On.EntityStates.Huntress.BlinkState.GetBlinkVector += GetNonDominantVector;
             On.EntityStates.Huntress.BaseArrowBarrage.OnEnter += AnimateBarrageBowPull;
             On.EntityStates.Huntress.BaseArrowBarrage.HandlePrimaryAttack += AnimateBarrageBowShoot;
@@ -76,10 +91,22 @@ namespace VRMod
             On.EntityStates.Huntress.BaseArrowBarrage.OnExit += HideArrowCluster;
 
             On.EntityStates.Bandit2.Weapon.SlashBlade.OnEnter += ChangeSlashDirection;
+            On.EntityStates.Bandit2.Weapon.BasePrepSidearmRevolverState.OnEnter += PlayRevolverSpinAnimation;
 
             On.EntityStates.Toolbot.BaseNailgunState.FireBullet += SetNailgunMuzzle;
             On.EntityStates.Toolbot.FireGrenadeLauncher.OnEnter += SetScrapMuzzle;
             On.EntityStates.Toolbot.FireSpear.FireBullet += SetRebarMuzzle;
+            On.EntityStates.Toolbot.CooldownSpear.OnEnter += AnimateChargeSpear;
+            On.EntityStates.Toolbot.FireNailgun.OnExit += AnimateSpinDown;
+            On.EntityStates.Toolbot.FireBuzzsaw.OnExit += AnimateSawSlowdown;
+            On.EntityStates.Toolbot.BaseToolbotPrimarySkillState.OnEnter += ForceBuzzsawMuzzle;
+            On.EntityStates.Toolbot.ToolbotStanceSwap.OnEnter += AnimateRetoolRetract;
+            On.EntityStates.Toolbot.ToolbotStanceSwap.FixedUpdate += AnimateRetoolExtend;
+            On.EntityStates.Toolbot.ToolbotDualWieldStart.OnEnter += AnimateDualWieldRetract;
+            On.EntityStates.Toolbot.ToolbotDualWieldStart.FixedUpdate += AnimateDualWieldExtend;
+            On.EntityStates.Toolbot.ToolbotDualWield.OnExit += AnimateDualWieldEnd;
+            onHandPairSet += SetInitialTool;
+            On.EntityStates.Toolbot.AimStunDrone.OnExit += AnimateGrenadeThrow;
             IL.EntityStates.Toolbot.RecoverAimStunDrone.OnEnter += SetGrenadeMuzzle;
 
             On.EntityStates.Engi.EngiWeapon.FireGrenades.FireGrenade += RemoveMuzzleFlash;
@@ -99,6 +126,195 @@ namespace VRMod
             On.EntityStates.Captain.Weapon.FireTazer.Fire += ChangeTazerMuzzleShoot;
 
             IL.EntityStates.GlobalSkills.LunarNeedle.FireLunarNeedle.OnEnter += ChangeNeedleMuzzle;
+        }
+
+        private static void ForceBuzzsawMuzzle(On.EntityStates.Toolbot.BaseToolbotPrimarySkillState.orig_OnEnter orig, EntityStates.Toolbot.BaseToolbotPrimarySkillState self)
+        {
+            orig(self);
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                if (self.baseMuzzleName == "MuzzleBuzzsaw" && self.isInDualWield)
+                {
+                    self.muzzleName = self.baseMuzzleName;
+
+                    if (self.activatorSkillSlot == self.skillLocator.primary)
+                    {
+                        self.muzzleTransform = GetHandMuzzleByIndex(true, 1);
+                    }
+                    else
+                    {
+                        self.muzzleTransform = GetHandMuzzleByIndex(false, 1);
+                    }
+                }
+            }
+        }
+
+        private static void AnimateDualWieldEnd(On.EntityStates.Toolbot.ToolbotDualWield.orig_OnExit orig, EntityStates.Toolbot.ToolbotDualWield self)
+        {
+            orig(self);
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                GetHandAnimator(false).SetFloat("RetoolSpeed", 4f);
+                GetHandAnimator(false).SetTrigger("RetoolRetract");
+                RoR2Application.instance.StartCoroutine(ExtendAfterDelay());
+            }
+        }
+
+        private static IEnumerator ExtendAfterDelay()
+        {
+            yield return new WaitForSeconds(0.25f);
+            GetHandAnimator(false).SetInteger("ToolID", 0);
+            GetHandAnimator(false).SetTrigger("RetoolExtend");
+        }
+
+        private static void AnimateDualWieldExtend(On.EntityStates.Toolbot.ToolbotDualWieldStart.orig_FixedUpdate orig, EntityStates.Toolbot.ToolbotDualWieldStart self)
+        {
+            orig(self);
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                if (halfTime.hasPassed && !hasSwapped)
+                {
+                    hasSwapped = true;
+
+                    GenericSkill currentSkill = self.primary2Slot;
+
+                    if (currentSkill)
+                    {
+                        GetHandAnimator(false).SetInteger("ToolID", Array.IndexOf(multPrimarySkills, currentSkill.skillDef.skillName));
+                        GetHandAnimator(false).SetTrigger("RetoolExtend");
+                    }
+                }
+            }
+        }
+
+        private static void AnimateDualWieldRetract(On.EntityStates.Toolbot.ToolbotDualWieldStart.orig_OnEnter orig, EntityStates.Toolbot.ToolbotDualWieldStart self)
+        {
+            orig(self);
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                hasSwapped = false;
+                halfTime = Run.FixedTimeStamp.now + (self.duration / 2);
+                GetHandAnimator(false).SetFloat("RetoolSpeed", 2f / self.duration);
+                GetHandAnimator(false).SetTrigger("RetoolRetract");
+            }
+        }
+
+        private static void AnimateSawSlowdown(On.EntityStates.Toolbot.FireBuzzsaw.orig_OnExit orig, EntityStates.Toolbot.FireBuzzsaw self)
+        {
+            orig(self);
+
+            CharacterBody body = self.outer.GetComponent<CharacterBody>();
+            if (IsLocalPlayer(body))
+            {
+                GetHandAnimator(body.skillLocator.FindSkillSlot(self.activatorSkillSlot) == SkillSlot.Primary).SetTrigger("BuzzsawSlowdown");
+            }
+        }
+
+        private static void AnimateGrenadeThrow(On.EntityStates.Toolbot.AimStunDrone.orig_OnExit orig, EntityStates.Toolbot.AimStunDrone self)
+        {
+            orig(self);
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                GetHandAnimator(true).ResetTrigger("AimGrenade");
+                GetHandAnimator(false).SetTrigger("ThrowGrenade");
+            }
+        }
+
+        private static void AnimateChargeSpear(On.EntityStates.Toolbot.CooldownSpear.orig_OnEnter orig, EntityStates.Toolbot.CooldownSpear self)
+        {
+            orig(self);
+
+            CharacterBody body = self.outer.GetComponent<CharacterBody>();
+            if (IsLocalPlayer(body))
+            {
+                bool dominant = body.skillLocator.FindSkillSlot(self.activatorSkillSlot) == SkillSlot.Primary;
+                GetHandAnimator(dominant).SetFloat("SpearChargeSpeed", 1f / self.duration);
+                GetHandAnimator(dominant).SetTrigger("SpearCharge");
+            }
+        }
+
+        private static void SetInitialTool(CharacterBody body)
+        {
+            if (body.name == "ToolbotBody(Clone)")
+            {
+                GenericSkill currentSkill = body.skillLocator.primary;
+
+                if (currentSkill)
+                {
+                    GetHandAnimator(true).SetInteger("ToolID", Array.IndexOf(multPrimarySkills, currentSkill.skillDef.skillName));
+                }
+            }
+        }
+
+        private static void AnimateRetoolExtend(On.EntityStates.Toolbot.ToolbotStanceSwap.orig_FixedUpdate orig, EntityStates.Toolbot.ToolbotStanceSwap self)
+        {
+            orig(self);
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                if (halfTime.hasPassed && !hasSwapped)
+                {
+                    hasSwapped = true;
+
+                    GenericSkill currentSkill = self.previousStanceState == typeof(EntityStates.Toolbot.ToolbotStanceA) ? self.GetPrimarySkill2() : self.GetPrimarySkill1();
+
+                    if (currentSkill)
+                    {
+                        GetHandAnimator(true).SetInteger("ToolID", Array.IndexOf(multPrimarySkills, currentSkill.skillDef.skillName));
+                        GetHandAnimator(true).SetTrigger("RetoolExtend");
+                    }
+                }
+            }
+        }
+
+        private static void AnimateRetoolRetract(On.EntityStates.Toolbot.ToolbotStanceSwap.orig_OnEnter orig, EntityStates.Toolbot.ToolbotStanceSwap self)
+        {
+            orig(self);
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                hasSwapped = false;
+                halfTime = Run.FixedTimeStamp.now + (self.baseDuration / (self.attackSpeedStat * 2));
+                GetHandAnimator(true).SetFloat("RetoolSpeed", 2f / (self.baseDuration / self.attackSpeedStat));
+                GetHandAnimator(true).SetTrigger("RetoolRetract");
+            }
+        }
+
+        private static void AnimateSpinDown(On.EntityStates.Toolbot.FireNailgun.orig_OnExit orig, EntityStates.Toolbot.FireNailgun self)
+        {
+            orig(self);
+
+            CharacterBody body = self.outer.GetComponent<CharacterBody>();
+            if (IsLocalPlayer(body))
+            {
+                GetHandAnimator(body.skillLocator.FindSkillSlot(self.activatorSkillSlot) == SkillSlot.Primary).SetTrigger("NailgunSlowdown");
+            }
+        }
+
+        private static void DeleteEffect(On.EntityStates.Huntress.HuntressWeapon.ThrowGlaive.orig_OnEnter orig, EntityStates.Huntress.HuntressWeapon.ThrowGlaive self)
+        {
+            orig(self);
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()) && self.chargeEffect)
+            {
+                EntityStates.EntityState.Destroy(self.chargeEffect);
+            }
+        }
+
+        private static void AnimateGlaiveThrow(On.EntityStates.Huntress.HuntressWeapon.ThrowGlaive.orig_FireOrbGlaive orig, EntityStates.Huntress.HuntressWeapon.ThrowGlaive self)
+        {
+            orig(self);
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()) && self.hasSuccessfullyThrownGlaive)
+            {
+                GetHandAnimator(false).SetTrigger("ThrowGlaive");
+            }
+        }
+
+        private static void PlayRevolverSpinAnimation(On.EntityStates.Bandit2.Weapon.BasePrepSidearmRevolverState.orig_OnEnter orig, EntityStates.Bandit2.Weapon.BasePrepSidearmRevolverState self)
+        {
+            orig(self);
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                GetHandAnimator(true).SetFloat("SpinSpeed", 1f / self.duration);
+                GetHandAnimator(true).SetTrigger("RevolverSpin");
+            }
         }
 
         private static void ChangeNeedleMuzzle(ILContext il)
@@ -160,7 +376,7 @@ namespace VRMod
 
             if (!IsLocalPlayer(self.outer.GetComponent<CharacterBody>())) return;
 
-            self.dashVector = GetHandMuzzle(false).forward;
+            self.dashVector = GetHandCurrentMuzzle(false).forward;
         }
 
         private static void ForceFocusedDashDirection(On.EntityStates.Merc.FocusedAssaultDash.orig_OnEnter orig, EntityStates.Merc.FocusedAssaultDash self)
@@ -169,7 +385,7 @@ namespace VRMod
 
             if (!IsLocalPlayer(self.outer.GetComponent<CharacterBody>())) return;
 
-            self.dashVector = GetHandMuzzle(false).forward;
+            self.dashVector = GetHandCurrentMuzzle(false).forward;
         }
 
         private static void ForceWhirlwindDirection(On.EntityStates.Merc.WhirlwindBase.orig_FixedUpdate orig, EntityStates.Merc.WhirlwindBase self)
@@ -189,7 +405,7 @@ namespace VRMod
 
             if (!IsLocalPlayer(self.outer.GetComponent<CharacterBody>())) return;
 
-            abilityDirection = GetHandMuzzle(false).forward;
+            abilityDirection = GetHandCurrentMuzzle(false).forward;
 
             if (self.characterDirection)
                 self.characterDirection.forward = abilityDirection;
@@ -201,7 +417,7 @@ namespace VRMod
 
             if (!IsLocalPlayer(self.outer.GetComponent<CharacterBody>())) return;
 
-            abilityDirection = GetHandMuzzle(false).forward;
+            abilityDirection = GetHandCurrentMuzzle(false).forward;
 
             if (self.characterDirection)
                 self.characterDirection.forward = abilityDirection;
@@ -213,7 +429,7 @@ namespace VRMod
 
             if (!IsLocalPlayer(self.outer.GetComponent<CharacterBody>())) return;
 
-            abilityDirection = GetHandMuzzle(false).forward;
+            abilityDirection = GetHandCurrentMuzzle(false).forward;
 
             if (self.characterDirection)
                 self.characterDirection.forward = abilityDirection;
@@ -329,7 +545,7 @@ namespace VRMod
         {
             if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
             {
-                return GetHandMuzzle(false).transform.forward;
+                return GetHandCurrentMuzzle(false).transform.forward;
             }
             return orig(self);
         }
@@ -417,15 +633,6 @@ namespace VRMod
                 if (!preventBowPull && self.firedArrowCount < self.maxArrowCount)
                     GetHandAnimator(true).SetTrigger("Pull");
             }
-        }
-
-        private static void AnimatePrimaryBowPull(On.EntityStates.Huntress.HuntressWeapon.FireSeekingArrow.orig_OnEnter orig, EntityStates.Huntress.HuntressWeapon.FireSeekingArrow self)
-        {
-            if(IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
-            {
-                GetHandAnimator(true).SetTrigger("Pull");
-            }
-            orig(self);
         }
 
         private static void SprintBreakDirection(ILContext il)
