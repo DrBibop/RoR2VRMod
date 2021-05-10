@@ -46,7 +46,7 @@ Each person has a different level of tolerance regarding motion sickness and VR.
 Your hands will appear once you start a game. The menus don't use any motion controls at the moment. You can simply use the joysticks to navigate.
 
 ### Can I play using the VR Mod in multiplayer with my non-VR friends?
-Yes! The mod is only required for VR players. You can play with vanilla players if you disable motion controls in the configs. Otherwise, the other players also need a modded client but don't need the VR mod.
+Yes! The mod is only required for VR players. You can play with vanilla players just fine too!
 
 ### Why play a 3rd person game in VR?
 It honestly feels pretty great! This mod makes you play in first person by default but you can always come back to third person using the config editor.
@@ -113,7 +113,10 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 
 ### 2.0.0
 - Added motion controls support.
+- Added a vignette during high-mobility abilities to reduce motion sickness (can be disabled).
 - A dialog box now opens in the main menu telling the player how to recenter the HMD.
-- The sprint icon on the bottom right now turns yellow while sprinting to compensate for the lack of visual cues like the crosshair.
+- The sprint icon on the bottom right turns yellow while sprinting to compensate for the lack of visual cues like the crosshair.
+- The HUD should now appear at the same size no matter your resolution/FOV.
+- Added HUD width and height config settings.
 - Fixed a bug that caused some targeting indicators to not face the camera properly.
 - Fixed a bug that caused the dialog box in the pause menu to not follow the menu rotation.

@@ -25,7 +25,7 @@ namespace VRMod
 
         private bool foundSkill;
 
-        private bool wasAvailable = false;
+        private bool wasAvailable;
 
         private CharacterBody body;
 
@@ -96,7 +96,8 @@ namespace VRMod
 
         private void UpdateBool()
         {
-            bool available = associatedSkill.skillDef.skillName == skillName && associatedSkill.stock > 0;
+
+            bool available = associatedSkill != null && associatedSkill.skillDef.skillName == skillName && associatedSkill.stock > 0;
 
             if (available != wasAvailable)
             {

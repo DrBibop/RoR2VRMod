@@ -21,7 +21,7 @@ namespace VRMod
         private static bool justTurnedLeft => isTurningLeft && !wasTurningLeft;
         private static bool justTurnedRight => isTurningRight && !wasTurningRight;
 
-        internal static void Init()
+		internal static void Init()
         {
             On.RoR2.MatchCamera.Awake += (orig, self) =>
             {
@@ -33,10 +33,9 @@ namespace VRMod
             On.RoR2.CameraRigController.SetCameraState += SetCameraStateOverride;
 
             On.RoR2.CameraRigController.Update += CameraUpdateOverride;
-			On.RoR2.CameraRigController.Start += RemoveBlur;
+			On.RoR2.CameraRigController.Start += InitCamera;
 
-
-            if (ModConfig.FirstPerson.Value)
+			if (ModConfig.FirstPerson.Value)
             {
                 On.RoR2.Run.Update += SetBodyInvisible;
 
@@ -44,14 +43,14 @@ namespace VRMod
                 {
                     orig(self);
                     if (VRCameraWrapper.instance)
-                        Object.Destroy(VRCameraWrapper.instance.gameObject);
+                        GameObject.Destroy(VRCameraWrapper.instance.gameObject);
                 };
             }
 
             On.RoR2.CameraRigController.GetCrosshairRaycastRay += GetVRCrosshairRaycastRay;
         }
 
-        private static void RemoveBlur(On.RoR2.CameraRigController.orig_Start orig, CameraRigController self)
+        private static void InitCamera(On.RoR2.CameraRigController.orig_Start orig, CameraRigController self)
         {
 			orig(self);
 
@@ -63,6 +62,14 @@ namespace VRMod
 				if (ppVolume)
 					ppVolume.profile.GetSetting<DepthOfField>().active = false;
 			}
+
+			if (Run.instance && ModConfig.ConfortVignette.Value)
+            {
+				self.uiCam.gameObject.AddComponent<ConfortVignette>();
+			}
+
+			if (self.hud)
+				UIFixes.AdjustHUD(self.hud);
         }
 
         //I really didnt't want to use IL for this part... so COPYING THE WHOLE METHOD IT IS

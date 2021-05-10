@@ -11,8 +11,11 @@ namespace VRMod
         private static readonly ConfigFile configFile = new ConfigFile(System.IO.Path.Combine(Paths.ConfigPath, CONFIG_FILE_NAME), true);
         internal static ConfigEntry<bool> ConfigUseOculus { get; private set; }
         internal static ConfigEntry<bool> FirstPerson { get; private set; }
+        internal static ConfigEntry<bool> ConfortVignette { get; private set; }
 
         internal static ConfigEntry<float> UIScale { get; private set; }
+        internal static ConfigEntry<int> HUDWidth { get; private set; }
+        internal static ConfigEntry<int> HUDHeight { get; private set; }
         internal static ConfigEntry<float> BottomAnchor { get; private set; }
         internal static ConfigEntry<float> TopAnchor { get; private set; }
         internal static ConfigEntry<float> LeftAnchor { get; private set; }
@@ -40,36 +43,57 @@ namespace VRMod
                 true,
                 "Experience the game in a first person POV."
             );
+            ConfortVignette = configFile.Bind<bool>(
+                "VR Settings",
+                "Confort Vignette",
+                true,
+                "Adds a black vignette during high-mobility abilities to reduce motion sickness."
+            );
+
 
             UIScale = configFile.Bind<float>(
                 "HUD Settings",
                 "UI scale",
-                0.8f,
+                1f,
+                "Scale of UI elements in the HUD."
+            );
+
+            HUDWidth = configFile.Bind<int>(
+                "HUD Settings",
+                "HUD Width",
+                1200,
+                "Scale of UI elements in the HUD."
+            );
+
+            HUDHeight = configFile.Bind<int>(
+                "HUD Settings",
+                "HUD Height",
+                1000,
                 "Scale of UI elements in the HUD."
             );
 
             BottomAnchor = configFile.Bind<float>(
                 "HUD Settings",
                 "Bottom anchor",
-                0.5f,
+                1f,
                 "Position of the bottom anchor between 0 and 1 (Middle to bottom edge of the screen)."
             );
             TopAnchor = configFile.Bind<float>(
                 "HUD Settings",
                 "Top anchor",
-                0.3f,
+                0.7f,
                 "Position of the top anchor between 0 and 1 (Middle to top edge of the screen)."
             );
             LeftAnchor = configFile.Bind<float>(
                 "HUD Settings",
                 "Left anchor",
-                0.5f,
+                1f,
                 "Position of the left anchor between 0 and 1 (Middle to left edge of the screen)."
             );
             RightAnchor = configFile.Bind<float>(
                 "HUD Settings",
                 "Right anchor",
-                0.5f,
+                1f,
                 "Position of the right anchor between 0 and 1 (Middle to right edge of the screen)."
             );
 
@@ -115,8 +139,6 @@ namespace VRMod
 
             if (SnapTurn.Value || UseMotionControls.Value)
                 LockedCameraPitch.Value = true;
-
-
         }
     }
 }

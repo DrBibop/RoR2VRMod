@@ -110,9 +110,15 @@ namespace VRMod
             IL.EntityStates.Toolbot.RecoverAimStunDrone.OnEnter += SetGrenadeMuzzle;
 
             On.EntityStates.Engi.EngiWeapon.FireGrenades.FireGrenade += RemoveMuzzleFlash;
+            On.EntityStates.Engi.EngiWeapon.ChargeGrenades.OnExit += AnimateGrenadeRelease;
+            On.EntityStates.Engi.EngiMissilePainter.Paint.OnExit += AnimateHarpoonRelease;
+            On.EntityStates.Engi.EngiWeapon.PlaceTurret.OnExit += AnimateBlueprintRelease;
 
             On.EntityStates.Mage.Weapon.FireFireBolt.FireGauntlet += SetFireboltMuzzle;
             On.EntityStates.Mage.Weapon.Flamethrower.FireGauntlet += DestroyOffHandEffect;
+            On.EntityStates.Mage.Weapon.Flamethrower.OnExit += StopCastAnimation;
+            On.EntityStates.Mage.Weapon.BaseThrowBombState.OnEnter += AnimateBombCast;
+            On.EntityStates.Mage.Weapon.PrepWall.OnExit += AnimateWallCast;
 
             On.EntityStates.Merc.WhirlwindBase.OnEnter += ChangeWhirlwindDirection;
             On.EntityStates.Merc.WhirlwindBase.FixedUpdate += ForceWhirlwindDirection;
@@ -126,6 +132,61 @@ namespace VRMod
             On.EntityStates.Captain.Weapon.FireTazer.Fire += ChangeTazerMuzzleShoot;
 
             IL.EntityStates.GlobalSkills.LunarNeedle.FireLunarNeedle.OnEnter += ChangeNeedleMuzzle;
+        }
+
+        private static void AnimateWallCast(On.EntityStates.Mage.Weapon.PrepWall.orig_OnExit orig, EntityStates.Mage.Weapon.PrepWall self)
+        {
+            orig(self);
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                GetHandAnimator(false).SetTrigger("Cast");
+            }
+        }
+
+        private static void AnimateBombCast(On.EntityStates.Mage.Weapon.BaseThrowBombState.orig_OnEnter orig, EntityStates.Mage.Weapon.BaseThrowBombState self)
+        {
+            orig(self);
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                GetHandAnimator(false).SetTrigger("Cast");
+            }
+        }
+
+        private static void StopCastAnimation(On.EntityStates.Mage.Weapon.Flamethrower.orig_OnExit orig, EntityStates.Mage.Weapon.Flamethrower self)
+        {
+            orig(self);
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                GetHandAnimator(true).ResetTrigger("Cast");
+                GetHandAnimator(true).SetBool("HoldCast", false);
+            }
+        }
+
+        private static void AnimateBlueprintRelease(On.EntityStates.Engi.EngiWeapon.PlaceTurret.orig_OnExit orig, EntityStates.Engi.EngiWeapon.PlaceTurret self)
+        {
+            orig(self);
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                GetHandAnimator(true).SetTrigger("Release");
+            }
+        }
+
+        private static void AnimateHarpoonRelease(On.EntityStates.Engi.EngiMissilePainter.Paint.orig_OnExit orig, EntityStates.Engi.EngiMissilePainter.Paint self)
+        {
+            orig(self);
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                GetHandAnimator(true).SetTrigger("Release");
+            }
+        }
+
+        private static void AnimateGrenadeRelease(On.EntityStates.Engi.EngiWeapon.ChargeGrenades.orig_OnExit orig, EntityStates.Engi.EngiWeapon.ChargeGrenades self)
+        {
+            orig(self);
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                GetHandAnimator(true).SetTrigger("Release");
+            }
         }
 
         private static void ForceBuzzsawMuzzle(On.EntityStates.Toolbot.BaseToolbotPrimarySkillState.orig_OnEnter orig, EntityStates.Toolbot.BaseToolbotPrimarySkillState self)
@@ -678,8 +739,13 @@ namespace VRMod
         {
             orig(self, muzzleString);
 
+            if (!IsLocalPlayer(self.outer.GetComponent<CharacterBody>())) return;
+
             if (self.leftFlamethrowerTransform)
                 GameObject.Destroy(self.leftFlamethrowerTransform.gameObject);
+
+            GetHandAnimator(true).SetBool("HoldCast", true);
+            GetHandAnimator(true).SetTrigger("Cast");
         }
         private static void SetFMJMuzzle(On.EntityStates.GenericProjectileBaseState.orig_FireProjectile orig, EntityStates.GenericProjectileBaseState self)
         {

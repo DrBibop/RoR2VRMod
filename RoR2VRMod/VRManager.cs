@@ -12,11 +12,9 @@ namespace VRMod
         {
             instance = new GameObject("VRManager");
 
-            GameObject vrInputs = new GameObject("VRInputs");
-            vrInputs.transform.SetParent(instance.transform);
-            vrInputs.AddComponent<MPEventSystemProvider>().fallBackToMainEventSystem = true;
+            instance.AddComponent<MPEventSystemProvider>().fallBackToMainEventSystem = true;
 
-            InputResponse inputResponse = vrInputs.AddComponent<InputResponse>();
+            InputResponse inputResponse = instance.AddComponent<InputResponse>();
             inputResponse.inputActionNames = new string[] { "RecenterHMD" };
             inputResponse.onPress = new UnityEvent();
             inputResponse.onPress.AddListener(Recenter);
