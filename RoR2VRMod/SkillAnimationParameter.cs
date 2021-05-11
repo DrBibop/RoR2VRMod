@@ -1,5 +1,6 @@
 ﻿using RoR2;
 using System;
+using System.Linq;
 using UnityEngine;
 
 namespace VRMod
@@ -45,18 +46,18 @@ namespace VRMod
             else
             {
                 if (filterSkillSlot == SkillSlot.None)
-                {
-                    GenericSkill[] skills = body.skillLocator.allSkills;
+                {    
+                    associatedSkill = body.skillLocator.FindSkill(skillName);
 
-                    foreach (GenericSkill skill in skills)
+                    if (!associatedSkill)
                     {
-                        if (skill.skillDef.skillName == skillName)
-                        {
-                            foundSkill = true;
-                            associatedSkill = skill;
-                            RoR2Application.onUpdate += UpdateBool;
-                            break;
-                        }
+                        associatedSkill = body.skillLocator.allSkills.ToList().First(x => x.skillDef.skillName == skillName);
+                    }
+
+                    if (associatedSkill)
+                    {
+                        foundSkill = true;
+                        RoR2Application.onUpdate += UpdateBool;
                     }
                 }
                 else
@@ -96,8 +97,7 @@ namespace VRMod
 
         private void UpdateBool()
         {
-
-            bool available = associatedSkill != null && associatedSkill.skillDef.skillName == skillName && associatedSkill.stock > 0;
+            bool available = associatedSkill != null && (associatedSkill.skillDef.skillName == skillName || associatedSkill.skillName == skillName) && associatedSkill.stock > 0;
 
             if (available != wasAvailable)
             {

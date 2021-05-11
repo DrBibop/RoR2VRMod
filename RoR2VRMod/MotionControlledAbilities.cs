@@ -1,5 +1,6 @@
 ﻿using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using Rewired;
 using RoR2;
 using System;
 using System.Collections;
@@ -715,6 +716,18 @@ namespace VRMod
                 }
             );
             c.Emit(OpCodes.Stloc_S, (byte)13);
+
+            for (int i = 0; i < 4; i++)
+            {
+                c.GotoNext(x => x.MatchCallvirt(typeof(Player), "GetButton"));
+
+                c.Remove();
+                c.EmitDelegate<Func<Player, int, bool>>((player, button) =>
+                    {
+                        return player.GetButton(button) || MeleeSwingAbility.skillStates[button - 7];
+                    }
+                );
+            }
         }
 
         private static void PlayFMJShootAnimation(On.EntityStates.Commando.CommandoWeapon.FireFMJ.orig_PlayAnimation orig, EntityStates.Commando.CommandoWeapon.FireFMJ self, float duration)

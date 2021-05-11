@@ -69,6 +69,7 @@ namespace VRMod
                 "ArtiHand",
                 "ArtiHand2",
                 "MercHand",
+                "MercSword",
                 "RexHand",
                 "LoaderHand",
                 "AcridHand",

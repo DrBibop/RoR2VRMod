@@ -36,6 +36,7 @@ The Index Knuckles and the Reverb G2 controllers use the same binds as the Oculu
 With your file downloaded, open a file explorer and go to `C:/Users/%USERNAME%/Documents/steamvr/input/imports`. Create the `imports` folder if necessary. Drag the binding file you downloaded into that directory.
 
 Now that the file is setup, you can open the game in VR and open the SteamVR overlay. Inside the overlay, you can go activate the custom binding:
+
 ![](https://thumbs.gfycat.com/GloriousComfortableFieldmouse-size_restricted.gif)
 
 # FAQ
