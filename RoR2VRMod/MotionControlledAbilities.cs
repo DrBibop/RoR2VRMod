@@ -127,12 +127,55 @@ namespace VRMod
             On.EntityStates.Merc.Assaulter2.OnEnter += ForceDashDirection;
             On.EntityStates.Merc.FocusedAssaultDash.OnEnter += ForceFocusedDashDirection;
 
+            On.EntityStates.Treebot.Weapon.FireSyringe.FixedUpdate += AnimateSyringeShoot;
+            On.EntityStates.Treebot.Weapon.FireSyringe.OnExit += EndSyringeShoot;
+            On.EntityStates.Treebot.Weapon.FireSonicBoom.OnEnter += AnimateSonicBoom;
+
             On.EntityStates.Croco.Bite.OnEnter += ChangeBiteDirection;
 
             On.EntityStates.Captain.Weapon.FireTazer.OnEnter += ChangeTazerMuzzleEnter;
             On.EntityStates.Captain.Weapon.FireTazer.Fire += ChangeTazerMuzzleShoot;
 
             IL.EntityStates.GlobalSkills.LunarNeedle.FireLunarNeedle.OnEnter += ChangeNeedleMuzzle;
+        }
+
+        private static void AnimateSonicBoom(On.EntityStates.Treebot.Weapon.FireSonicBoom.orig_OnEnter orig, EntityStates.Treebot.Weapon.FireSonicBoom self)
+        {
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                GetHandAnimator(false).SetTrigger("Push");
+            }
+            orig(self);
+        }
+
+        private static void EndSyringeShoot(On.EntityStates.Treebot.Weapon.FireSyringe.orig_OnExit orig, EntityStates.Treebot.Weapon.FireSyringe self)
+        {
+            orig(self);
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                GetHandAnimator(true).SetInteger("SyringeShots", 0);
+
+                if (self.projectilesFired < EntityStates.Treebot.Weapon.FireSyringe.projectileCount)
+                {
+                    GetHandAnimator(true).SetTrigger("ForceReload");
+                }
+            }
+        }
+
+        private static void AnimateSyringeShoot(On.EntityStates.Treebot.Weapon.FireSyringe.orig_FixedUpdate orig, EntityStates.Treebot.Weapon.FireSyringe self)
+        {
+            if (!IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                orig(self);
+                return;
+            }
+
+            if (self.projectilesFired <= 0)
+            {
+                GetHandAnimator(true).SetFloat("ReloadSpeed", self.attackSpeedStat);
+            }
+            orig(self);
+            GetHandAnimator(true).SetInteger("SyringeShots", self.projectilesFired);
         }
 
         private static void AnimateWallCast(On.EntityStates.Mage.Weapon.PrepWall.orig_OnExit orig, EntityStates.Mage.Weapon.PrepWall self)

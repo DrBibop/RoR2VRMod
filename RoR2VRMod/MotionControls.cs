@@ -29,17 +29,6 @@ namespace VRMod
         internal static void Init()
         {
             On.RoR2.CameraRigController.Start += SetupVRHands;
-
-            /*
-            RoR2.PauseManager.onPauseStartGlobal += ResetToPointer;
-
-            RoR2.PauseManager.onPauseEndGlobal += () =>
-            {
-                CharacterBody body = LocalUserManager.GetFirstLocalUser().cachedBody;
-                if (body)
-                    SetHandPair(body.name.Substring(0, body.name.IndexOf("Body")));
-            };
-            */
             On.RoR2.CharacterBody.OnSprintStart += OnSprintStart;
 
             On.RoR2.CharacterBody.OnSprintStop += OnSprintStop;
@@ -70,7 +59,8 @@ namespace VRMod
                 "ArtiHand2",
                 "MercHand",
                 "MercSword",
-                "RexHand",
+                "RexGun",
+                "RexFlower",
                 "LoaderHand",
                 "AcridHand",
                 "CaptainHand",

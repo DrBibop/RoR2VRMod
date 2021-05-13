@@ -23,7 +23,7 @@ namespace VRMod.ControllerMappings
 
         internal override bool GetRightSecondary()
         {
-            return UnityInputHelper.GetJoystickButtonValueByJoystickIndex(rightJoyID, 17);
+            return UnityInputHelper.GetJoystickButtonValueByJoystickIndex(rightJoyID, 17) && !base.GetRightJoyPress();
         }
     }
 }

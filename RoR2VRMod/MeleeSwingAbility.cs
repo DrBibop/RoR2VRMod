@@ -51,23 +51,17 @@ namespace VRMod
                 tipPath[1] = tipPath[0];
                 tipPath[0] = newPoint;
 
-                VRMod.StaticLogger.LogInfo(tipPath[0]);
-
                 if (firstFrame)
                 {
                     firstFrame = false;
                     tipPath[2] = tipPath[1] = tipPath[0];
                 }
-
-                VRMod.StaticLogger.LogInfo(Vector3.Distance(tipPath[0], tipPath[2]) / 2);
             }
 
             bool swinging = (Time.fixedDeltaTime * speedThreshold) < (Vector3.Distance(tipPath[0], tipPath[2]) / 2);
 
             if (swinging)
                 timer = activationTime;
-
-            VRMod.StaticLogger.LogInfo(timer);
 
             List<GenericSkill> skillsToActivate = body.skillLocator.allSkills.ToList().Where(x => activatedSkills.ToList().Contains(x.skillDef.skillName)).ToList();
 
