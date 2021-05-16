@@ -28,6 +28,7 @@ namespace VRMod
         internal static ConfigEntry<bool> LockedCameraPitch { get; private set; }
         internal static ConfigEntry<bool> UseMotionControls { get; private set; }
         internal static ConfigEntry<bool> LeftDominantHand { get; private set; }
+        internal static ConfigEntry<bool> ControllerMovementDirection { get; private set; }
 
         internal static void Init()
         {
@@ -132,6 +133,12 @@ namespace VRMod
                 "Set left hand as dominant",
                 false,
                 "Swaps trigger and grip inputs. The aiming hand for each skill is also swapped."
+            );
+            ControllerMovementDirection = configFile.Bind<bool>(
+                "Controls",
+                "Use controller direction for movement",
+                false,
+                "When enabled, pushing forward on the joystick will move the character towards the direction the controller is pointing instead of the head."
             );
 
             if (!FirstPerson.Value)

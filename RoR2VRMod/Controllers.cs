@@ -1,4 +1,6 @@
-﻿using Rewired;
+﻿using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using Rewired;
 using Rewired.Data;
 using Rewired.Data.Mapping;
 using RoR2;
@@ -8,11 +10,13 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Networking;
+using UnityEngine.XR;
 using VRMod.ControllerMappings;
 
 namespace VRMod
 {
-    internal class Controllers
+    public class Controllers
     {
         private static CustomController vrControllers;
         private static CustomControllerMap vrDefaultMap;
@@ -24,6 +28,11 @@ namespace VRMod
         private static bool hasRecentered = false;
 
         private static TMP_SpriteAsset glyphsSpriteAsset;
+
+        private static List<SkillRemap> skillRemaps = new List<SkillRemap>()
+        {
+            new SkillRemap() { bodyName = "LoaderBody", skill1 = SkillSlot.Utility, skill2 = SkillSlot.Special }
+        };
 
         internal static void Init()
         {
@@ -43,9 +52,86 @@ namespace VRMod
 
             On.RoR2.UI.MainMenu.MainMenuController.Start += ShowRecenterDialog;
 
+            PlayerCharacterMasterController.onPlayerAdded += SubscribeToBodyEvents;
+
+            if (ModConfig.ControllerMovementDirection.Value)
+                IL.RoR2.PlayerCharacterMasterController.Update += ControllerMovementDirection;
+
             SetupControllerInputs();
 
             glyphsSpriteAsset = VRMod.VRAssetBundle.LoadAsset<TMP_SpriteAsset>("sprVRGlyphs");
+        }
+
+        private static void SubscribeToBodyEvents(PlayerCharacterMasterController obj)
+        {
+            obj.master.onBodyStart += ApplyRemapsFromBody;
+            obj.master.onBodyDestroyed += ApplyRemapsFromBody;
+        }
+
+        private static void ApplyRemapsFromBody(CharacterBody obj)
+        {
+            if (obj.master != LocalUserManager.GetFirstLocalUser().cachedMaster) return;
+            ApplyRemaps(obj.name.Remove(obj.name.IndexOf("(Clone)")));
+        }
+
+        internal static void ApplyRemaps(string bodyName)
+        {
+
+            SkillRemap[] remaps = skillRemaps.Where(x => x.bodyName == bodyName).ToArray();
+
+            foreach (SkillRemap remap in remaps)
+            {
+                ActionElementMap originalMap1 = vrDefaultMap.GetElementMapsWithAction(7 + (int)remap.skill1)[0];
+                ActionElementMap originalMap2 = vrDefaultMap.GetElementMapsWithAction(7 + (int)remap.skill2)[0];
+
+                int elementIdentifierId1 = originalMap1.elementIdentifierId;
+                int elementIdentifierId2 = originalMap2.elementIdentifierId;
+
+                Player player = LocalUserManager.GetFirstLocalUser().inputPlayer;
+
+                bool result1 = player.controllers.maps.GetMap(vrControllers, vrDefaultMap.id).ReplaceElementMap(originalMap1.id, originalMap1.actionId, originalMap1.axisContribution, elementIdentifierId2, originalMap1.elementType, originalMap1.axisRange, originalMap1.invert);
+                bool result2 = player.controllers.maps.GetMap(vrControllers, vrDefaultMap.id).ReplaceElementMap(originalMap2.id, originalMap2.actionId, originalMap2.axisContribution, elementIdentifierId1, originalMap2.elementType, originalMap2.axisRange, originalMap2.invert);
+
+                if (!(result1 && result2))
+                {
+                    VRMod.StaticLogger.LogError("Failed to remap");
+                }    
+            }
+        }
+
+        private static void ControllerMovementDirection(ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
+
+            c.GotoNext(x => x.MatchLdloca(6));
+            c.GotoNext(x => x.MatchLdloca(6));
+
+            c.Emit(OpCodes.Ldloc_S, (byte)6);
+            c.EmitDelegate<Func<Vector2, Vector2>>((vector) =>
+            {
+                float angleDifference;
+
+                if (MotionControls.HandsReady)
+                {
+                    Vector3 controllerDirection = MotionControls.GetHandCurrentMuzzle(false).forward;
+                    Vector3 cameraDirection = Camera.main.transform.forward;
+
+                    controllerDirection.y = 0;
+                    cameraDirection.y = 0;
+
+                    angleDifference = Vector3.SignedAngle(controllerDirection, cameraDirection, Vector3.up);
+                }
+                else
+                {
+                    Quaternion controllerRotation = InputTracking.GetLocalRotation(XRNode.LeftHand);
+                    Quaternion headRotation = Camera.main.transform.localRotation;
+
+                    angleDifference = headRotation.eulerAngles.y - controllerRotation.eulerAngles.y;
+                }
+
+                return Quaternion.Euler(new Vector3(0, 0, angleDifference)) * vector;
+            });
+            c.Emit(OpCodes.Stloc_S, (byte)6);
         }
 
         private static void ShowRecenterDialog(On.RoR2.UI.MainMenu.MainMenuController.orig_Start orig, RoR2.UI.MainMenu.MainMenuController self)
@@ -432,6 +518,13 @@ namespace VRMod
             }
 
             controllerMap = new GenericVRMap(leftID, rightID, name, true);
+        }
+
+        public struct SkillRemap
+        {
+            public string bodyName;
+            public SkillSlot skill1;
+            public SkillSlot skill2;
         }
     }
 }

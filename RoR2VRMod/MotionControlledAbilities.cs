@@ -36,8 +36,7 @@ namespace VRMod
             typeof(EntityStates.Treebot.Weapon.AimMortarRain),
             typeof(EntityStates.Treebot.Weapon.FireSonicBoom),
             typeof(EntityStates.Treebot.Weapon.FirePlantSonicBoom),
-            typeof(EntityStates.Loader.SwingChargedFist),
-            typeof(EntityStates.Loader.SwingZapFist),
+            typeof(EntityStates.Loader.ThrowPylon),
             typeof(EntityStates.Loader.FireHook),
             typeof(EntityStates.Loader.FireYankHook),
             typeof(EntityStates.Croco.FireSpit),
@@ -131,12 +130,64 @@ namespace VRMod
             On.EntityStates.Treebot.Weapon.FireSyringe.OnExit += EndSyringeShoot;
             On.EntityStates.Treebot.Weapon.FireSonicBoom.OnEnter += AnimateSonicBoom;
 
+            On.EntityStates.Loader.FireHook.OnEnter += AnimateHookEnter;
+            On.EntityStates.Loader.FireHook.OnExit += AnimateHookExit;
+            On.EntityStates.Loader.BaseChargeFist.OnEnter += ShowLoaderRay;
+            On.EntityStates.Loader.BaseChargeFist.OnExit += HideLoaderRay;
+
             On.EntityStates.Croco.Bite.OnEnter += ChangeBiteDirection;
+            On.EntityStates.Croco.BaseLeap.OnExit += AnimateAcridRest;
 
             On.EntityStates.Captain.Weapon.FireTazer.OnEnter += ChangeTazerMuzzleEnter;
             On.EntityStates.Captain.Weapon.FireTazer.Fire += ChangeTazerMuzzleShoot;
 
             IL.EntityStates.GlobalSkills.LunarNeedle.FireLunarNeedle.OnEnter += ChangeNeedleMuzzle;
+        }
+
+        private static void AnimateAcridRest(On.EntityStates.Croco.BaseLeap.orig_OnExit orig, EntityStates.Croco.BaseLeap self)
+        {
+            orig(self);
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                GetHandAnimator(true).SetTrigger("Rest");
+                GetHandAnimator(false).SetTrigger("Rest");
+            }
+        }
+
+        private static void HideLoaderRay(On.EntityStates.Loader.BaseChargeFist.orig_OnExit orig, EntityStates.Loader.BaseChargeFist self)
+        {
+            orig(self);
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                GetHandAnimator(true).SetBool("Ray", false);
+            }
+        }
+
+        private static void ShowLoaderRay(On.EntityStates.Loader.BaseChargeFist.orig_OnEnter orig, EntityStates.Loader.BaseChargeFist self)
+        {
+            orig(self);
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                GetHandAnimator(true).SetBool("Ray", true);
+            }
+        }
+
+        private static void AnimateHookExit(On.EntityStates.Loader.FireHook.orig_OnExit orig, EntityStates.Loader.FireHook self)
+        {
+            orig(self);
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                GetHandAnimator(false).SetBool("Hook", false);
+            }
+        }
+
+        private static void AnimateHookEnter(On.EntityStates.Loader.FireHook.orig_OnEnter orig, EntityStates.Loader.FireHook self)
+        {
+            orig(self);
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                GetHandAnimator(false).SetBool("Hook", true);
+            }
         }
 
         private static void AnimateSonicBoom(On.EntityStates.Treebot.Weapon.FireSonicBoom.orig_OnEnter orig, EntityStates.Treebot.Weapon.FireSonicBoom self)

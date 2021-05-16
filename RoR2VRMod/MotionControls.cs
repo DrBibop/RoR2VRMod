@@ -62,7 +62,9 @@ namespace VRMod
                 "RexGun",
                 "RexFlower",
                 "LoaderHand",
+                "LoaderHand2",
                 "AcridHand",
+                "AcridHand2",
                 "CaptainHand",
                 "HereticWing"
             };

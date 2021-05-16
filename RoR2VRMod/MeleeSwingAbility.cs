@@ -23,19 +23,51 @@ namespace VRMod
 
         internal static bool[] skillStates = new bool[4];
 
-        private float timer;
+        private static float[] timers = new float[4];
+
+        private static CharacterBody body;
+
+        private static List<MeleeSwingAbility> instanceList = new List<MeleeSwingAbility>();
 
         private Vector3[] tipPath = new Vector3[3];
 
         private bool firstFrame = true;
 
-        private CharacterBody body;
+        private void OnEnable()
+        {
+            if (instanceList.Count() <= 0)
+            {
+                RoR2Application.onFixedUpdate += UpdateTimer;
+            }
+
+            instanceList.Add(this);
+        }
+
+        private void OnDisable()
+        {
+            instanceList.Remove(this);
+
+            if (instanceList.Count() <= 0)
+            {
+                RoR2Application.onFixedUpdate -= UpdateTimer;
+            }
+        }
+
+        private static void UpdateTimer()
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                if (timers[i] > 0)
+                {
+                    timers[i] -= Time.fixedDeltaTime;
+                }
+
+                skillStates[i] = timers[i] > 0;
+            }
+        }
 
         private void FixedUpdate()
         {
-            if (timer > 0)
-                timer -= Time.fixedDeltaTime;
-
             if (!VRCameraWrapper.instance) return;
 
             if (!body)
@@ -60,34 +92,14 @@ namespace VRMod
 
             bool swinging = (Time.fixedDeltaTime * speedThreshold) < (Vector3.Distance(tipPath[0], tipPath[2]) / 2);
 
-            if (swinging)
-                timer = activationTime;
-
-            List<GenericSkill> skillsToActivate = body.skillLocator.allSkills.ToList().Where(x => activatedSkills.ToList().Contains(x.skillDef.skillName)).ToList();
+            List<GenericSkill> skillsToActivate = body.skillLocator.allSkills.ToList().Where(x => activatedSkills.ToList().Contains(x.skillName) || activatedSkills.ToList().Contains(x.skillDef.skillName)).ToList();
 
             foreach (GenericSkill skill in skillsToActivate)
             {
                 SkillSlot slot = body.skillLocator.FindSkillSlot(skill);
 
-                bool activate = timer > 0;
-
-                switch (slot)
-                {
-                    case SkillSlot.Primary:
-                        skillStates[0] = activate;
-                        break;
-                    case SkillSlot.Secondary:
-                        skillStates[1] = activate;
-                        break;
-                    case SkillSlot.Utility:
-                        skillStates[2] = activate;
-                        break;
-                    case SkillSlot.Special:
-                        skillStates[3] = activate;
-                        break;
-                    default:
-                        continue;
-                }
+                if (slot != SkillSlot.None && swinging)
+                    timers[(int)slot] = activationTime;
             }
         }
     }
