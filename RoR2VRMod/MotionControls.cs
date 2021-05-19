@@ -37,7 +37,7 @@ namespace VRMod
             {
                 orig(self, bodyName);
                 if (bodyName.Contains("Heretic"))
-                    SetHandPair(bodyName.Substring(0, bodyName.IndexOf("Body")));
+                    SetHandPair(bodyName);
             };
 
             On.RoR2.CharacterModel.UpdateMaterials += UpdateHandMaterials;
@@ -66,6 +66,7 @@ namespace VRMod
                 "AcridHand",
                 "AcridHand2",
                 "CaptainHand",
+                "CaptainGun",
                 "HereticWing"
             };
 
@@ -74,7 +75,9 @@ namespace VRMod
                 GameObject prefab = VRMod.VRAssetBundle.LoadAsset<GameObject>(prefabName);
 
                 if (prefab)
+                {
                     AddHandPrefab(prefab);
+                }
             }
         }
 
@@ -308,6 +311,14 @@ namespace VRMod
                         transformPairList.Add(new ChildLocator.NameTransformPair() { name = "CurrentDominantMuzzle", transform = dominantHand.currentHand.currentMuzzle.transform });
                         transformPairList.Add(new ChildLocator.NameTransformPair() { name = "CurrentNonDominantMuzzle", transform = nonDominantHand.currentHand.currentMuzzle.transform });
                         childLocator.transformPairs = transformPairList.ToArray();
+                    }
+                    else
+                    {
+                        int index1 = transformPairList.FindIndex(x => x.name == "CurrentDominantMuzzle");
+                        int index2 = transformPairList.FindIndex(x => x.name == "CurrentNonDominantMuzzle");
+
+                        childLocator.transformPairs[index1].transform = dominantHand.currentHand.currentMuzzle.transform;
+                        childLocator.transformPairs[index2].transform = nonDominantHand.currentHand.currentMuzzle.transform;
                     }
 
                     foreach (Muzzle muzzle in dominantHand.currentHand.muzzles)

@@ -51,7 +51,14 @@ namespace VRMod
 
                     if (!associatedSkill)
                     {
-                        associatedSkill = body.skillLocator.allSkills.ToList().First(x => x.skillDef.skillName == skillName);
+                        try
+                        {
+                            associatedSkill = body.skillLocator.allSkills.ToList().First(x => x.skillDef.skillName == skillName);
+                        }
+                        catch
+                        {
+                            return;
+                        }
                     }
 
                     if (associatedSkill)

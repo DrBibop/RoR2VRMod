@@ -138,10 +138,21 @@ namespace VRMod
             On.EntityStates.Croco.Bite.OnEnter += ChangeBiteDirection;
             On.EntityStates.Croco.BaseLeap.OnExit += AnimateAcridRest;
 
+            On.EntityStates.Captain.Weapon.FireCaptainShotgun.OnEnter += AnimateShotgunShoot;
             On.EntityStates.Captain.Weapon.FireTazer.OnEnter += ChangeTazerMuzzleEnter;
             On.EntityStates.Captain.Weapon.FireTazer.Fire += ChangeTazerMuzzleShoot;
 
             IL.EntityStates.GlobalSkills.LunarNeedle.FireLunarNeedle.OnEnter += ChangeNeedleMuzzle;
+        }
+
+        private static void AnimateShotgunShoot(On.EntityStates.Captain.Weapon.FireCaptainShotgun.orig_OnEnter orig, EntityStates.Captain.Weapon.FireCaptainShotgun self)
+        {
+            orig(self);
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                GetHandAnimator(true).SetFloat("ShootSpeed", 1f / self.duration);
+                GetHandAnimator(true).SetTrigger("Shoot");
+            }
         }
 
         private static void AnimateAcridRest(On.EntityStates.Croco.BaseLeap.orig_OnExit orig, EntityStates.Croco.BaseLeap self)
@@ -493,8 +504,9 @@ namespace VRMod
         {
             if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
             {
+                GetHandAnimator(false).SetTrigger("Rest");
                 string muzzleString = EntityStates.Captain.Weapon.FireTazer.targetMuzzle;
-                EntityStates.Captain.Weapon.FireTazer.targetMuzzle = "VRMuzzle_NonDominant";
+                EntityStates.Captain.Weapon.FireTazer.targetMuzzle = "CurrentNonDominantMuzzle";
                 orig(self);
                 EntityStates.Captain.Weapon.FireTazer.targetMuzzle = muzzleString;
                 return;
@@ -508,7 +520,7 @@ namespace VRMod
             if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
             {
                 string muzzleString = EntityStates.Captain.Weapon.FireTazer.targetMuzzle;
-                EntityStates.Captain.Weapon.FireTazer.targetMuzzle = "VRMuzzle_NonDominant";
+                EntityStates.Captain.Weapon.FireTazer.targetMuzzle = "CurrentNonDominantMuzzle";
                 orig(self);
                 EntityStates.Captain.Weapon.FireTazer.targetMuzzle = muzzleString;
                 return;
@@ -675,7 +687,7 @@ namespace VRMod
             c.Emit(OpCodes.Ldarg_0);
             c.EmitDelegate<Func<EntityStates.Toolbot.RecoverAimStunDrone, string>>((self) =>
             {
-                return IsLocalPlayer(self.outer.GetComponent<CharacterBody>()) ? "VRMuzzle_NonDominant" : "MuzzleNailgun";
+                return IsLocalPlayer(self.outer.GetComponent<CharacterBody>()) ? "CurrentNonDominantMuzzle" : "MuzzleNailgun";
             });
         }
 

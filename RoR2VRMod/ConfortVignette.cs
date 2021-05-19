@@ -50,7 +50,7 @@ namespace VRMod
 			instance = this;
 
 			if (!vignette)
-				vignette = VRMod.VRAssetBundle.LoadAsset<Material>("matVignette");
+				vignette = VRMod.VRAssetBundle.LoadAsset<Material>("VignetteMaterial");
 		}
 
 		private void OnEnable()
