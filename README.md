@@ -118,6 +118,6 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - A dialog box now opens in the main menu telling the player how to recenter the HMD.
 - The sprint icon on the bottom right turns yellow while sprinting to compensate for the lack of visual cues like the crosshair.
 - The HUD should now appear at the same size no matter your resolution/FOV.
-- Added HUD width and height config settings.
+- Added HUD width and height config settings (HUD anchor settings need to be reset to default if you have downloaded a previous version).
 - Fixed a bug that caused some targeting indicators to not face the camera properly.
 - Fixed a bug that caused the dialog box in the pause menu to not follow the menu rotation.

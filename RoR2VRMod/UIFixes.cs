@@ -196,9 +196,6 @@ namespace VRMod
                 }
             }
 
-            CanvasScaler scaler = hud.canvas.gameObject.AddComponent<CanvasScaler>();
-            scaler.scaleFactor = ModConfig.UIScale.Value;
-
             Transform[] uiElements = new Transform[] {
                 hud.mainUIPanel.transform.Find("SpringCanvas"),
                 hud.mainContainer.transform.Find("NotificationArea"),
@@ -222,6 +219,9 @@ namespace VRMod
             hud.transform.localRotation = Quaternion.identity;
             hud.transform.position = new Vector3(0, 0, 12.35f);
             rectTransform.pivot = menuPivot;
+
+            CanvasScaler scaler = hud.canvas.gameObject.AddComponent<CanvasScaler>();
+            scaler.scaleFactor = ModConfig.UIScale.Value;
         }
 
         private static void UpdateAllHealthBarPositionsVR(On.RoR2.UI.CombatHealthBarViewer.orig_UpdateAllHealthbarPositions orig, RoR2.UI.CombatHealthBarViewer self, Camera sceneCam, Camera uiCam)

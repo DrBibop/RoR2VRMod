@@ -627,7 +627,10 @@ namespace VRMod
 
         private static Ray GetLeftAimRay(On.RoR2.EquipmentSlot.orig_GetAimRay orig, EquipmentSlot self)
         {
-            return GetHandRayBySide(true);
+            if (IsLocalPlayer(self.characterBody))
+                return GetHandRayBySide(true);
+            else
+                return orig(self);
         }
 
         private static Ray CancelModifyIfLocal(On.RoR2.CameraRigController.orig_ModifyAimRayIfApplicable orig, Ray originalAimRay, GameObject target, out float extraRaycastDistance)
