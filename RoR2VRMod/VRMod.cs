@@ -14,7 +14,7 @@ using UnityEngine;
 [assembly: ManualNetworkRegistration]
 namespace VRMod
 {
-    [BepInPlugin("com.DrBibop.VRMod", "VRMod", "1.3.0")]
+    [BepInPlugin("com.DrBibop.VRMod", "VRMod", "2.0.0")]
     public class VRMod : BaseUnityPlugin
     {
         internal static ManualLogSource StaticLogger;
