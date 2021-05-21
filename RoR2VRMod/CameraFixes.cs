@@ -6,6 +6,7 @@ using RoR2.Networking;
 using RoR2.UI;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Rendering.PostProcessing;
 
 namespace VRMod
 {
@@ -20,7 +21,7 @@ namespace VRMod
         private static bool justTurnedLeft => isTurningLeft && !wasTurningLeft;
         private static bool justTurnedRight => isTurningRight && !wasTurningRight;
 
-        internal static void Init()
+		internal static void Init()
         {
             On.RoR2.MatchCamera.Awake += (orig, self) =>
             {
@@ -32,9 +33,9 @@ namespace VRMod
             On.RoR2.CameraRigController.SetCameraState += SetCameraStateOverride;
 
             On.RoR2.CameraRigController.Update += CameraUpdateOverride;
+			On.RoR2.CameraRigController.Start += InitCamera;
 
-
-            if (ModConfig.FirstPerson.Value)
+			if (ModConfig.FirstPerson.Value)
             {
                 On.RoR2.Run.Update += SetBodyInvisible;
 
@@ -42,14 +43,36 @@ namespace VRMod
                 {
                     orig(self);
                     if (VRCameraWrapper.instance)
-                        Object.Destroy(VRCameraWrapper.instance.gameObject);
+                        GameObject.Destroy(VRCameraWrapper.instance.gameObject);
                 };
             }
 
             On.RoR2.CameraRigController.GetCrosshairRaycastRay += GetVRCrosshairRaycastRay;
         }
 
-		//I really didnt't want to use IL for this part... so COPYING THE WHOLE METHOD IT IS
+        private static void InitCamera(On.RoR2.CameraRigController.orig_Start orig, CameraRigController self)
+        {
+			orig(self);
+
+			Transform blur = self.transform.Find("GlobalPostProcessVolume, Base");
+
+			if (blur)
+			{
+				PostProcessVolume ppVolume = blur.GetComponent<PostProcessVolume>();
+				if (ppVolume)
+					ppVolume.profile.GetSetting<DepthOfField>().active = false;
+			}
+
+			if (Run.instance && ModConfig.ConfortVignette.Value)
+            {
+				self.uiCam.gameObject.AddComponent<ConfortVignette>();
+			}
+
+			if (self.hud)
+				UIFixes.AdjustHUD(self.hud);
+        }
+
+        //I really didnt't want to use IL for this part... so COPYING THE WHOLE METHOD IT IS
         private static void CameraUpdateOverride(On.RoR2.CameraRigController.orig_Update orig, CameraRigController self)
         {
 			if (Time.deltaTime == 0f)
@@ -96,7 +119,7 @@ namespace VRMod
 				float num2 = userProfile.stickLookSensitivity * CameraRigController.aimStickGlobalScale.value * 45f;
 				Vector2 vector = new Vector2(player.GetAxisRaw(ModConfig.SnapTurn.Value ? 26 : 2), player.GetAxisRaw(3));
 				Vector2 vector2 = new Vector2(player.GetAxisRaw(16), player.GetAxisRaw(17));
-				if (ModConfig.SnapTurn.Value || ModConfig.LockedCameraPitch.Value)
+				if (ModConfig.LockedCameraPitch.Value)
                 {
 					vector2.y = 0;
                 }
@@ -212,14 +235,14 @@ namespace VRMod
 					isTurningLeft = vector.x < -0.8f || vector2.x < -0.8f;
 					isTurningRight = vector.x > 0.8f || vector2.x > 0.8f;
 
-					num14 = 0;
+					num14 = 0f;
 
 					if (justTurnedLeft)
 						num14 = -ModConfig.SnapTurnAngle.Value;
 					else if (justTurnedRight)
 						num14 = ModConfig.SnapTurnAngle.Value;
 
-					num15 = 0;
+					num15 = 0f;
                 }
 			}
 			else
@@ -434,7 +457,7 @@ namespace VRMod
 						VRCameraWrapper.instance = wrapperObject.AddComponent<VRCameraWrapper>();
 						VRCameraWrapper.instance.Init(self);
                     }
-					VRCameraWrapper.instance.ManualUpdate(cameraState);
+					VRCameraWrapper.instance.UpdateRotation(cameraState);
 
                     cameraState.rotation = self.sceneCam.transform.rotation;
 
@@ -484,6 +507,11 @@ namespace VRMod
 
         private static Ray GetVRCrosshairRaycastRay(On.RoR2.CameraRigController.orig_GetCrosshairRaycastRay orig, RoR2.CameraRigController self, Vector2 crosshairOffset, Vector3 raycastStartPlanePoint)
         {
+			if (MotionControls.HandsReady)
+            {
+				return MotionControls.GetHandRayByDominance(true);
+            }
+
             if (!self.sceneCam)
             {
                 return default(Ray);

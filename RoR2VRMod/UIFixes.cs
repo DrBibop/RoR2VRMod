@@ -1,6 +1,4 @@
-﻿using Mono.Cecil.Cil;
-using MonoMod.Cil;
-using RoR2;
+﻿using RoR2;
 using RoR2.UI;
 using System;
 using UnityEngine;
@@ -21,16 +19,17 @@ namespace VRMod
         private static readonly Vector2 menuResolution = new Vector2(1500, 1000);
         private static readonly Vector2 hdResolution = new Vector2(1920, 1080);
 
-        private static Camera uiCamera;
+        private static Camera cachedUICam;
+
+        private static Vector3 camRotation = Vector3.zero;
 
         internal static void Init()
         {
-            On.RoR2.UI.HUD.Awake += AdjustHUDAnchors;
-
             On.RoR2.UI.CombatHealthBarViewer.UpdateAllHealthbarPositions += UpdateAllHealthBarPositionsVR;
 
             On.RoR2.Indicator.PositionForUI += PositionForUIOverride;
             On.RoR2.PositionIndicator.UpdatePositions += UpdatePositionsOverride;
+            On.RoR2.GameOverController.GenerateReportScreen += UnparentHUD;
 
             On.RoR2.UI.MainMenu.BaseMainMenuScreen.OnEnter += (orig, self, controller) =>
             {
@@ -55,17 +54,23 @@ namespace VRMod
             On.RoR2.UI.PauseScreenController.OnEnable += (orig, self) =>
             {
                 orig(self);
+                if (!GetUICamera()) return;
+
+                camRotation = new Vector3(0, cachedUICam.transform.eulerAngles.y, 0);
                 SetRenderMode(self.gameObject, hdResolution, menuPosition, menuScale, true);
             };
             On.RoR2.UI.SimpleDialogBox.Start += (orig, self) =>
             {
                 orig(self);
-                SetRenderMode(self.transform.root.gameObject, hdResolution, menuPosition, menuScale);
+                SetRenderMode(self.transform.root.gameObject, hdResolution, menuPosition, menuScale, PauseManager.isPaused);
             };
             On.RoR2.UI.GameEndReportPanelController.Awake += (orig, self) =>
             {
                 orig(self);
-                SetRenderMode(self.gameObject, hdResolution, menuPosition, menuScale);
+                if (!GetUICamera()) return;
+
+                camRotation = new Vector3(0, cachedUICam.transform.eulerAngles.y, 0);
+                SetRenderMode(self.gameObject, hdResolution, menuPosition, menuScale, true);
             };
             On.RoR2.SplashScreenController.Start += (orig, self) =>
             {
@@ -82,6 +87,23 @@ namespace VRMod
                 orig(self);
                 self.gameEndReportPanelPrefab.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
             };
+        }
+
+        private static GameEndReportPanelController UnparentHUD(On.RoR2.GameOverController.orig_GenerateReportScreen orig, GameOverController self, HUD hud)
+        {
+            hud.transform.SetParent(null);
+            hud.canvas.renderMode = RenderMode.ScreenSpaceCamera;
+            return orig(self, hud);
+        }
+
+        private static bool GetUICamera()
+        {
+            if (cachedUICam == null)
+            {
+                GameObject cameraObject = Camera.main.transform.parent.gameObject;
+                cachedUICam = cameraObject.name.Contains("Wrapper") ? cameraObject.GetComponent<VRCameraWrapper>().cameraRigController.uiCam : cameraObject.GetComponent<CameraRigController>().uiCam;
+            }
+            return cachedUICam != null;
         }
 
         private static void UpdatePositionsOverride(On.RoR2.PositionIndicator.orig_UpdatePositions orig, UICamera uiCamera)
@@ -108,10 +130,12 @@ namespace VRMod
             if (self.targetTransform)
             {
                 Vector3 position = self.targetTransform.position;
+                
                 Vector3 vector = sceneCamera.transform.parent.InverseTransformDirection(position - sceneCamera.transform.parent.position);
                 if (self.visualizerTransform != null)
                 {
                     self.visualizerTransform.position = vector;
+                    self.visualizerTransform.rotation = Quaternion.LookRotation((vector - uiCamera.transform.position).normalized);
                     self.visualizerTransform.localScale = (self is EntityStates.Engi.EngiMissilePainter.Paint.EngiMissileIndicator ? 1 : 0.1f) * Vector3.Distance(sceneCamera.transform.position, position) * Vector3.one;
                 }
             }
@@ -119,11 +143,7 @@ namespace VRMod
 
         private static void SetRenderMode(GameObject uiObject, Vector2 resolution, Vector3 positionOffset, Vector3 scale, bool followRotation = false)
         {
-            if (!uiCamera)
-            {
-                GameObject cameraObject = Camera.main.transform.parent.gameObject;
-                uiCamera = cameraObject.name.Contains("Wrapper") ? cameraObject.GetComponent<VRCameraWrapper>().cameraRigController.uiCam : cameraObject.GetComponent<CameraRigController>().uiCam;
-            }
+            if (!GetUICamera()) return;
 
             Canvas canvas = uiObject.GetComponent<Canvas>();
 
@@ -133,27 +153,25 @@ namespace VRMod
                     canvas.renderMode = RenderMode.ScreenSpaceOverlay;
 
                 canvas.renderMode = RenderMode.WorldSpace;
-                canvas.worldCamera = uiCamera;
+                canvas.worldCamera = cachedUICam;
 
                 Vector3 offset = positionOffset;
 
                 if (followRotation)
                 {
-                    Vector3 camRotation = new Vector3(0, uiCamera.transform.eulerAngles.y, 0);
-
                     offset = Quaternion.Euler(camRotation) * offset;
 
-                    if (uiObject.transform.parent)
+                    if (uiObject.transform.root != uiObject.transform)
                         uiObject.transform.parent.rotation = Quaternion.Euler(uiObject.transform.parent.eulerAngles + camRotation);
                     else
-                        uiObject.transform.rotation = Quaternion.Euler(uiObject.transform.parent.eulerAngles + camRotation);
+                        uiObject.transform.rotation = Quaternion.Euler(uiObject.transform.eulerAngles + camRotation);
 
                 }
 
                 if (uiObject.transform.parent)
-                    uiObject.transform.parent.position = uiCamera.transform.position + offset;
+                    uiObject.transform.parent.position = cachedUICam.transform.position + offset;
 
-                uiObject.transform.position = uiCamera.transform.position + offset;
+                uiObject.transform.position = cachedUICam.transform.position + offset;
                 uiObject.transform.localScale = scale;
 
                 RectTransform rect = uiObject.GetComponent<RectTransform>();
@@ -165,17 +183,23 @@ namespace VRMod
             }
         }
 
-        private static void AdjustHUDAnchors(On.RoR2.UI.HUD.orig_Awake orig, RoR2.UI.HUD self)
+        internal static void AdjustHUD(RoR2.UI.HUD hud)
         {
-            orig(self);
+            if (ModConfig.UseMotionControls.Value)
+            {
+                CrosshairManager crosshairManager = hud.GetComponent<CrosshairManager>();
 
-            CanvasScaler scaler = self.canvas.gameObject.AddComponent<CanvasScaler>();
-            scaler.scaleFactor = ModConfig.UIScale.Value;
+                if (crosshairManager)
+                {
+                    crosshairManager.container.gameObject.SetActive(false);
+                    crosshairManager.hitmarker.gameObject.SetActive(false);
+                }
+            }
 
             Transform[] uiElements = new Transform[] {
-                self.mainUIPanel.transform.Find("SpringCanvas"),
-                self.mainContainer.transform.Find("NotificationArea"),
-                self.mainContainer.transform.Find("MapNameCluster")
+                hud.mainUIPanel.transform.Find("SpringCanvas"),
+                hud.mainContainer.transform.Find("NotificationArea"),
+                hud.mainContainer.transform.Find("MapNameCluster")
             };
 
             foreach (Transform uiElement in uiElements)
@@ -184,6 +208,20 @@ namespace VRMod
                 rect.anchorMin = ModConfig.AnchorMin;
                 rect.anchorMax = ModConfig.AnchorMax;
             }
+
+            if (!GetUICamera()) return;
+
+            hud.canvas.renderMode = RenderMode.WorldSpace;
+            RectTransform rectTransform = hud.GetComponent<RectTransform>();
+            rectTransform.sizeDelta = new Vector2(ModConfig.HUDWidth.Value, ModConfig.HUDHeight.Value);
+            rectTransform.localScale = menuScale;
+            hud.transform.SetParent(cachedUICam.transform);
+            hud.transform.localRotation = Quaternion.identity;
+            hud.transform.position = new Vector3(0, 0, 12.35f);
+            rectTransform.pivot = menuPivot;
+
+            CanvasScaler scaler = hud.canvas.gameObject.AddComponent<CanvasScaler>();
+            scaler.scaleFactor = ModConfig.UIScale.Value;
         }
 
         private static void UpdateAllHealthBarPositionsVR(On.RoR2.UI.CombatHealthBarViewer.orig_UpdateAllHealthbarPositions orig, RoR2.UI.CombatHealthBarViewer self, Camera sceneCam, Camera uiCam)

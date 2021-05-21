@@ -11,8 +11,11 @@ namespace VRMod
         private static readonly ConfigFile configFile = new ConfigFile(System.IO.Path.Combine(Paths.ConfigPath, CONFIG_FILE_NAME), true);
         internal static ConfigEntry<bool> ConfigUseOculus { get; private set; }
         internal static ConfigEntry<bool> FirstPerson { get; private set; }
+        internal static ConfigEntry<bool> ConfortVignette { get; private set; }
 
         internal static ConfigEntry<float> UIScale { get; private set; }
+        internal static ConfigEntry<int> HUDWidth { get; private set; }
+        internal static ConfigEntry<int> HUDHeight { get; private set; }
         internal static ConfigEntry<float> BottomAnchor { get; private set; }
         internal static ConfigEntry<float> TopAnchor { get; private set; }
         internal static ConfigEntry<float> LeftAnchor { get; private set; }
@@ -23,6 +26,9 @@ namespace VRMod
         internal static ConfigEntry<bool> SnapTurn { get; private set; }
         internal static ConfigEntry<float> SnapTurnAngle { get; private set; }
         internal static ConfigEntry<bool> LockedCameraPitch { get; private set; }
+        internal static ConfigEntry<bool> UseMotionControls { get; private set; }
+        internal static ConfigEntry<bool> LeftDominantHand { get; private set; }
+        internal static ConfigEntry<bool> ControllerMovementDirection { get; private set; }
 
         internal static void Init()
         {
@@ -38,36 +44,57 @@ namespace VRMod
                 true,
                 "Experience the game in a first person POV."
             );
+            ConfortVignette = configFile.Bind<bool>(
+                "VR Settings",
+                "Confort Vignette",
+                true,
+                "Adds a black vignette during high-mobility abilities to reduce motion sickness."
+            );
+
 
             UIScale = configFile.Bind<float>(
                 "HUD Settings",
                 "UI scale",
-                0.8f,
+                1f,
+                "Scale of UI elements in the HUD."
+            );
+
+            HUDWidth = configFile.Bind<int>(
+                "HUD Settings",
+                "HUD Width",
+                1200,
+                "Scale of UI elements in the HUD."
+            );
+
+            HUDHeight = configFile.Bind<int>(
+                "HUD Settings",
+                "HUD Height",
+                1000,
                 "Scale of UI elements in the HUD."
             );
 
             BottomAnchor = configFile.Bind<float>(
                 "HUD Settings",
                 "Bottom anchor",
-                0.5f,
+                1f,
                 "Position of the bottom anchor between 0 and 1 (Middle to bottom edge of the screen)."
             );
             TopAnchor = configFile.Bind<float>(
                 "HUD Settings",
                 "Top anchor",
-                0.3f,
+                0.7f,
                 "Position of the top anchor between 0 and 1 (Middle to top edge of the screen)."
             );
             LeftAnchor = configFile.Bind<float>(
                 "HUD Settings",
                 "Left anchor",
-                0.5f,
+                1f,
                 "Position of the left anchor between 0 and 1 (Middle to left edge of the screen)."
             );
             RightAnchor = configFile.Bind<float>(
                 "HUD Settings",
                 "Right anchor",
-                0.5f,
+                1f,
                 "Position of the right anchor between 0 and 1 (Middle to right edge of the screen)."
             );
 
@@ -77,7 +104,7 @@ namespace VRMod
             SnapTurn = configFile.Bind<bool>(
                 "Controls",
                 "Snap turn",
-                false,
+                true,
                 "TRUE: Rotate the camera in increments (unavailable in third person).  FALSE: Smooth camera rotation."
             );
             SnapTurnAngle = configFile.Bind<float>(
@@ -93,6 +120,32 @@ namespace VRMod
                 true,
                 "Prevents the camera from rotating vertically (cannot disable when snap turn is on)."
             );
+
+
+            UseMotionControls = configFile.Bind<bool>(
+                "Controls",
+                "Use motion controls",
+                true,
+                "Enables motion controls for VR controllers. They act as a simple gamepad when set to false."
+            );
+            LeftDominantHand = configFile.Bind<bool>(
+                "Controls",
+                "Set left hand as dominant",
+                false,
+                "Swaps trigger and grip inputs. The aiming hand for each skill is also swapped."
+            );
+            ControllerMovementDirection = configFile.Bind<bool>(
+                "Controls",
+                "Use controller direction for movement",
+                false,
+                "When enabled, pushing forward on the joystick will move the character towards the direction the controller is pointing instead of the head."
+            );
+
+            if (!FirstPerson.Value)
+                UseMotionControls.Value = false;
+
+            if (SnapTurn.Value || UseMotionControls.Value)
+                LockedCameraPitch.Value = true;
         }
     }
 }
