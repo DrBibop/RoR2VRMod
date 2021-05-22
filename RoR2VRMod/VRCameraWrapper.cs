@@ -8,6 +8,7 @@ namespace VRMod
     {
         public static VRCameraWrapper instance;
 
+
         public void Init(CameraRigController cameraRigController)
         {
             instance = this;
@@ -17,10 +18,11 @@ namespace VRMod
             {
                 cameraRigController.transform.GetChild(cameraRigController.transform.childCount - 1).SetParent(transform);
             }
+
             cameraRigController.sceneCam.transform.localPosition = localCamPos;
         }
 
-        internal void ManualUpdate(CameraState cameraState)
+        internal void UpdateRotation(CameraState cameraState)
         {
             transform.rotation = cameraState.rotation;
         }
