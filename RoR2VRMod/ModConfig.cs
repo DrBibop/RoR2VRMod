@@ -12,6 +12,7 @@ namespace VRMod
         internal static ConfigEntry<bool> ConfigUseOculus { get; private set; }
         internal static ConfigEntry<bool> FirstPerson { get; private set; }
         internal static ConfigEntry<bool> ConfortVignette { get; private set; }
+        internal static ConfigEntry<bool> HideDecals { get; private set; }
 
         internal static ConfigEntry<float> UIScale { get; private set; }
         internal static ConfigEntry<int> HUDWidth { get; private set; }
@@ -50,14 +51,13 @@ namespace VRMod
                 true,
                 "Adds a black vignette during high-mobility abilities to reduce motion sickness."
             );
-
-
-            UIScale = configFile.Bind<float>(
-                "HUD Settings",
-                "UI scale",
-                1f,
-                "Scale of UI elements in the HUD."
+            HideDecals = configFile.Bind<bool>(
+                "VR Settings",
+                "Hide broken decal textures",
+                false,
+                "Decals only render on the left eye. You can completely hide them while waiting for a potential fix."
             );
+
 
             HUDWidth = configFile.Bind<int>(
                 "HUD Settings",

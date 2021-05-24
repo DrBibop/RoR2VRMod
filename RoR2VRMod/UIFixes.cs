@@ -21,7 +21,7 @@ namespace VRMod
 
         private static Camera cachedUICam;
 
-        private static Vector3 camRotation = Vector3.zero;
+        private static Canvas cachedMultiplayerCanvas;
 
         internal static void Init()
         {
@@ -30,6 +30,11 @@ namespace VRMod
             On.RoR2.Indicator.PositionForUI += PositionForUIOverride;
             On.RoR2.PositionIndicator.UpdatePositions += UpdatePositionsOverride;
             On.RoR2.GameOverController.GenerateReportScreen += UnparentHUD;
+            
+            RoR2Application.onLoad += () =>
+            {
+                RoR2Application.instance.mainCanvas.renderMode = RenderMode.ScreenSpaceCamera;
+            };
 
             On.RoR2.UI.MainMenu.BaseMainMenuScreen.OnEnter += (orig, self, controller) =>
             {
@@ -54,9 +59,6 @@ namespace VRMod
             On.RoR2.UI.PauseScreenController.OnEnable += (orig, self) =>
             {
                 orig(self);
-                if (!GetUICamera()) return;
-
-                camRotation = new Vector3(0, cachedUICam.transform.eulerAngles.y, 0);
                 SetRenderMode(self.gameObject, hdResolution, menuPosition, menuScale, true);
             };
             On.RoR2.UI.SimpleDialogBox.Start += (orig, self) =>
@@ -67,9 +69,6 @@ namespace VRMod
             On.RoR2.UI.GameEndReportPanelController.Awake += (orig, self) =>
             {
                 orig(self);
-                if (!GetUICamera()) return;
-
-                camRotation = new Vector3(0, cachedUICam.transform.eulerAngles.y, 0);
                 SetRenderMode(self.gameObject, hdResolution, menuPosition, menuScale, true);
             };
             On.RoR2.SplashScreenController.Start += (orig, self) =>
@@ -87,6 +86,38 @@ namespace VRMod
                 orig(self);
                 self.gameEndReportPanelPrefab.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
             };
+
+            
+            On.RoR2.RemoteGameBrowser.RemoteGameBrowserController.Awake += (orig, self) =>
+            {
+                orig(self);
+                cachedMultiplayerCanvas = self.GetComponentInParent<Canvas>();
+            };
+
+            On.RoR2.RemoteGameDetailsPanelController.Awake += OpenPopupInMenuCanvas;
+
+            On.RoR2.UI.MainMenu.ProfileMainMenuScreen.OpenCreateProfileMenu += SetAddProfileButtonAsDefaultFallback;
+        }
+
+        private static void SetAddProfileButtonAsDefaultFallback(On.RoR2.UI.MainMenu.ProfileMainMenuScreen.orig_OpenCreateProfileMenu orig, RoR2.UI.MainMenu.ProfileMainMenuScreen self, bool firstTime)
+        {
+            orig(self, firstTime);
+            self.submitProfileNameButton.defaultFallbackButton = true;
+        }
+
+        private static void OpenPopupInMenuCanvas(On.RoR2.RemoteGameDetailsPanelController.orig_Awake orig, RemoteGameDetailsPanelController self)
+        {
+            orig(self);
+            if (cachedMultiplayerCanvas)
+                self.transform.SetParent(cachedMultiplayerCanvas.transform);
+
+            RectTransform rect = (self.transform as RectTransform);
+
+            rect.localPosition = Vector3.zero;
+            rect.rotation = Quaternion.identity;
+            rect.localScale = Vector3.one;
+            rect.sizeDelta = menuResolution / 2;
+
         }
 
         private static GameEndReportPanelController UnparentHUD(On.RoR2.GameOverController.orig_GenerateReportScreen orig, GameOverController self, HUD hud)
@@ -159,6 +190,8 @@ namespace VRMod
 
                 if (followRotation)
                 {
+                    Vector3 camRotation = new Vector3(0, cachedUICam.transform.eulerAngles.y, 0);
+
                     offset = Quaternion.Euler(camRotation) * offset;
 
                     if (uiObject.transform.root != uiObject.transform)
@@ -192,7 +225,9 @@ namespace VRMod
                 if (crosshairManager)
                 {
                     crosshairManager.container.gameObject.SetActive(false);
-                    crosshairManager.hitmarker.gameObject.SetActive(false);
+
+                    //Thanks HutchyBen
+                    crosshairManager.hitmarker.GetComponent<Image>().enabled = false;
                 }
             }
 
@@ -219,9 +254,6 @@ namespace VRMod
             hud.transform.localRotation = Quaternion.identity;
             hud.transform.position = new Vector3(0, 0, 12.35f);
             rectTransform.pivot = menuPivot;
-
-            CanvasScaler scaler = hud.canvas.gameObject.AddComponent<CanvasScaler>();
-            scaler.scaleFactor = ModConfig.UIScale.Value;
         }
 
         private static void UpdateAllHealthBarPositionsVR(On.RoR2.UI.CombatHealthBarViewer.orig_UpdateAllHealthbarPositions orig, RoR2.UI.CombatHealthBarViewer self, Camera sceneCam, Camera uiCam)

@@ -53,7 +53,7 @@ Yes! The mod is only required for VR players. You can play with vanilla players 
 It honestly feels pretty great! This mod makes you play in first person by default but you can always come back to third person using the config editor.
 
 ### I can't press any buttons when I launch the game.
-This is likely because the game is not in focus on your PC. Make sure to click on the game window to pull it to the front. If your cursor is stuck in place, you can press the Windows key or Ctrl+Escape to unclock it and click on the game. If that doesn't fix it, relaunching the game should work.
+This is likely because the game is not in focus on your PC. Make sure to click on the game window to pull it to the front. If your cursor is stuck in place, you can press the Windows key or Ctrl+Escape to unlock it and click on the game. If that doesn't fix it, relaunching the game should work.
 
 ### The game won't launch in VR!
 If you are using SteamVR and the game launches in game theatre mode, right click the game on Steam and go to `Properties > General`. You can then turn off the "Use Desktop Game Theatre while SteamVR is active" option. If it's still not working, there was likely an error when trying to activate VR. Ask for help on the [Discord server](https://discord.gg/eQ7Fwac).
