@@ -9,7 +9,7 @@ namespace VRMod
         internal bool twoHandedAimActive = true;
 
         [SerializeField]
-        private float angleTolerance = 40f;
+        internal float angleTolerance = 40f;
 
         [SerializeField]
         private Transform originTransform;

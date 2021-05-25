@@ -74,6 +74,31 @@ namespace VRMod
             {
                 GameObject prefab = VRMod.VRAssetBundle.LoadAsset<GameObject>(prefabName);
 
+                if (prefabName == "BanditRifle")
+                {
+                    TwoHandedOrigin origin = prefab.GetComponent<TwoHandedOrigin>();
+
+                    origin.angleTolerance = ModConfig.BanditWeaponGripSnapAngle.Value;
+                }
+                if (prefabName == "MercSword")
+                {
+                    MeleeSwingAbility melee = prefab.GetComponent<MeleeSwingAbility>();
+
+                    melee.speedThreshold = ModConfig.MercSwingSpeedThreshold.Value;
+                }
+                if (prefabName == "LoaderHand" || prefabName == "LoaderHand2")
+                {
+                    MeleeSwingAbility melee = prefab.GetComponent<MeleeSwingAbility>();
+
+                    melee.speedThreshold = ModConfig.LoaderSwingSpeedThreshold.Value;
+                }
+                if (prefabName == "AcridHand" || prefabName == "AcridHand2")
+                {
+                    MeleeSwingAbility melee = prefab.GetComponent<MeleeSwingAbility>();
+
+                    melee.speedThreshold = ModConfig.AcridSwingSpeedThreshold.Value;
+                }
+
                 if (prefab)
                 {
                     AddHandPrefab(prefab);

@@ -6,6 +6,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using UnityEngine;
 using static VRMod.MotionControls;
 
@@ -66,13 +67,51 @@ namespace VRMod
 
         private static bool hasSwapped;
 
+        private struct ScaledEffect
+        {
+            internal ScaledEffect(GameObject prefab, float scale)
+            {
+                effectPrefab = prefab;
+                effectScale = scale;
+            }
+
+            internal GameObject effectPrefab;
+            internal float effectScale;
+        }
+
         internal static void Init()
         {
+            List<ScaledEffect> scaledMuzzleFlashes = new List<ScaledEffect>()
+            {
+                new ScaledEffect(Resources.Load<GameObject>("prefabs/effects/muzzleflashes/Muzzleflash1"), 0.4f),
+                new ScaledEffect(Resources.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashFMJ"), 0.4f),
+                new ScaledEffect(Resources.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashBarrage"), 0.4f),
+                new ScaledEffect(Resources.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashHuntress"), 0.5f),
+                new ScaledEffect(Resources.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashEngiGrenade"), 0.5f),
+                new ScaledEffect(Resources.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashMageFire"), 0.5f),
+                new ScaledEffect(Resources.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashMageLightning"), 0.5f),
+                new ScaledEffect(Resources.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashMageLightningLarge").transform.Find("Particles").gameObject, 0.5f),
+                new ScaledEffect(Resources.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashMageIceLarge").transform.Find("Particles").gameObject, 0.5f),
+                new ScaledEffect(Resources.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashMageLightningLargeWithTrail").transform.Find("Particles").gameObject, 0.5f)
+            };
+
+            foreach (var muzzleFlash in scaledMuzzleFlashes)
+            {
+                foreach (Transform child in muzzleFlash.effectPrefab.transform)
+                {
+                    if (child.name.ToLower().Contains("light")) continue;
+                    child.localScale *= muzzleFlash.effectScale;
+                }
+            }
+
             IL.RoR2.PlayerCharacterMasterController.FixedUpdate += SprintBreakDirection;
             On.RoR2.PlayerCharacterMasterController.CheckPinging += PingFromHand;
             On.RoR2.CameraRigController.ModifyAimRayIfApplicable += CancelModifyIfLocal;
             On.RoR2.EquipmentSlot.GetAimRay += GetLeftAimRay;
             On.EntityStates.BaseState.GetAimRay += EditAimray;
+
+            if (!ModConfig.CommandoDualWield.Value)
+                On.EntityStates.GenericBulletBaseState.FireBullet += ForceShotgunMuzzle;
 
             On.EntityStates.GenericBulletBaseState.GenerateBulletAttack += ChangeShotgunMuzzle;
             On.EntityStates.GenericProjectileBaseState.FireProjectile += SetFMJMuzzle;
@@ -115,6 +154,7 @@ namespace VRMod
             On.EntityStates.Engi.EngiWeapon.PlaceTurret.OnExit += AnimateBlueprintRelease;
 
             On.EntityStates.Mage.Weapon.FireFireBolt.FireGauntlet += SetFireboltMuzzle;
+            On.EntityStates.Mage.Weapon.Flamethrower.OnEnter += ShrinkFireEffect;
             On.EntityStates.Mage.Weapon.Flamethrower.FireGauntlet += DestroyOffHandEffect;
             On.EntityStates.Mage.Weapon.Flamethrower.OnExit += StopCastAnimation;
             On.EntityStates.Mage.Weapon.BaseThrowBombState.OnEnter += AnimateBombCast;
@@ -138,11 +178,55 @@ namespace VRMod
             On.EntityStates.Croco.Bite.OnEnter += ChangeBiteDirection;
             On.EntityStates.Croco.BaseLeap.OnExit += AnimateAcridRest;
 
+            On.EntityStates.Captain.Weapon.ChargeCaptainShotgun.OnEnter += ShrinkChargeEffect;
             On.EntityStates.Captain.Weapon.FireCaptainShotgun.OnEnter += AnimateShotgunShoot;
             On.EntityStates.Captain.Weapon.FireTazer.OnEnter += ChangeTazerMuzzleEnter;
             On.EntityStates.Captain.Weapon.FireTazer.Fire += ChangeTazerMuzzleShoot;
 
             IL.EntityStates.GlobalSkills.LunarNeedle.FireLunarNeedle.OnEnter += ChangeNeedleMuzzle;
+        }
+
+        private static void ForceShotgunMuzzle(On.EntityStates.GenericBulletBaseState.orig_FireBullet orig, EntityStates.GenericBulletBaseState self, Ray aimRay)
+        {
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                self.muzzleName = "MuzzleLeft";
+            }
+            orig(self, aimRay);
+        }
+
+        private static void ShrinkChargeEffect(On.EntityStates.Captain.Weapon.ChargeCaptainShotgun.orig_OnEnter orig, EntityStates.Captain.Weapon.ChargeCaptainShotgun self)
+        {
+            foreach (Transform child in EntityStates.Captain.Weapon.ChargeCaptainShotgun.holdChargeVfxPrefab.transform)
+            {
+                if (child.name.ToLower().Contains("light")) continue;
+                child.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+            }
+
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            {
+                foreach (Transform child in EntityStates.Captain.Weapon.ChargeCaptainShotgun.chargeupVfxPrefab.transform)
+                {
+                    if (child.name.ToLower().Contains("light")) continue;
+                    child.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+                }
+            }
+
+            orig(self);
+        }
+
+        private static void ShrinkFireEffect(On.EntityStates.Mage.Weapon.Flamethrower.orig_OnEnter orig, EntityStates.Mage.Weapon.Flamethrower self)
+        {
+            Transform effect1 = self.flamethrowerEffectPrefab.transform.GetChild(4);
+            Transform effect2 = self.flamethrowerEffectPrefab.transform.GetChild(5);
+
+            effect1.localScale = new Vector3(0.15f, 0.15f, 0.15f);
+            effect2.localScale = new Vector3(0.15f, 0.15f, 0.15f);
+
+            effect1.localPosition = Vector3.zero;
+            effect2.localPosition = Vector3.zero;
+
+            orig(self);
         }
 
         private static void AnimateShotgunShoot(On.EntityStates.Captain.Weapon.FireCaptainShotgun.orig_OnEnter orig, EntityStates.Captain.Weapon.FireCaptainShotgun self)
@@ -871,7 +955,7 @@ namespace VRMod
         }
         private static void SetFMJMuzzle(On.EntityStates.GenericProjectileBaseState.orig_FireProjectile orig, EntityStates.GenericProjectileBaseState self)
         {
-            if (!IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
             {
                 if (self is EntityStates.Commando.CommandoWeapon.FireFMJ)
                     self.targetMuzzle = "MuzzleLeft";
@@ -883,7 +967,13 @@ namespace VRMod
         {
             if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()) && self is EntityStates.Commando.CommandoWeapon.FireShotgunBlast)
             {
-                Animator animator = GetHandAnimator(!self.muzzleName.Contains("Left"));
+                if (!ModConfig.CommandoDualWield.Value)
+                {
+                    self.muzzleName = "MuzzleLeft";
+                    aimRay = GetHandRayByDominance(false);
+                }
+
+                Animator animator = GetHandAnimator(!self.muzzleName.Contains("Left") && ModConfig.CommandoDualWield.Value);
 
                 if (animator)
                     animator.SetTrigger("Primary");
@@ -896,6 +986,9 @@ namespace VRMod
         {
             if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
             {
+                if (!ModConfig.CommandoDualWield.Value)
+                    targetMuzzle = "MuzzleRight";
+
                 if (targetMuzzle.Contains("Left"))
                 {
                     self.aimRay = GetHandRayByDominance(false);

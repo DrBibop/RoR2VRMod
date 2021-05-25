@@ -1,6 +1,5 @@
 ﻿using RoR2;
 using RoR2.UI;
-using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -20,6 +19,7 @@ namespace VRMod
         private static readonly Vector2 hdResolution = new Vector2(1920, 1080);
 
         private static Camera cachedUICam;
+        private static Vector3 camRotation;
 
         private static Canvas cachedMultiplayerCanvas;
 
@@ -59,6 +59,7 @@ namespace VRMod
             On.RoR2.UI.PauseScreenController.OnEnable += (orig, self) =>
             {
                 orig(self);
+                camRotation = new Vector3(0, cachedUICam.transform.eulerAngles.y, 0);
                 SetRenderMode(self.gameObject, hdResolution, menuPosition, menuScale, true);
             };
             On.RoR2.UI.SimpleDialogBox.Start += (orig, self) =>
@@ -69,6 +70,7 @@ namespace VRMod
             On.RoR2.UI.GameEndReportPanelController.Awake += (orig, self) =>
             {
                 orig(self);
+                camRotation = new Vector3(0, cachedUICam.transform.eulerAngles.y, 0);
                 SetRenderMode(self.gameObject, hdResolution, menuPosition, menuScale, true);
             };
             On.RoR2.SplashScreenController.Start += (orig, self) =>
@@ -190,8 +192,6 @@ namespace VRMod
 
                 if (followRotation)
                 {
-                    Vector3 camRotation = new Vector3(0, cachedUICam.transform.eulerAngles.y, 0);
-
                     offset = Quaternion.Euler(camRotation) * offset;
 
                     if (uiObject.transform.root != uiObject.transform)
