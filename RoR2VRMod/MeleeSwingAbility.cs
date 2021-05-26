@@ -13,7 +13,7 @@ namespace VRMod
         private Transform weaponTip;
 
         [SerializeField]
-        private float speedThreshold;
+        internal float speedThreshold;
 
         [SerializeField]
         private string[] activatedSkills;

@@ -24,8 +24,9 @@ namespace VRMod
 
         private static GenericVRMap controllerMap;
 
-        private static bool isUsingMotionControls = false;
-        private static bool hasRecentered = false;
+        private static bool isUsingMotionControls;
+        private static bool hasRecentered;
+        private static bool initializedMainPlayer;
 
         private static TMP_SpriteAsset glyphsSpriteAsset;
 
@@ -169,7 +170,7 @@ namespace VRMod
         {
             orig(self);
 
-            if (ModConfig.UseMotionControls.Value && self.inputSource == MPEventSystem.InputSource.Gamepad)
+            if (ModConfig.UseMotionControls.Value && self.inputSource == MPEventSystem.InputSource.Gamepad && self.button)
             {
                 self.button.interactable = false;
                 self.button = null;
@@ -414,8 +415,15 @@ namespace VRMod
 
             if (localUser != null)
             {
+                VRMod.StaticLogger.LogInfo("Attempt local");
                 if (AddVRController(localUser.inputPlayer))
                     RoR2Application.onUpdate -= Update;
+            }
+            else if (!initializedMainPlayer)
+            {
+                VRMod.StaticLogger.LogInfo("Attempt main");
+                if (AddVRController(LocalUserManager.GetRewiredMainPlayer()))
+                    initializedMainPlayer = true;
             }
         }
 

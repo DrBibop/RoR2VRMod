@@ -12,6 +12,13 @@ namespace VRMod
         internal static ConfigEntry<bool> ConfigUseOculus { get; private set; }
         internal static ConfigEntry<bool> FirstPerson { get; private set; }
         internal static ConfigEntry<bool> ConfortVignette { get; private set; }
+        internal static ConfigEntry<bool> HideDecals { get; private set; }
+
+        internal static ConfigEntry<bool> CommandoDualWield { get; private set; }
+        internal static ConfigEntry<float> BanditWeaponGripSnapAngle { get; private set; }
+        internal static ConfigEntry<float> MercSwingSpeedThreshold { get; private set; }
+        internal static ConfigEntry<float> LoaderSwingSpeedThreshold { get; private set; }
+        internal static ConfigEntry<float> AcridSwingSpeedThreshold { get; private set; }
 
         internal static ConfigEntry<float> UIScale { get; private set; }
         internal static ConfigEntry<int> HUDWidth { get; private set; }
@@ -50,14 +57,44 @@ namespace VRMod
                 true,
                 "Adds a black vignette during high-mobility abilities to reduce motion sickness."
             );
-
-
-            UIScale = configFile.Bind<float>(
-                "HUD Settings",
-                "UI scale",
-                1f,
-                "Scale of UI elements in the HUD."
+            HideDecals = configFile.Bind<bool>(
+                "VR Settings",
+                "Hide broken decal textures",
+                false,
+                "Decals only render on the left eye. You can completely hide them while waiting for a potential fix."
             );
+
+            CommandoDualWield = configFile.Bind<bool>(
+                "Survivor Settings",
+                "Commando: Dual wield",
+                true,
+                "TRUE: Double Tap and Phase Blast alternate between the left and right pistol for each bullet. FALSE: Double Tap only uses the dominant pistol while Phase Blast uses the non-dominant pistol."
+            );
+            BanditWeaponGripSnapAngle = configFile.Bind<float>(
+                "Survivor Settings",
+                "Bandit: Weapon grip snap angle",
+                40,
+                "Angle in which the non-dominant hand can grip the weapon."
+            );
+            MercSwingSpeedThreshold = configFile.Bind<float>(
+                "Survivor Settings",
+                "Mercenary: Swing speed threshold",
+                22,
+                "The sword tip speed required to trigger an attack."
+            );
+            LoaderSwingSpeedThreshold = configFile.Bind<float>(
+                "Survivor Settings",
+                "Loader: Swing speed threshold",
+                18,
+                "The mech fist speed required to trigger an attack."
+            );
+            AcridSwingSpeedThreshold = configFile.Bind<float>(
+                "Survivor Settings",
+                "Acrid: Swing speed threshold",
+                12,
+                "The claw tip speed required to trigger an attack."
+            );
+
 
             HUDWidth = configFile.Bind<int>(
                 "HUD Settings",
@@ -120,8 +157,6 @@ namespace VRMod
                 true,
                 "Prevents the camera from rotating vertically (cannot disable when snap turn is on)."
             );
-
-
             UseMotionControls = configFile.Bind<bool>(
                 "Controls",
                 "Use motion controls",

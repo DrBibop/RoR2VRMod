@@ -4,6 +4,7 @@ using Rewired;
 using RoR2;
 using RoR2.Networking;
 using RoR2.UI;
+using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
@@ -48,6 +49,19 @@ namespace VRMod
             }
 
             On.RoR2.CameraRigController.GetCrosshairRaycastRay += GetVRCrosshairRaycastRay;
+
+			if (ModConfig.HideDecals.Value)
+            {
+				On.ThreeEyedGames.DecaliciousRenderer.OnEnable += DisableDecal;
+				On.ThreeEyedGames.DecaliciousRenderer.Add += (orig, self, decal, limitTo) => { };
+				On.ThreeEyedGames.DecaliciousRenderer.AddDeferred += (orig, self, decal) => { };
+				On.ThreeEyedGames.DecaliciousRenderer.AddUnlit += (orig, self, decal) => { };
+			}
+		}
+
+        private static void DisableDecal(On.ThreeEyedGames.DecaliciousRenderer.orig_OnEnable orig, ThreeEyedGames.DecaliciousRenderer self)
+        {
+			self.enabled = false;
         }
 
         private static void InitCamera(On.RoR2.CameraRigController.orig_Start orig, CameraRigController self)
@@ -70,6 +84,8 @@ namespace VRMod
 
 			if (self.hud)
 				UIFixes.AdjustHUD(self.hud);
+
+			RoR2Application.instance.mainCanvas.worldCamera = self.uiCam;
         }
 
         //I really didnt't want to use IL for this part... so COPYING THE WHOLE METHOD IT IS
