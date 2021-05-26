@@ -6,7 +6,6 @@ using System.Collections;
 using System;
 using BepInEx.Logging;
 using R2API.Utils;
-using RoR2;
 using UnityEngine;
 
 [module: UnverifiableCode]
