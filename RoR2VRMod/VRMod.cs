@@ -3,14 +3,11 @@ using System.Security;
 using System.Security.Permissions;
 using UnityEngine.XR;
 using System.Collections;
-using System;
 using BepInEx.Logging;
-using R2API.Utils;
 using UnityEngine;
 
 [module: UnverifiableCode]
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
-[assembly: ManualNetworkRegistration]
 namespace VRMod
 {
     [BepInPlugin("com.DrBibop.VRMod", "VRMod", "2.0.1")]
@@ -58,10 +55,4 @@ namespace VRMod
             }
         }
     }
-}
-
-namespace R2API.Utils
-{
-    [AttributeUsage(AttributeTargets.Assembly)]
-    public class ManualNetworkRegistrationAttribute : Attribute { }
 }

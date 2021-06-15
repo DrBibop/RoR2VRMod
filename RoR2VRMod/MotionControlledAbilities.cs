@@ -104,6 +104,9 @@ namespace VRMod
                 }
             }
 
+            GameObject banditSmokeBomb = Resources.Load<GameObject>("prefabs/effects/muzzleflashes/Bandit2SmokeBomb");
+            banditSmokeBomb.transform.Find("Core/Dust, CenterTube").gameObject.SetActive(false);
+
             IL.RoR2.PlayerCharacterMasterController.FixedUpdate += SprintBreakDirection;
             On.RoR2.PlayerCharacterMasterController.CheckPinging += PingFromHand;
             On.RoR2.CameraRigController.ModifyAimRayIfApplicable += CancelModifyIfLocal;

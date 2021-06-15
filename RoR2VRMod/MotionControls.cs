@@ -26,6 +26,22 @@ namespace VRMod
 
         public static SetHandPairEventHandler onHandPairSet;
 
+        private static List<HUDQueueEntry> wristHudQueue = new List<HUDQueueEntry>();
+
+        private static List<HUDQueueEntry> watchHudQueue = new List<HUDQueueEntry>();
+
+        internal struct HUDQueueEntry
+        {
+            internal RectTransform transform;
+            internal bool left;
+
+            internal HUDQueueEntry(RectTransform transform, bool left)
+            {
+                this.transform = transform;
+                this.left = left;
+            }
+        }
+
         internal static void Init()
         {
             On.RoR2.CameraRigController.Start += SetupVRHands;
@@ -106,6 +122,11 @@ namespace VRMod
             }
         }
 
+        internal static void SetSprintIcon(Image sprintIcon)
+        {
+            cachedSprintIcon = sprintIcon;
+        }
+
         private static void OnSprintStop(On.RoR2.CharacterBody.orig_OnSprintStop orig, CharacterBody self)
         {
             if (self == LocalUserManager.GetFirstLocalUser().cachedBody)
@@ -174,6 +195,22 @@ namespace VRMod
                     self.UpdateRendererMaterials(rendererInfo.renderer, rendererInfo.defaultMaterial, rendererInfo.ignoreOverlays);
                 }
             }
+        }
+
+        public static void AddWristHUD(bool left, RectTransform hudCluster)
+        {
+            if (HandsReady)
+                (left == ModConfig.LeftDominantHand.Value ? dominantHand : nonDominantHand).smallHud.AddHUDCluster(hudCluster);
+            else
+                wristHudQueue.Add(new HUDQueueEntry(hudCluster, left));
+        }
+
+        public static void AddWatchHUD(bool left, RectTransform hudCluster)
+        {
+            if (HandsReady)
+                (left == ModConfig.LeftDominantHand.Value ? dominantHand : nonDominantHand).watchHud.AddHUDCluster(hudCluster);
+            else
+                watchHudQueue.Add(new HUDQueueEntry(hudCluster, left));
         }
 
         /// <summary>
@@ -291,6 +328,26 @@ namespace VRMod
 
             dominantHand.oppositeHand = nonDominantHand;
             nonDominantHand.oppositeHand = dominantHand;
+
+            dominantHand.smallHud.Init(self);
+            nonDominantHand.smallHud.Init(self);
+
+            foreach (HUDQueueEntry queueEntry in wristHudQueue)
+            {
+                (queueEntry.left ? leftHand : rightHand).smallHud.AddHUDCluster(queueEntry.transform);
+            }
+
+            wristHudQueue.Clear();
+
+            dominantHand.watchHud.Init(self);
+            nonDominantHand.watchHud.Init(self);
+
+            foreach (HUDQueueEntry queueEntry in watchHudQueue)
+            {
+                (queueEntry.left ? leftHand : rightHand).watchHud.AddHUDCluster(queueEntry.transform);
+            }
+
+            watchHudQueue.Clear();
 
             RoR2Application.onFixedUpdate += CheckForLocalBody;
         }

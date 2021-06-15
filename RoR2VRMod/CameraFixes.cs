@@ -4,7 +4,6 @@ using Rewired;
 using RoR2;
 using RoR2.Networking;
 using RoR2.UI;
-using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
@@ -22,9 +21,20 @@ namespace VRMod
         private static bool justTurnedLeft => isTurningLeft && !wasTurningLeft;
         private static bool justTurnedRight => isTurningRight && !wasTurningRight;
 
+		private static GameObject spectatorCamera;
+		private static GameObject spectatorScreen;
+
+		private static GameObject spectatorCameraPrefab;
+		private static GameObject spectatorScreenPrefab;
+
 		internal static void Init()
         {
-            On.RoR2.MatchCamera.Awake += (orig, self) =>
+			spectatorCameraPrefab = VRMod.VRAssetBundle.LoadAsset<GameObject>("SpectatorCamera");
+			spectatorCameraPrefab.GetComponent<Camera>().stereoTargetEye = StereoTargetEyeMask.None;
+
+			spectatorScreenPrefab = VRMod.VRAssetBundle.LoadAsset<GameObject>("SpectatorScreen");
+
+			On.RoR2.MatchCamera.Awake += (orig, self) =>
             {
                 self.matchFOV = false;
                 orig(self);
@@ -463,35 +473,59 @@ namespace VRMod
 
         private static void SetCameraStateOverride(On.RoR2.CameraRigController.orig_SetCameraState orig, CameraRigController self, CameraState cameraState)
         {
-            if (Run.instance && self.cameraMode == CameraRigController.CameraMode.PlayerBasic)
+			if (Run.instance)
             {
-                if (ModConfig.FirstPerson.Value)
+				if (self.cameraMode == CameraRigController.CameraMode.PlayerBasic)
+				{
+					if (ModConfig.FirstPerson.Value)
+					{
+						if (!VRCameraWrapper.instance)
+						{
+							GameObject wrapperObject = new GameObject("VR Camera Wrapper");
+							VRCameraWrapper.instance = wrapperObject.AddComponent<VRCameraWrapper>();
+							VRCameraWrapper.instance.Init(self);
+						}
+						VRCameraWrapper.instance.UpdateRotation(cameraState);
+
+						cameraState.rotation = self.sceneCam.transform.rotation;
+
+						Vector3 pos = VRCameraWrapper.instance.transform.position;
+
+						if (self.targetBody)
+						{
+							pos = self.targetBody.transform.position;
+
+							CapsuleCollider collider = self.targetBody.GetComponent<CapsuleCollider>();
+
+							if (collider)
+								pos.y += (collider.height) / 2;
+						}
+
+						VRCameraWrapper.instance.transform.position = pos;
+					}
+				}
+				else if (self.cameraMode == CameraRigController.CameraMode.SpectateUser)
                 {
-                    if (!VRCameraWrapper.instance)
+					if (!spectatorCamera)
                     {
-                        GameObject wrapperObject = new GameObject("VR Camera Wrapper");
-						VRCameraWrapper.instance = wrapperObject.AddComponent<VRCameraWrapper>();
-						VRCameraWrapper.instance.Init(self);
-                    }
-					VRCameraWrapper.instance.UpdateRotation(cameraState);
+						spectatorCamera = GameObject.Instantiate(spectatorCameraPrefab, null);
+						spectatorScreen = GameObject.Instantiate(spectatorScreenPrefab, null);
+						spectatorScreen.transform.rotation = Quaternion.Euler(new Vector3(0, self.sceneCam.transform.eulerAngles.y, 0));
+						spectatorScreen.transform.position = self.sceneCam.transform.position + spectatorScreen.transform.forward * 2;
+					}
 
-                    cameraState.rotation = self.sceneCam.transform.rotation;
-
-                    Vector3 pos = VRCameraWrapper.instance.transform.position;
-
-                    if (self.targetBody)
-                    {
-                        pos = self.targetBody.transform.position;
-
-                        CapsuleCollider collider = self.targetBody.GetComponent<CapsuleCollider>();
-
-                        if (collider)
-                            pos.y += (collider.height) / 2;
-                    }
-
-					VRCameraWrapper.instance.transform.position = pos;
+					spectatorCamera.transform.position = cameraState.position;
+					spectatorCamera.transform.rotation = cameraState.rotation;
                 }
-            }
+				else
+                {
+					if (spectatorCamera)
+                    {
+						GameObject.Destroy(spectatorCamera);
+						GameObject.Destroy(spectatorScreen);
+					}
+                }
+			}
 
             orig(self, cameraState);
         }

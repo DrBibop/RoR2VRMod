@@ -119,7 +119,6 @@ namespace VRMod
             rect.rotation = Quaternion.identity;
             rect.localScale = Vector3.one;
             rect.sizeDelta = menuResolution / 2;
-
         }
 
         private static GameEndReportPanelController UnparentHUD(On.RoR2.GameOverController.orig_GenerateReportScreen orig, GameOverController self, HUD hud)
@@ -154,7 +153,7 @@ namespace VRMod
 
                 Transform rigTransform = VRCameraWrapper.instance ? VRCameraWrapper.instance.transform : uiCamera.cameraRigController.transform;
                 indicator.transform.position = rigTransform.InverseTransformDirection(position - rigTransform.position);
-                indicator.transform.localScale = (isPingIndicator ? 1: 0.2f) * Vector3.Distance(rigTransform.position, position) * Vector3.one;
+                indicator.transform.localScale = (isPingIndicator ? 1: 0.2f) * Vector3.Distance(uiCamera.cameraRigController.sceneCam.transform.position, position) * Vector3.one;
             }
         }
 
@@ -216,7 +215,7 @@ namespace VRMod
             }
         }
 
-        internal static void AdjustHUD(RoR2.UI.HUD hud)
+        internal static void AdjustHUD(HUD hud)
         {
             if (ModConfig.UseMotionControls.Value)
             {
@@ -227,22 +226,21 @@ namespace VRMod
                     crosshairManager.container.gameObject.SetActive(false);
 
                     //Thanks HutchyBen
-                    crosshairManager.hitmarker.GetComponent<Image>().enabled = false;
+                    crosshairManager.hitmarker.enabled = false;
                 }
             }
 
-            Transform[] uiElements = new Transform[] {
-                hud.mainUIPanel.transform.Find("SpringCanvas"),
-                hud.mainContainer.transform.Find("NotificationArea"),
-                hud.mainContainer.transform.Find("MapNameCluster")
-            };
+            RectTransform springCanvas = hud.mainUIPanel.transform.Find("SpringCanvas") as RectTransform;
+            springCanvas.anchorMin = ModConfig.AnchorMin;
+            springCanvas.anchorMax = ModConfig.AnchorMax;
 
-            foreach (Transform uiElement in uiElements)
-            {
-                RectTransform rect = uiElement.GetComponent<RectTransform>();
-                rect.anchorMin = ModConfig.AnchorMin;
-                rect.anchorMax = ModConfig.AnchorMax;
-            }
+            RectTransform notificationArea = hud.mainContainer.transform.Find("NotificationArea") as RectTransform;
+            notificationArea.anchorMin = new Vector2(0.5f, ModConfig.AnchorMin.y);
+            notificationArea.anchorMax = new Vector2(0.5f, ModConfig.AnchorMin.y);
+
+            RectTransform mapNameCluster = hud.mainContainer.transform.Find("MapNameCluster") as RectTransform;
+            mapNameCluster.anchorMin = new Vector2(0.5f, (ModConfig.AnchorMax.y - 0.5f) * 0.54f + 0.5f);
+            mapNameCluster.anchorMax = new Vector2(0.5f, (ModConfig.AnchorMax.y - 0.5f) * 0.54f + 0.5f);
 
             if (!GetUICamera()) return;
 
@@ -254,6 +252,74 @@ namespace VRMod
             hud.transform.localRotation = Quaternion.identity;
             hud.transform.position = new Vector3(0, 0, 12.35f);
             rectTransform.pivot = menuPivot;
+
+
+            if (ModConfig.WristHUD.Value)
+            {
+                RectTransform healthCluster = springCanvas.Find("BottomLeftCluster/BarRoots") as RectTransform;
+                healthCluster.localRotation = Quaternion.identity;
+                healthCluster.pivot = new Vector2(0.5f, 0f);
+                healthCluster.localPosition = Vector3.zero;
+                MotionControls.AddWristHUD(true, healthCluster);
+
+                RectTransform moneyCluster = springCanvas.Find("UpperLeftCluster") as RectTransform;
+                moneyCluster.localRotation = Quaternion.identity;
+                moneyCluster.pivot = new Vector2(0.5f, 1f);
+                moneyCluster.localPosition = Vector3.zero;
+                MotionControls.AddWristHUD(true, moneyCluster);
+
+                RectTransform contextCluster = springCanvas.Find("RightCluster") as RectTransform;
+                contextCluster.localRotation = Quaternion.identity;
+                contextCluster.pivot = new Vector2(0f, 0f);
+                contextCluster.localPosition = Vector3.zero;
+                (contextCluster.GetChild(0) as RectTransform).pivot = new Vector2(0f, 2f);
+                MotionControls.AddWristHUD(false, contextCluster);
+
+                RectTransform cooldownsCluster = springCanvas.Find("BottomRightCluster") as RectTransform;
+                cooldownsCluster.localRotation = Quaternion.identity;
+                cooldownsCluster.pivot = new Vector2(0.2f, -0.6f);
+                cooldownsCluster.localPosition = Vector3.zero;
+                MotionControls.AddWristHUD(false, cooldownsCluster);
+
+                MotionControls.SetSprintIcon(cooldownsCluster.Find("Scaler/SprintCluster/SprintIcon").GetComponent<Image>());
+            }
+
+            if (ModConfig.WatchHUD.Value)
+            {
+                Transform topCluster = springCanvas.Find("TopCenterCluster");
+                GameObject clusterClone = GameObject.Instantiate(topCluster.gameObject, topCluster.parent);
+                foreach (Transform child in clusterClone.transform)
+                {
+                    GameObject.Destroy(child.gameObject);
+                }
+                RectTransform cloneRect = clusterClone.transform as RectTransform;
+                cloneRect.pivot = new Vector2(0.5f, 1f);
+                cloneRect.localPosition = Vector3.zero;
+                RectTransform inventoryCluster = topCluster.Find("ItemInventoryDisplayRoot") as RectTransform;
+                inventoryCluster.SetParent(cloneRect);
+                inventoryCluster.localPosition = Vector3.zero;
+                MotionControls.AddWatchHUD(true, cloneRect);
+
+                RectTransform chatCluster = springCanvas.Find("BottomLeftCluster/ChatBoxRoot") as RectTransform;
+                chatCluster.localRotation = Quaternion.identity;
+                chatCluster.pivot = new Vector2(0.5f, 0f);
+                chatCluster.localPosition = Vector3.zero;
+                MotionControls.AddWatchHUD(true, chatCluster);
+
+                RectTransform difficultyCluster = springCanvas.Find("UpperRightCluster") as RectTransform;
+                difficultyCluster.localRotation = Quaternion.identity;
+                difficultyCluster.pivot = new Vector2(-1f, -2.5f);
+                difficultyCluster.localPosition = Vector3.zero;
+                MotionControls.AddWatchHUD(false, difficultyCluster);
+
+                RectTransform alliesCluster = springCanvas.Find("LeftCluster") as RectTransform;
+                alliesCluster.localRotation = Quaternion.identity;
+                alliesCluster.pivot = new Vector2(1f, 0.5f);
+                alliesCluster.localPosition = Vector3.zero;
+                MotionControls.AddWatchHUD(false, alliesCluster);
+            }
+
+            hud.gameObject.AddComponent<SmoothHUD>().Init(hud.cameraRigController);
         }
 
         private static void UpdateAllHealthBarPositionsVR(On.RoR2.UI.CombatHealthBarViewer.orig_UpdateAllHealthbarPositions orig, RoR2.UI.CombatHealthBarViewer self, Camera sceneCam, Camera uiCam)

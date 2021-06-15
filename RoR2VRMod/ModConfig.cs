@@ -1,5 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
+using System.Globalization;
 using UnityEngine;
 
 namespace VRMod
@@ -14,13 +15,18 @@ namespace VRMod
         internal static ConfigEntry<bool> ConfortVignette { get; private set; }
         internal static ConfigEntry<bool> HideDecals { get; private set; }
 
+        internal static ConfigEntry<string> RayColorHex { get; private set; }
+        internal static ConfigEntry<float> RayOpacity { get; private set; }
         internal static ConfigEntry<bool> CommandoDualWield { get; private set; }
         internal static ConfigEntry<float> BanditWeaponGripSnapAngle { get; private set; }
         internal static ConfigEntry<float> MercSwingSpeedThreshold { get; private set; }
         internal static ConfigEntry<float> LoaderSwingSpeedThreshold { get; private set; }
         internal static ConfigEntry<float> AcridSwingSpeedThreshold { get; private set; }
+        internal static Color RayColor = Color.white;
 
-        internal static ConfigEntry<float> UIScale { get; private set; }
+        internal static ConfigEntry<bool> WristHUD { get; private set; }
+        internal static ConfigEntry<bool> WatchHUD { get; private set; }
+        internal static ConfigEntry<bool> SmoothHUD { get; private set; }
         internal static ConfigEntry<int> HUDWidth { get; private set; }
         internal static ConfigEntry<int> HUDHeight { get; private set; }
         internal static ConfigEntry<float> BottomAnchor { get; private set; }
@@ -64,6 +70,18 @@ namespace VRMod
                 "Decals only render on the left eye. You can completely hide them while waiting for a potential fix."
             );
 
+            RayColorHex = configFile.Bind<string>(
+                "Survivor Settings",
+                "General: Aim ray hex color",
+                "FFFFFF",
+                "Changes the color of aim rays. You can use Google's color picker to find your desired color's hex value."
+            );
+            RayOpacity = configFile.Bind<float>(
+                "Survivor Settings",
+                "General: Aim ray opacity",
+                0.6f,
+                "Sets the aim ray opacity between 0 (invisible) and 1 (opaque)."
+            );
             CommandoDualWield = configFile.Bind<bool>(
                 "Survivor Settings",
                 "Commando: Dual wield",
@@ -95,21 +113,75 @@ namespace VRMod
                 "The claw tip speed required to trigger an attack."
             );
 
+            string hexString = RayColorHex.Value;
 
+            if (hexString.StartsWith("#") && hexString.Length > 1)
+            {
+                hexString = hexString.Substring(1);
+            }
+
+            if (hexString.Length == 6)
+            {
+                string[] hexValues = new string[]
+                {
+                    hexString.Substring(0, 2),
+                    hexString.Substring(2, 2),
+                    hexString.Substring(4, 2)
+                };
+
+                for (int i = 0; i < 3; i++)
+                {
+                    int colorChannel = 255;
+                    if (int.TryParse(hexValues[i], NumberStyles.HexNumber, CultureInfo.InvariantCulture, out colorChannel))
+                    {
+                        switch (i)
+                        {
+                            case 0:
+                                RayColor.r = (float)colorChannel / 255f;
+                                break;
+                            case 1:
+                                RayColor.g = (float)colorChannel / 255f;
+                                break;
+                            case 2:
+                                RayColor.b = (float)colorChannel / 255f;
+                                break;
+                        }
+                    }
+                }
+            }
+
+            RayColor.a = RayOpacity.Value;
+
+            WristHUD = configFile.Bind<bool>(
+                "HUD Settings",
+                "Wrist HUD",
+                true,
+                "TRUE: Attaches the healthbar, money and cooldowns to the wrists. FALSE: Attaches the healthbar, money and cooldowns to the camera."
+            );
+            WatchHUD = configFile.Bind<bool>(
+                "HUD Settings",
+                "Watch HUD",
+                true,
+                "TRUE: Attaches the inventory, chat, objective and allies to a watch that appears when looking at it. FALSE: Attaches the inventory, chat, objective and allies to the camera."
+            );
+            WatchHUD = configFile.Bind<bool>(
+                "HUD Settings",
+                "Smooth HUD",
+                true,
+                "TRUE: The camera HUD will follow the camera smoothly making it lag behind when moving the headset. FALSE: The camera HUD will follow the camera directly without delay."
+            );
             HUDWidth = configFile.Bind<int>(
                 "HUD Settings",
                 "HUD Width",
                 1200,
-                "Scale of UI elements in the HUD."
+                "Width of the camera HUD."
             );
-
             HUDHeight = configFile.Bind<int>(
                 "HUD Settings",
                 "HUD Height",
                 1000,
-                "Scale of UI elements in the HUD."
+                "Height of the camera HUD."
             );
-
             BottomAnchor = configFile.Bind<float>(
                 "HUD Settings",
                 "Bottom anchor",
@@ -181,6 +253,12 @@ namespace VRMod
 
             if (SnapTurn.Value || UseMotionControls.Value)
                 LockedCameraPitch.Value = true;
+
+            if (!UseMotionControls.Value)
+            {
+                WristHUD.Value = false;
+                WatchHUD.Value = false;
+            }
         }
     }
 }
