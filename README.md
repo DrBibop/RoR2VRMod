@@ -1,6 +1,6 @@
 
 # Play Risk of Rain 2 in VR!
-This mod was made possible with the joint effort of elliottate, MrPurple and me with some help from HutchyBen. You can contact us in our [Discord server](https://discord.gg/eQ7Fwac).
+Experience Risk of Rain 2 in virtual reality with full motion controls support! Join the [Flatscreen to VR Discord server](https://discord.gg/eQ7Fwac) to stay up to date with the development.
 
 ![](https://thumbs.gfycat.com/DeterminedSpryCassowary-size_restricted.gif)
 
@@ -84,6 +84,14 @@ To access the config file if you downloaded the mod manually, go to your game di
 ### I'm still getting problems.
 You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You can also check our [issues list](https://github.com/DrBibop/RoR2VRMod/issues) to see what problems are known.
 
+# Credits
+
+**DrBibop:** Mod/patcher programmer, animator, 3D artist
+**MrPurple6411:** Patcher programmer
+**dotflare:** 3D artist
+**Ncognito:** 3D artist
+**eliotttate:** Original creator, code assist
+**HutchyBen:** Code assist
 
 # Changelog
 ### 1.0.0
@@ -150,3 +158,14 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - The credits now appear in the headset (it is currently stuck on the headset but this will change soon).
 - Fixed a bug that caused inputs to not register when no profiles are selected.
 - Fixed a bug that caused the profile creation pop-up to be uninteractable.
+
+### 2.1.0
+- Added a wrist HUD setting that attaches the healthbar, money display and skills to the wrist.
+- Added a watch HUD setting that attaches the inventory, chat, difficulty, objective and allies to a watch-like HUD.
+- Added a smooth HUD setting that adds smoothing to the camera HUD when moving the headset.
+- Added a spectator screen that appears in front of you when spectating players.
+- Added "Ray color" and "Ray opacity" settings to customize the aim ray.
+- Added new HD models for Loader's hands, Bandit's shotgun and Bandit's revolver.
+- Removed "UI scale" setting as it already exists in-game.
+- Removed the center smoke effect on Bandit's stealth ability for improved visibility.
+- Fixed a bug that caused Vive Cosmos controllers to use the standard Vive controller binds.

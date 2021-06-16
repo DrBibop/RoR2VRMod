@@ -164,11 +164,11 @@ namespace VRMod
                 true,
                 "TRUE: Attaches the inventory, chat, objective and allies to a watch that appears when looking at it. FALSE: Attaches the inventory, chat, objective and allies to the camera."
             );
-            WatchHUD = configFile.Bind<bool>(
+            SmoothHUD = configFile.Bind<bool>(
                 "HUD Settings",
                 "Smooth HUD",
                 true,
-                "TRUE: The camera HUD will follow the camera smoothly making it lag behind when moving the headset. FALSE: The camera HUD will follow the camera directly without delay."
+                "TRUE: The camera HUD will follow the camera smoothly making it lag behind when moving the headset. FALSE: The camera HUD will follow the camera directly without smoothing."
             );
             HUDWidth = configFile.Bind<int>(
                 "HUD Settings",
@@ -239,7 +239,7 @@ namespace VRMod
                 "Controls",
                 "Set left hand as dominant",
                 false,
-                "Swaps trigger and grip inputs. The aiming hand for each skill is also swapped."
+                "Swaps left/right triggers and grips. The aiming hand for each skill is also swapped as well as hand models."
             );
             ControllerMovementDirection = configFile.Bind<bool>(
                 "Controls",
