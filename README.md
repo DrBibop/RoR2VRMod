@@ -168,4 +168,6 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - Added new HD models for Loader's hands, Bandit's shotgun and Bandit's revolver.
 - Removed "UI scale" setting as it already exists in-game.
 - Removed the center smoke effect on Bandit's stealth ability for improved visibility.
+- Possibly fixed a bug that caused the Heretic wings to appear on the wrong player which would break some abilities.
+- Fixed a bug that caused Heretic's primary skill projectiles to not appear from the hand after transforming.
 - Fixed a bug that caused Vive Cosmos controllers to use the standard Vive controller binds.

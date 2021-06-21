@@ -10,7 +10,10 @@ namespace VRMod
         private bool faceCamera;
 
         [SerializeField]
-        private bool showOnProximity;
+        private bool hideWhenFacingAway;
+
+        [SerializeField]
+        private GameObject[] hudsToHideWhenVisible;
 
         private Canvas canvas;
 
@@ -56,7 +59,7 @@ namespace VRMod
 
         private void FixedUpdate()
         {
-            if (showOnProximity)
+            if (hideWhenFacingAway)
             {
                 bool show = Vector3.Angle(transform.forward, transform.position - cameraRig.sceneCam.transform.position) <= 25;
 
@@ -68,6 +71,14 @@ namespace VRMod
 
                     if (Mathf.Abs(canvas.transform.localScale.x - targetScale.x) < 0.00001)
                         canvas.transform.localScale = targetScale;
+                }
+
+                foreach (GameObject hud in hudsToHideWhenVisible)
+                {
+                    if (hud.activeSelf == show)
+                    {
+                        hud.SetActive(!show);
+                    }
                 }
             }
         }
