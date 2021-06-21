@@ -1,4 +1,6 @@
-﻿using RoR2;
+﻿using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using RoR2;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,6 +28,22 @@ namespace VRMod
 
         public static SetHandPairEventHandler onHandPairSet;
 
+        private static List<HUDQueueEntry> wristHudQueue = new List<HUDQueueEntry>();
+
+        private static List<HUDQueueEntry> watchHudQueue = new List<HUDQueueEntry>();
+
+        internal struct HUDQueueEntry
+        {
+            internal RectTransform transform;
+            internal bool left;
+
+            internal HUDQueueEntry(RectTransform transform, bool left)
+            {
+                this.transform = transform;
+                this.left = left;
+            }
+        }
+
         internal static void Init()
         {
             On.RoR2.CameraRigController.Start += SetupVRHands;
@@ -33,12 +51,7 @@ namespace VRMod
 
             On.RoR2.CharacterBody.OnSprintStop += OnSprintStop;
 
-            On.RoR2.CharacterMaster.TransformBody += (orig, self, bodyName) =>
-            {
-                orig(self, bodyName);
-                if (bodyName.Contains("Heretic"))
-                    SetHandPair(bodyName);
-            };
+            IL.RoR2.CharacterMaster.OnInventoryChanged += TransformHereticHandsIL;
 
             On.RoR2.CharacterModel.UpdateMaterials += UpdateHandMaterials;
 
@@ -106,6 +119,31 @@ namespace VRMod
             }
         }
 
+        private static void TransformHereticHandsIL(ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
+
+            c.GotoNext(
+                x => x.MatchCall(typeof(CharacterMaster), "TransformBody")
+            );
+
+            c.Index++;
+
+            c.Emit(OpCodes.Ldarg_0);
+            c.EmitDelegate<Action<CharacterMaster>>((cm) =>
+            {
+                if (cm == LocalUserManager.GetFirstLocalUser().cachedMaster)
+                {
+                    RoR2Application.onFixedUpdate += CheckForLocalBody;
+                }
+            });
+        }
+
+        internal static void SetSprintIcon(Image sprintIcon)
+        {
+            cachedSprintIcon = sprintIcon;
+        }
+
         private static void OnSprintStop(On.RoR2.CharacterBody.orig_OnSprintStop orig, CharacterBody self)
         {
             if (self == LocalUserManager.GetFirstLocalUser().cachedBody)
@@ -166,14 +204,32 @@ namespace VRMod
             {
                 foreach (CharacterModel.RendererInfo rendererInfo in dominantHand.currentHand.rendererInfos)
                 {
+                    if (!rendererInfo.renderer || !rendererInfo.defaultMaterial) continue;
                     self.UpdateRendererMaterials(rendererInfo.renderer, rendererInfo.defaultMaterial, rendererInfo.ignoreOverlays);
                 }
 
                 foreach (CharacterModel.RendererInfo rendererInfo in nonDominantHand.currentHand.rendererInfos)
                 {
+                    if (!rendererInfo.renderer || !rendererInfo.defaultMaterial) continue;
                     self.UpdateRendererMaterials(rendererInfo.renderer, rendererInfo.defaultMaterial, rendererInfo.ignoreOverlays);
                 }
             }
+        }
+
+        public static void AddWristHUD(bool left, RectTransform hudCluster)
+        {
+            if (HandsReady)
+                (left == ModConfig.LeftDominantHand.Value ? dominantHand : nonDominantHand).smallHud.AddHUDCluster(hudCluster);
+            else
+                wristHudQueue.Add(new HUDQueueEntry(hudCluster, left));
+        }
+
+        public static void AddWatchHUD(bool left, RectTransform hudCluster)
+        {
+            if (HandsReady)
+                (left == ModConfig.LeftDominantHand.Value ? dominantHand : nonDominantHand).watchHud.AddHUDCluster(hudCluster);
+            else
+                watchHudQueue.Add(new HUDQueueEntry(hudCluster, left));
         }
 
         /// <summary>
@@ -291,6 +347,26 @@ namespace VRMod
 
             dominantHand.oppositeHand = nonDominantHand;
             nonDominantHand.oppositeHand = dominantHand;
+
+            dominantHand.smallHud.Init(self);
+            nonDominantHand.smallHud.Init(self);
+
+            foreach (HUDQueueEntry queueEntry in wristHudQueue)
+            {
+                (queueEntry.left ? leftHand : rightHand).smallHud.AddHUDCluster(queueEntry.transform);
+            }
+
+            wristHudQueue.Clear();
+
+            dominantHand.watchHud.Init(self);
+            nonDominantHand.watchHud.Init(self);
+
+            foreach (HUDQueueEntry queueEntry in watchHudQueue)
+            {
+                (queueEntry.left ? leftHand : rightHand).watchHud.AddHUDCluster(queueEntry.transform);
+            }
+
+            watchHudQueue.Clear();
 
             RoR2Application.onFixedUpdate += CheckForLocalBody;
         }

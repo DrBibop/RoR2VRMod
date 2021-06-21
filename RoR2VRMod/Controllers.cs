@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityEngine.XR;
 using VRMod.ControllerMappings;
 
@@ -415,13 +414,11 @@ namespace VRMod
 
             if (localUser != null)
             {
-                VRMod.StaticLogger.LogInfo("Attempt local");
                 if (AddVRController(localUser.inputPlayer))
                     RoR2Application.onUpdate -= Update;
             }
             else if (!initializedMainPlayer)
             {
-                VRMod.StaticLogger.LogInfo("Attempt main");
                 if (AddVRController(LocalUserManager.GetRewiredMainPlayer()))
                     initializedMainPlayer = true;
             }
@@ -503,7 +500,7 @@ namespace VRMod
 
             if (!ModConfig.ConfigUseOculus.Value)
             {
-                if (name.Contains("vive"))
+                if (name.Contains("vive") && !name.Contains("cosmos"))
                 {
                     controllerMap = new ViveMap(leftID, rightID, name);
                     return;

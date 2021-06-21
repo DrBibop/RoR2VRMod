@@ -13,6 +13,12 @@ namespace VRMod
         [SerializeField]
         private Hand pointerHand;
 
+        [SerializeField]
+        internal HandHUD smallHud;
+
+        [SerializeField]
+        internal HandHUD watchHud;
+
         internal Hand currentHand { get; private set; }
 
         internal XRNode xrNode;
@@ -28,6 +34,7 @@ namespace VRMod
         private void Awake()
         {
             SetCurrentHand(pointerHand);
+            ray.material.color = ModConfig.RayColor;
         }
 
         private void Update()
