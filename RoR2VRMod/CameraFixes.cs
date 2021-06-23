@@ -504,7 +504,7 @@ namespace VRMod
 						VRCameraWrapper.instance.transform.position = pos;
 					}
 				}
-				else if (self.cameraMode == CameraRigController.CameraMode.SpectateUser && self.targetBody != null)
+				else if (self.targetBody != null && self.targetBody != LocalUserManager.GetFirstLocalUser().cachedBody)
                 {
 					if (!spectatorCamera)
                     {
