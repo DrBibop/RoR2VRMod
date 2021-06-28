@@ -59,7 +59,7 @@ namespace VRMod
 
         private void FixedUpdate()
         {
-            if (hideWhenFacingAway)
+            if (hideWhenFacingAway && cameraRig && canvas)
             {
                 bool show = Vector3.Angle(transform.forward, transform.position - cameraRig.sceneCam.transform.position) <= 25;
 

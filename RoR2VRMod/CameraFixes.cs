@@ -504,7 +504,8 @@ namespace VRMod
 						VRCameraWrapper.instance.transform.position = pos;
 					}
 				}
-				else if (self.targetBody != null && self.targetBody != LocalUserManager.GetFirstLocalUser().cachedBody)
+
+				if (self.target != null && self.target != self.localUserViewer.cachedBodyObject)
                 {
 					if (!spectatorCamera)
                     {
