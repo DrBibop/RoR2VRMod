@@ -1,5 +1,6 @@
 ﻿using RoR2;
 using RoR2.UI;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -23,8 +24,13 @@ namespace VRMod
 
         private static Canvas cachedMultiplayerCanvas;
 
+        private static GameObject creditsCanvasPrefab;
+        private static GameObject creditsCanvas;
+
         internal static void Init()
         {
+            creditsCanvasPrefab = VRMod.VRAssetBundle.LoadAsset<GameObject>("CreditsCanvas");
+
             On.RoR2.UI.CombatHealthBarViewer.UpdateAllHealthbarPositions += UpdateAllHealthBarPositionsVR;
 
             On.RoR2.Indicator.PositionForUI += PositionForUIOverride;
@@ -99,6 +105,29 @@ namespace VRMod
             On.RoR2.RemoteGameDetailsPanelController.Awake += OpenPopupInMenuCanvas;
 
             On.RoR2.UI.MainMenu.ProfileMainMenuScreen.OpenCreateProfileMenu += SetAddProfileButtonAsDefaultFallback;
+
+            On.RoR2.UI.CreditsPanelController.OnEnable += MoveCreditsToWorldSpace;
+        }
+
+        private static void MoveCreditsToWorldSpace(On.RoR2.UI.CreditsPanelController.orig_OnEnable orig, CreditsPanelController self)
+        {
+            orig(self);
+
+            if (creditsCanvasPrefab)
+            {
+                creditsCanvas = GameObject.Instantiate(creditsCanvasPrefab, null);
+                creditsCanvas.transform.position = new Vector3(0, 0, 8);
+            }
+
+            if (creditsCanvas)
+            {
+                Transform credits = self.scrollRect.transform;
+                credits.SetParent(creditsCanvas.transform);
+                credits.localPosition = Vector3.zero;
+                credits.localRotation = Quaternion.identity;
+                credits.localScale = Vector3.one;
+                GameObject.Destroy(self.transform.Find("Backdrop").gameObject);
+            }
         }
 
         private static void SetAddProfileButtonAsDefaultFallback(On.RoR2.UI.MainMenu.ProfileMainMenuScreen.orig_OpenCreateProfileMenu orig, RoR2.UI.MainMenu.ProfileMainMenuScreen self, bool firstTime)

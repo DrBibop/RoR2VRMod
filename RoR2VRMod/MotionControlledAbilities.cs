@@ -64,7 +64,7 @@ namespace VRMod
 
         private static Run.FixedTimeStamp halfTime;
 
-        private static bool hasSwapped;
+        private static bool isSwapping;
 
         private struct ScaledEffect
         {
@@ -148,6 +148,7 @@ namespace VRMod
             On.EntityStates.Toolbot.ToolbotDualWield.OnExit += AnimateDualWieldEnd;
             onHandPairSet += SetInitialTool;
             On.EntityStates.Toolbot.AimStunDrone.OnExit += AnimateGrenadeThrow;
+            On.EntityStates.Toolbot.ToolbotDash.OnEnter += AnimateDashExtend;
             IL.EntityStates.Toolbot.RecoverAimStunDrone.OnEnter += SetGrenadeMuzzle;
 
             On.EntityStates.Engi.EngiWeapon.FireGrenades.FireGrenade += RemoveMuzzleFlash;
@@ -188,9 +189,28 @@ namespace VRMod
             IL.EntityStates.GlobalSkills.LunarNeedle.FireLunarNeedle.OnEnter += ChangeNeedleMuzzle;
         }
 
+        private static void AnimateDashExtend(On.EntityStates.Toolbot.ToolbotDash.orig_OnEnter orig, EntityStates.Toolbot.ToolbotDash self)
+        {
+            orig(self);
+            if (IsLocalPlayer(self.characterBody))
+            {
+                if (isSwapping)
+                {
+                    isSwapping = false;
+                    RoR2Application.instance.StartCoroutine(ExtendAfterDelay());
+                }
+                else if (GetHandAnimator(false).GetInteger("ToolID") != 0)
+                {
+                    GetHandAnimator(false).SetFloat("RetoolSpeed", 4f);
+                    GetHandAnimator(false).SetTrigger("RetoolRetract");
+                    RoR2Application.instance.StartCoroutine(ExtendAfterDelay());
+                }
+            }
+        }
+
         private static void ForceShotgunMuzzle(On.EntityStates.GenericBulletBaseState.orig_FireBullet orig, EntityStates.GenericBulletBaseState self, Ray aimRay)
         {
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 self.muzzleName = "MuzzleLeft";
             }
@@ -205,7 +225,7 @@ namespace VRMod
                 child.localScale = new Vector3(0.5f, 0.5f, 0.5f);
             }
 
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 foreach (Transform child in EntityStates.Captain.Weapon.ChargeCaptainShotgun.chargeupVfxPrefab.transform)
                 {
@@ -234,7 +254,7 @@ namespace VRMod
         private static void AnimateShotgunShoot(On.EntityStates.Captain.Weapon.FireCaptainShotgun.orig_OnEnter orig, EntityStates.Captain.Weapon.FireCaptainShotgun self)
         {
             orig(self);
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 GetHandAnimator(true).SetFloat("ShootSpeed", 1f / self.duration);
                 GetHandAnimator(true).SetTrigger("Shoot");
@@ -244,7 +264,7 @@ namespace VRMod
         private static void AnimateAcridRest(On.EntityStates.Croco.BaseLeap.orig_OnExit orig, EntityStates.Croco.BaseLeap self)
         {
             orig(self);
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 GetHandAnimator(true).SetTrigger("Rest");
                 GetHandAnimator(false).SetTrigger("Rest");
@@ -254,7 +274,7 @@ namespace VRMod
         private static void HideLoaderRay(On.EntityStates.Loader.BaseChargeFist.orig_OnExit orig, EntityStates.Loader.BaseChargeFist self)
         {
             orig(self);
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 GetHandAnimator(true).SetBool("Ray", false);
             }
@@ -263,7 +283,7 @@ namespace VRMod
         private static void ShowLoaderRay(On.EntityStates.Loader.BaseChargeFist.orig_OnEnter orig, EntityStates.Loader.BaseChargeFist self)
         {
             orig(self);
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 GetHandAnimator(true).SetBool("Ray", true);
             }
@@ -272,7 +292,7 @@ namespace VRMod
         private static void AnimateHookExit(On.EntityStates.Loader.FireHook.orig_OnExit orig, EntityStates.Loader.FireHook self)
         {
             orig(self);
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 GetHandAnimator(false).SetBool("Hook", false);
             }
@@ -281,7 +301,7 @@ namespace VRMod
         private static void AnimateHookEnter(On.EntityStates.Loader.FireHook.orig_OnEnter orig, EntityStates.Loader.FireHook self)
         {
             orig(self);
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 GetHandAnimator(false).SetBool("Hook", true);
             }
@@ -289,7 +309,7 @@ namespace VRMod
 
         private static void AnimateSonicBoom(On.EntityStates.Treebot.Weapon.FireSonicBoom.orig_OnEnter orig, EntityStates.Treebot.Weapon.FireSonicBoom self)
         {
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 GetHandAnimator(false).SetTrigger("Push");
             }
@@ -299,7 +319,7 @@ namespace VRMod
         private static void EndSyringeShoot(On.EntityStates.Treebot.Weapon.FireSyringe.orig_OnExit orig, EntityStates.Treebot.Weapon.FireSyringe self)
         {
             orig(self);
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 GetHandAnimator(true).SetInteger("SyringeShots", 0);
 
@@ -312,7 +332,7 @@ namespace VRMod
 
         private static void AnimateSyringeShoot(On.EntityStates.Treebot.Weapon.FireSyringe.orig_FixedUpdate orig, EntityStates.Treebot.Weapon.FireSyringe self)
         {
-            if (!IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (!IsLocalPlayer(self.characterBody))
             {
                 orig(self);
                 return;
@@ -329,7 +349,7 @@ namespace VRMod
         private static void AnimateWallCast(On.EntityStates.Mage.Weapon.PrepWall.orig_OnExit orig, EntityStates.Mage.Weapon.PrepWall self)
         {
             orig(self);
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 GetHandAnimator(false).SetTrigger("Cast");
             }
@@ -338,7 +358,7 @@ namespace VRMod
         private static void AnimateBombCast(On.EntityStates.Mage.Weapon.BaseThrowBombState.orig_OnEnter orig, EntityStates.Mage.Weapon.BaseThrowBombState self)
         {
             orig(self);
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 GetHandAnimator(false).SetTrigger("Cast");
             }
@@ -347,7 +367,7 @@ namespace VRMod
         private static void StopCastAnimation(On.EntityStates.Mage.Weapon.Flamethrower.orig_OnExit orig, EntityStates.Mage.Weapon.Flamethrower self)
         {
             orig(self);
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 GetHandAnimator(true).ResetTrigger("Cast");
                 GetHandAnimator(true).SetBool("HoldCast", false);
@@ -357,7 +377,7 @@ namespace VRMod
         private static void AnimateBlueprintRelease(On.EntityStates.Engi.EngiWeapon.PlaceTurret.orig_OnExit orig, EntityStates.Engi.EngiWeapon.PlaceTurret self)
         {
             orig(self);
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 GetHandAnimator(true).SetTrigger("Release");
             }
@@ -366,7 +386,7 @@ namespace VRMod
         private static void AnimateHarpoonRelease(On.EntityStates.Engi.EngiMissilePainter.Paint.orig_OnExit orig, EntityStates.Engi.EngiMissilePainter.Paint self)
         {
             orig(self);
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 GetHandAnimator(true).SetTrigger("Release");
             }
@@ -375,7 +395,7 @@ namespace VRMod
         private static void AnimateGrenadeRelease(On.EntityStates.Engi.EngiWeapon.ChargeGrenades.orig_OnExit orig, EntityStates.Engi.EngiWeapon.ChargeGrenades self)
         {
             orig(self);
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 GetHandAnimator(true).SetTrigger("Release");
             }
@@ -384,7 +404,7 @@ namespace VRMod
         private static void ForceBuzzsawMuzzle(On.EntityStates.Toolbot.BaseToolbotPrimarySkillState.orig_OnEnter orig, EntityStates.Toolbot.BaseToolbotPrimarySkillState self)
         {
             orig(self);
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 if (self.baseMuzzleName == "MuzzleBuzzsaw" && self.isInDualWield)
                 {
@@ -405,10 +425,9 @@ namespace VRMod
         private static void AnimateDualWieldEnd(On.EntityStates.Toolbot.ToolbotDualWield.orig_OnExit orig, EntityStates.Toolbot.ToolbotDualWield self)
         {
             orig(self);
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 GetHandAnimator(false).SetFloat("RetoolSpeed", 4f);
-                GetHandAnimator(false).SetTrigger("RetoolRetract");
                 RoR2Application.instance.StartCoroutine(ExtendAfterDelay());
             }
         }
@@ -423,11 +442,11 @@ namespace VRMod
         private static void AnimateDualWieldExtend(On.EntityStates.Toolbot.ToolbotDualWieldStart.orig_FixedUpdate orig, EntityStates.Toolbot.ToolbotDualWieldStart self)
         {
             orig(self);
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
-                if (halfTime.hasPassed && !hasSwapped)
+                if (halfTime.hasPassed && isSwapping)
                 {
-                    hasSwapped = true;
+                    isSwapping = false;
 
                     GenericSkill currentSkill = self.primary2Slot;
 
@@ -443,9 +462,9 @@ namespace VRMod
         private static void AnimateDualWieldRetract(On.EntityStates.Toolbot.ToolbotDualWieldStart.orig_OnEnter orig, EntityStates.Toolbot.ToolbotDualWieldStart self)
         {
             orig(self);
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
-                hasSwapped = false;
+                isSwapping = true;
                 halfTime = Run.FixedTimeStamp.now + (self.duration / 2);
                 GetHandAnimator(false).SetFloat("RetoolSpeed", 2f / self.duration);
                 GetHandAnimator(false).SetTrigger("RetoolRetract");
@@ -456,7 +475,7 @@ namespace VRMod
         {
             orig(self);
 
-            CharacterBody body = self.outer.GetComponent<CharacterBody>();
+            CharacterBody body = self.characterBody;
             if (IsLocalPlayer(body))
             {
                 GetHandAnimator(body.skillLocator.FindSkillSlot(self.activatorSkillSlot) == SkillSlot.Primary).SetTrigger("BuzzsawSlowdown");
@@ -466,7 +485,7 @@ namespace VRMod
         private static void AnimateGrenadeThrow(On.EntityStates.Toolbot.AimStunDrone.orig_OnExit orig, EntityStates.Toolbot.AimStunDrone self)
         {
             orig(self);
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 GetHandAnimator(true).ResetTrigger("AimGrenade");
                 GetHandAnimator(false).SetTrigger("ThrowGrenade");
@@ -477,7 +496,7 @@ namespace VRMod
         {
             orig(self);
 
-            CharacterBody body = self.outer.GetComponent<CharacterBody>();
+            CharacterBody body = self.characterBody;
             if (IsLocalPlayer(body))
             {
                 bool dominant = body.skillLocator.FindSkillSlot(self.activatorSkillSlot) == SkillSlot.Primary;
@@ -502,11 +521,11 @@ namespace VRMod
         private static void AnimateRetoolExtend(On.EntityStates.Toolbot.ToolbotStanceSwap.orig_FixedUpdate orig, EntityStates.Toolbot.ToolbotStanceSwap self)
         {
             orig(self);
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
-                if (halfTime.hasPassed && !hasSwapped)
+                if (halfTime.hasPassed && !isSwapping)
                 {
-                    hasSwapped = true;
+                    isSwapping = true;
 
                     GenericSkill currentSkill = self.previousStanceState == typeof(EntityStates.Toolbot.ToolbotStanceA) ? self.GetPrimarySkill2() : self.GetPrimarySkill1();
 
@@ -522,9 +541,9 @@ namespace VRMod
         private static void AnimateRetoolRetract(On.EntityStates.Toolbot.ToolbotStanceSwap.orig_OnEnter orig, EntityStates.Toolbot.ToolbotStanceSwap self)
         {
             orig(self);
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
-                hasSwapped = false;
+                isSwapping = false;
                 halfTime = Run.FixedTimeStamp.now + (self.baseDuration / (self.attackSpeedStat * 2));
                 GetHandAnimator(true).SetFloat("RetoolSpeed", 2f / (self.baseDuration / self.attackSpeedStat));
                 GetHandAnimator(true).SetTrigger("RetoolRetract");
@@ -535,7 +554,7 @@ namespace VRMod
         {
             orig(self);
 
-            CharacterBody body = self.outer.GetComponent<CharacterBody>();
+            CharacterBody body = self.characterBody;
             if (IsLocalPlayer(body))
             {
                 GetHandAnimator(body.skillLocator.FindSkillSlot(self.activatorSkillSlot) == SkillSlot.Primary).SetTrigger("NailgunSlowdown");
@@ -545,7 +564,7 @@ namespace VRMod
         private static void DeleteEffect(On.EntityStates.Huntress.HuntressWeapon.ThrowGlaive.orig_OnEnter orig, EntityStates.Huntress.HuntressWeapon.ThrowGlaive self)
         {
             orig(self);
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()) && self.chargeEffect)
+            if (IsLocalPlayer(self.characterBody) && self.chargeEffect)
             {
                 EntityStates.EntityState.Destroy(self.chargeEffect);
             }
@@ -554,7 +573,7 @@ namespace VRMod
         private static void AnimateGlaiveThrow(On.EntityStates.Huntress.HuntressWeapon.ThrowGlaive.orig_FireOrbGlaive orig, EntityStates.Huntress.HuntressWeapon.ThrowGlaive self)
         {
             orig(self);
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()) && self.hasSuccessfullyThrownGlaive)
+            if (IsLocalPlayer(self.characterBody) && self.hasSuccessfullyThrownGlaive)
             {
                 GetHandAnimator(false).SetTrigger("ThrowGlaive");
             }
@@ -563,7 +582,7 @@ namespace VRMod
         private static void PlayRevolverSpinAnimation(On.EntityStates.Bandit2.Weapon.BasePrepSidearmRevolverState.orig_OnEnter orig, EntityStates.Bandit2.Weapon.BasePrepSidearmRevolverState self)
         {
             orig(self);
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 GetHandAnimator(true).SetFloat("SpinSpeed", 1f / self.duration);
                 GetHandAnimator(true).SetTrigger("RevolverSpin");
@@ -582,13 +601,13 @@ namespace VRMod
             c.Emit(OpCodes.Ldarg_0);
             c.EmitDelegate<Func<EntityStates.GlobalSkills.LunarNeedle.FireLunarNeedle, string>>((self) =>
             {
-                return IsLocalPlayer(self.outer.GetComponent<CharacterBody>()) ? "CurrentDominantMuzzle" : "Head";
+                return IsLocalPlayer(self.characterBody) ? "CurrentDominantMuzzle" : "Head";
             });
         }
 
         private static void ChangeTazerMuzzleShoot(On.EntityStates.Captain.Weapon.FireTazer.orig_Fire orig, EntityStates.Captain.Weapon.FireTazer self)
         {
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 GetHandAnimator(false).SetTrigger("Rest");
                 string muzzleString = EntityStates.Captain.Weapon.FireTazer.targetMuzzle;
@@ -603,7 +622,7 @@ namespace VRMod
 
         private static void ChangeTazerMuzzleEnter(On.EntityStates.Captain.Weapon.FireTazer.orig_OnEnter orig, EntityStates.Captain.Weapon.FireTazer self)
         {
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 string muzzleString = EntityStates.Captain.Weapon.FireTazer.targetMuzzle;
                 EntityStates.Captain.Weapon.FireTazer.targetMuzzle = "CurrentNonDominantMuzzle";
@@ -619,7 +638,7 @@ namespace VRMod
         {
             orig(self);
 
-            if (!IsLocalPlayer(self.outer.GetComponent<CharacterBody>())) return;
+            if (!IsLocalPlayer(self.characterBody)) return;
 
             self.swingEffectMuzzleString = "MuzzleHandL";
         }
@@ -628,7 +647,7 @@ namespace VRMod
         {
             orig(self);
 
-            if (!IsLocalPlayer(self.outer.GetComponent<CharacterBody>())) return;
+            if (!IsLocalPlayer(self.characterBody)) return;
 
             self.dashVector = GetHandCurrentMuzzle(false).forward;
         }
@@ -637,14 +656,14 @@ namespace VRMod
         {
             orig(self);
 
-            if (!IsLocalPlayer(self.outer.GetComponent<CharacterBody>())) return;
+            if (!IsLocalPlayer(self.characterBody)) return;
 
             self.dashVector = GetHandCurrentMuzzle(false).forward;
         }
 
         private static void ForceWhirlwindDirection(On.EntityStates.Merc.WhirlwindBase.orig_FixedUpdate orig, EntityStates.Merc.WhirlwindBase self)
         {
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 if (self.characterDirection)
                     self.characterDirection.forward = abilityDirection;
@@ -657,7 +676,7 @@ namespace VRMod
         {
             orig(self);
 
-            if (!IsLocalPlayer(self.outer.GetComponent<CharacterBody>())) return;
+            if (!IsLocalPlayer(self.characterBody)) return;
 
             abilityDirection = GetHandCurrentMuzzle(false).forward;
 
@@ -669,7 +688,7 @@ namespace VRMod
         {
             orig(self);
 
-            if (!IsLocalPlayer(self.outer.GetComponent<CharacterBody>())) return;
+            if (!IsLocalPlayer(self.characterBody)) return;
 
             abilityDirection = GetHandCurrentMuzzle(false).forward;
 
@@ -681,7 +700,7 @@ namespace VRMod
         {
             orig(self);
 
-            if (!IsLocalPlayer(self.outer.GetComponent<CharacterBody>())) return;
+            if (!IsLocalPlayer(self.characterBody)) return;
 
             abilityDirection = GetHandCurrentMuzzle(false).forward;
 
@@ -691,7 +710,7 @@ namespace VRMod
 
         private static void SetFireboltMuzzle(On.EntityStates.Mage.Weapon.FireFireBolt.orig_FireGauntlet orig, EntityStates.Mage.Weapon.FireFireBolt self)
         {
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
                 self.muzzleString = "MuzzleRight";
 
             orig(self);
@@ -699,7 +718,7 @@ namespace VRMod
 
         private static void RemoveMuzzleFlash(On.EntityStates.Engi.EngiWeapon.FireGrenades.orig_FireGrenade orig, EntityStates.Engi.EngiWeapon.FireGrenades self, string targetMuzzle)
         {
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 GameObject prefab = EntityStates.Engi.EngiWeapon.FireGrenades.effectPrefab;
                 EntityStates.Engi.EngiWeapon.FireGrenades.effectPrefab = null;
@@ -756,7 +775,7 @@ namespace VRMod
 
         private static void SetNailgunMuzzle(On.EntityStates.Toolbot.BaseNailgunState.orig_FireBullet orig, EntityStates.Toolbot.BaseNailgunState self, Ray aimRay, int bulletCount, float spreadPitchScale, float spreadYawScale)
         {
-            if (!IsLocalPlayer(self.outer.GetComponent<CharacterBody>())) orig(self, aimRay, bulletCount, spreadPitchScale, spreadYawScale);
+            if (!IsLocalPlayer(self.characterBody)) orig(self, aimRay, bulletCount, spreadPitchScale, spreadYawScale);
 
             string origName = EntityStates.Toolbot.BaseNailgunState.muzzleName;
             EntityStates.Toolbot.BaseNailgunState.muzzleName = ((EntityStates.Toolbot.IToolbotPrimarySkillState)self).muzzleName;
@@ -776,13 +795,13 @@ namespace VRMod
             c.Emit(OpCodes.Ldarg_0);
             c.EmitDelegate<Func<EntityStates.Toolbot.RecoverAimStunDrone, string>>((self) =>
             {
-                return IsLocalPlayer(self.outer.GetComponent<CharacterBody>()) ? "CurrentNonDominantMuzzle" : "MuzzleNailgun";
+                return IsLocalPlayer(self.characterBody) ? "CurrentNonDominantMuzzle" : "MuzzleNailgun";
             });
         }
 
         private static void SetRebarMuzzle(On.EntityStates.Toolbot.FireSpear.orig_FireBullet orig, EntityStates.Toolbot.FireSpear self, Ray aimRay)
         {
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 ((EntityStates.GenericBulletBaseState)self).muzzleName = ((EntityStates.Toolbot.IToolbotPrimarySkillState)self).muzzleName;
             }
@@ -792,7 +811,7 @@ namespace VRMod
         private static void SetScrapMuzzle(On.EntityStates.Toolbot.FireGrenadeLauncher.orig_OnEnter orig, EntityStates.Toolbot.FireGrenadeLauncher self)
         {
             orig(self);
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 self.targetMuzzle = (self as EntityStates.Toolbot.IToolbotPrimarySkillState).muzzleName;
             }
@@ -800,7 +819,7 @@ namespace VRMod
 
         private static Vector3 GetNonDominantVector(On.EntityStates.Huntress.BlinkState.orig_GetBlinkVector orig, EntityStates.Huntress.BlinkState self)
         {
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 return GetHandCurrentMuzzle(false).transform.forward;
             }
@@ -809,7 +828,7 @@ namespace VRMod
 
         private static Ray EditAimray(On.EntityStates.BaseState.orig_GetAimRay orig, EntityStates.BaseState self)
         {
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 if (self.outer.customName == "Weapon2" || nonDominantHandStateTypes.Contains(self.GetType()))
                     return GetHandRayByDominance(false);
@@ -830,7 +849,7 @@ namespace VRMod
 
         private static void HideArrowCluster(On.EntityStates.Huntress.BaseArrowBarrage.orig_OnExit orig, EntityStates.Huntress.BaseArrowBarrage self)
         {
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 GetHandAnimator(true).SetBool("ShowCluster", false);
             }
@@ -840,7 +859,7 @@ namespace VRMod
         private static void AnimateSnipeBow(On.EntityStates.Huntress.AimArrowSnipe.orig_HandlePrimaryAttack orig, EntityStates.Huntress.AimArrowSnipe self)
         {
             orig(self);
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 GetHandAnimator(true).SetTrigger("Primary");
 
@@ -852,7 +871,7 @@ namespace VRMod
         private static void AnimateBarrageBowShoot(On.EntityStates.Huntress.BaseArrowBarrage.orig_HandlePrimaryAttack orig, EntityStates.Huntress.BaseArrowBarrage self)
         {
             orig(self);
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 GetHandAnimator(true).SetTrigger("Primary");
             }
@@ -860,7 +879,7 @@ namespace VRMod
 
         private static void AnimateBarrageBowPull(On.EntityStates.Huntress.BaseArrowBarrage.orig_OnEnter orig, EntityStates.Huntress.BaseArrowBarrage self)
         {
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 GetHandAnimator(true).SetBool("ShowCluster", true);
                 GetHandAnimator(true).SetTrigger("Pull");
@@ -870,7 +889,7 @@ namespace VRMod
 
         private static void PreventBowPull(On.EntityStates.Huntress.HuntressWeapon.FireSeekingArrow.orig_OnExit orig, EntityStates.Huntress.HuntressWeapon.FireSeekingArrow self)
         {
-            if (!IsLocalPlayer(self.outer.GetComponent<CharacterBody>())) orig(self);
+            if (!IsLocalPlayer(self.characterBody)) orig(self);
 
             preventBowPull = true;
             orig(self);
@@ -883,7 +902,7 @@ namespace VRMod
             orig(self);
             if (self.firedArrowCount <= firedCount) return;
 
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 GetHandAnimator(true).SetTrigger("Primary");
 
@@ -927,7 +946,7 @@ namespace VRMod
 
         private static void PlayFMJShootAnimation(On.EntityStates.Commando.CommandoWeapon.FireFMJ.orig_PlayAnimation orig, EntityStates.Commando.CommandoWeapon.FireFMJ self, float duration)
         {
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 GetHandAnimator(false).SetTrigger("Primary");
             }
@@ -936,7 +955,7 @@ namespace VRMod
 
         private static void PlayBarrageShootAnimation(On.EntityStates.Commando.CommandoWeapon.FireBarrage.orig_FireBullet orig, EntityStates.Commando.CommandoWeapon.FireBarrage self)
         {
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 GetHandAnimator(true).SetTrigger("Primary");
             }
@@ -947,7 +966,7 @@ namespace VRMod
         {
             orig(self, muzzleString);
 
-            if (!IsLocalPlayer(self.outer.GetComponent<CharacterBody>())) return;
+            if (!IsLocalPlayer(self.characterBody)) return;
 
             if (self.leftFlamethrowerTransform)
                 GameObject.Destroy(self.leftFlamethrowerTransform.gameObject);
@@ -957,7 +976,7 @@ namespace VRMod
         }
         private static void SetFMJMuzzle(On.EntityStates.GenericProjectileBaseState.orig_FireProjectile orig, EntityStates.GenericProjectileBaseState self)
         {
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 if (self is EntityStates.Commando.CommandoWeapon.FireFMJ)
                     self.targetMuzzle = "MuzzleLeft";
@@ -967,7 +986,7 @@ namespace VRMod
 
         private static BulletAttack ChangeShotgunMuzzle(On.EntityStates.GenericBulletBaseState.orig_GenerateBulletAttack orig, EntityStates.GenericBulletBaseState self, Ray aimRay)
         {
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()) && self is EntityStates.Commando.CommandoWeapon.FireShotgunBlast)
+            if (IsLocalPlayer(self.characterBody) && self is EntityStates.Commando.CommandoWeapon.FireShotgunBlast)
             {
                 if (!ModConfig.CommandoDualWield.Value)
                 {
@@ -986,7 +1005,7 @@ namespace VRMod
 
         private static void CheckPistolBulletMuzzle(On.EntityStates.Commando.CommandoWeapon.FirePistol2.orig_FireBullet orig, EntityStates.Commando.CommandoWeapon.FirePistol2 self, string targetMuzzle)
         {
-            if (IsLocalPlayer(self.outer.GetComponent<CharacterBody>()))
+            if (IsLocalPlayer(self.characterBody))
             {
                 if (!ModConfig.CommandoDualWield.Value)
                     targetMuzzle = "MuzzleRight";

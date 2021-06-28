@@ -171,3 +171,11 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - Possibly fixed a bug that caused the Heretic wings to appear on the wrong player which would break some abilities.
 - Fixed a bug that caused Heretic's primary skill projectiles to not appear from the hand after transforming.
 - Fixed a bug that caused Vive Cosmos controllers to use the standard Vive controller binds.
+
+### 2.1.1
+- The credits no longer stick to the camera.
+- The spectator screen is now fully opaque.
+- Loader's aim rays have been aligned better with the mech arms.
+- Fixed a bug that caused the spectator screen to not appear in multiplayer for non-host players.
+- Fixed a bug that caused the shield effect to appear abnormally large on Bandit's new weapon models.
+- Fixed a bug that caused MUL-T's left hand animations to break when activating power mode right before transport mode.
