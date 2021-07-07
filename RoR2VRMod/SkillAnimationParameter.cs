@@ -1,5 +1,4 @@
 ﻿using RoR2;
-using System;
 using System.Linq;
 using UnityEngine;
 
@@ -12,10 +11,10 @@ namespace VRMod
         private string skillName;
 
         [SerializeField]
-        private SkillSlot filterSkillSlot;
+        private SkillSlot forceSkillSlot;
 
         [SerializeField]
-        private TriggerType triggerType;
+        private ParameterType parameterType;
 
         [SerializeField]
         private string parameterName;
@@ -38,14 +37,14 @@ namespace VRMod
             if (!body || !animator)
                 return;
 
-            if (triggerType == TriggerType.OnExecuteTrigger)
+            if (parameterType == ParameterType.OnExecuteTrigger)
             {
                 body.onSkillActivatedAuthority += OnActivatedAuthority;
                 body.onSkillActivatedServer += OnActivatedServer;
             }
             else
             {
-                if (filterSkillSlot == SkillSlot.None)
+                if (forceSkillSlot == SkillSlot.None)
                 {    
                     associatedSkill = body.skillLocator.FindSkill(skillName);
 
@@ -69,14 +68,14 @@ namespace VRMod
                 }
                 else
                 {
-                    associatedSkill = body.skillLocator.GetSkill(filterSkillSlot);
+                    associatedSkill = body.skillLocator.GetSkill(forceSkillSlot);
                 }
             }
         }
 
         private void OnDestroy()
         {
-            if (triggerType == TriggerType.OnAvailableBool)
+            if (parameterType == ParameterType.OnAvailableBool)
             {
                 if (foundSkill)
                     RoR2Application.onUpdate -= UpdateBool;
@@ -90,14 +89,14 @@ namespace VRMod
 
         private void OnActivatedAuthority(GenericSkill skill)
         {
-            if ((filterSkillSlot != SkillSlot.None && body.skillLocator.FindSkillSlot(skill) != filterSkillSlot) || skill.skillDef.skillName != skillName) return;
+            if ((forceSkillSlot != SkillSlot.None && body.skillLocator.FindSkillSlot(skill) != forceSkillSlot) || skill.skillDef.skillName != skillName) return;
 
             animator.SetTrigger(parameterName);
         }
 
         private void OnActivatedServer(GenericSkill skill)
         {
-            if (body.hasEffectiveAuthority || (filterSkillSlot != SkillSlot.None && body.skillLocator.FindSkillSlot(skill) != filterSkillSlot) || skill.skillDef.skillName != skillName) return;
+            if (body.hasEffectiveAuthority || (forceSkillSlot != SkillSlot.None && body.skillLocator.FindSkillSlot(skill) != forceSkillSlot) || skill.skillDef.skillName != skillName) return;
 
             animator.SetTrigger(parameterName);
         }
@@ -114,7 +113,7 @@ namespace VRMod
             }
         }
 
-        internal enum TriggerType
+        internal enum ParameterType
         {
             OnExecuteTrigger,
             OnAvailableBool

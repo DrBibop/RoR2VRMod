@@ -10,14 +10,14 @@ using UnityEngine.XR;
 
 namespace VRMod
 {
-    public class MotionControls
+    public static class MotionControls
     {
-        internal static bool HandsReady => dominantHand != null && nonDominantHand != null && dominantHand.currentHand != null && nonDominantHand.currentHand != null;
+        public static bool HandsReady => dominantHand != null && nonDominantHand != null && dominantHand.currentHand != null && nonDominantHand.currentHand != null;
 
         private static GameObject handSelectorPrefab;
 
-        private static HandSelector dominantHand;
-        private static HandSelector nonDominantHand;
+        private static HandController dominantHand;
+        private static HandController nonDominantHand;
 
         private static List<GameObject> handPrefabs = new List<GameObject>();
 
@@ -89,25 +89,25 @@ namespace VRMod
 
                 if (prefabName == "BanditRifle")
                 {
-                    TwoHandedOrigin origin = prefab.GetComponent<TwoHandedOrigin>();
+                    TwoHandedMainHand origin = prefab.GetComponent<TwoHandedMainHand>();
 
-                    origin.angleTolerance = ModConfig.BanditWeaponGripSnapAngle.Value;
+                    origin.snapAngle = ModConfig.BanditWeaponGripSnapAngle.Value;
                 }
                 if (prefabName == "MercSword")
                 {
-                    MeleeSwingAbility melee = prefab.GetComponent<MeleeSwingAbility>();
+                    MeleeSkill melee = prefab.GetComponent<MeleeSkill>();
 
                     melee.speedThreshold = ModConfig.MercSwingSpeedThreshold.Value;
                 }
                 if (prefabName == "LoaderHand" || prefabName == "LoaderHand2")
                 {
-                    MeleeSwingAbility melee = prefab.GetComponent<MeleeSwingAbility>();
+                    MeleeSkill melee = prefab.GetComponent<MeleeSkill>();
 
                     melee.speedThreshold = ModConfig.LoaderSwingSpeedThreshold.Value;
                 }
                 if (prefabName == "AcridHand" || prefabName == "AcridHand2")
                 {
-                    MeleeSwingAbility melee = prefab.GetComponent<MeleeSwingAbility>();
+                    MeleeSkill melee = prefab.GetComponent<MeleeSkill>();
 
                     melee.speedThreshold = ModConfig.AcridSwingSpeedThreshold.Value;
                 }
@@ -154,7 +154,7 @@ namespace VRMod
 
             if (self.name.Contains("Bandit2"))
             {
-                GetHandAnimator(true).SetBool("IsSprinting", false);
+                GetHandByDominance(true).animator.SetBool("IsSprinting", false);
             }
 
             orig(self);
@@ -186,7 +186,7 @@ namespace VRMod
 
             if (self.name.Contains("Bandit2"))
             {
-                GetHandAnimator(true).SetBool("IsSprinting", true);
+                GetHandByDominance(true).animator.SetBool("IsSprinting", true);
             }
 
             orig(self);
@@ -216,7 +216,7 @@ namespace VRMod
             }
         }
 
-        public static void AddWristHUD(bool left, RectTransform hudCluster)
+        internal static void AddWristHUD(bool left, RectTransform hudCluster)
         {
             if (HandsReady)
                 (left == ModConfig.LeftDominantHand.Value ? dominantHand : nonDominantHand).smallHud.AddHUDCluster(hudCluster);
@@ -224,7 +224,7 @@ namespace VRMod
                 wristHudQueue.Add(new HUDQueueEntry(hudCluster, left));
         }
 
-        public static void AddWatchHUD(bool left, RectTransform hudCluster)
+        internal static void AddWatchHUD(bool left, RectTransform hudCluster)
         {
             if (HandsReady)
                 (left == ModConfig.LeftDominantHand.Value ? dominantHand : nonDominantHand).watchHud.AddHUDCluster(hudCluster);
@@ -233,9 +233,9 @@ namespace VRMod
         }
 
         /// <summary>
-        /// Add a hand prefab to be instanciated when the matching body is being used by the local player.
+        /// Adds a hand prefab to use when the associated character is being played in VR. This must only be called once per prefab.
         /// </summary>
-        /// <param name="handPrefab">The hand prefab from your asset bundle.</param>
+        /// <param name="handPrefab">The hand prefab containing a hand script.</param>
         public static void AddHandPrefab(GameObject handPrefab)
         {
             if (!handPrefab)
@@ -259,62 +259,29 @@ namespace VRMod
         }
 
         /// <summary>
-        /// Returns the animator component of the chosen hand.
+        /// Returns the instantiated hand with the chosen dominance.
         /// </summary>
-        /// <param name="dominant">Return the component of the dominant or non-dominant hand.</param>
+        /// <param name="dominant">Whether to get the dominant or non-dominant hand.</param>
         /// <returns></returns>
-        public static Animator GetHandAnimator(bool dominant)
+        public static HandController GetHandByDominance(bool dominant)
         {
             if (!HandsReady)
-                throw new NullReferenceException("VR Mod: Cannot retrieve the animator of a hand that doesn't exist.");
+            {
+                VRMod.StaticLogger.LogError("Cannot access the VR hands as they are not instantiated. Returning null.");
+                return null;
+            }
 
-            return (dominant ? dominantHand : nonDominantHand).currentHand.animator;
+            return dominant ? dominantHand : nonDominantHand;
         }
 
         /// <summary>
-        /// Returns the generated ray from the chosen hand's muzzle by hand dominance.
+        /// Returns the instantiated hand with the chosen side.
         /// </summary>
-        /// <param name="dominant">Return the ray of the dominant or non-dominant hand.</param>
+        /// <param name="dominant">Whether to get the left or right hand.</param>
         /// <returns></returns>
-        public static Ray GetHandRayByDominance(bool dominant)
+        public static HandController GetHandBySide(bool left)
         {
-            if (!HandsReady)
-                throw new NullReferenceException("VR Mod: Cannot retrieve the ray of a hand that doesn't exist.");
-
-            return (dominant ? dominantHand : nonDominantHand).GetRay();
-        }
-
-        /// <summary>
-        /// Returns the current muzzle transform from the chosen hand.
-        /// </summary>
-        /// <param name="dominant"></param>
-        /// <returns>Return the muzzle of the dominant or non-dominant hand.</returns>
-        public static Transform GetHandCurrentMuzzle(bool dominant)
-        {
-            if (!HandsReady)
-                throw new NullReferenceException("VR Mod: Cannot retrieve the muzzle of a hand that doesn't exist.");
-
-            return (dominant ? dominantHand : nonDominantHand).currentHand.currentMuzzle.transform;
-        }
-
-        /// <summary>
-        /// Returns the muzzle transform at a certain index from the chosen hand.
-        /// </summary>
-        /// <param name="dominant"></param>
-        /// <returns>Return the muzzle of the dominant or non-dominant hand.</returns>
-        public static Transform GetHandMuzzleByIndex(bool dominant, int index)
-        {
-            if (!HandsReady)
-                throw new NullReferenceException("Cannot retrieve the muzzle of a hand that doesn't exist.");
-
-            Muzzle[] muzzles = (dominant ? dominantHand : nonDominantHand).currentHand.muzzles;
-
-            return muzzles[index].transform;
-        }
-
-        internal static Ray GetHandRayBySide(bool left)
-        {
-            return (left == ModConfig.LeftDominantHand.Value ? dominantHand : nonDominantHand).GetRay();
+            return left == ModConfig.LeftDominantHand.Value ? dominantHand : nonDominantHand;
         }
 
         private static bool CheckPrefabMatch(Hand hand, GameObject prefab)
@@ -330,13 +297,13 @@ namespace VRMod
 
             if (!Run.instance) return;
 
-            HandSelector leftHand = GameObject.Instantiate(handSelectorPrefab).GetComponent<HandSelector>();
+            HandController leftHand = GameObject.Instantiate(handSelectorPrefab).GetComponent<HandController>();
             leftHand.xrNode = XRNode.LeftHand;
             Vector3 mirroredScale = leftHand.transform.localScale;
             mirroredScale.x = -mirroredScale.x;
             leftHand.transform.localScale = mirroredScale;
 
-            HandSelector rightHand = GameObject.Instantiate(handSelectorPrefab).GetComponent<HandSelector>();
+            HandController rightHand = GameObject.Instantiate(handSelectorPrefab).GetComponent<HandController>();
             rightHand.xrNode = XRNode.RightHand;
 
             dominantHand = ModConfig.LeftDominantHand.Value ? leftHand : rightHand;

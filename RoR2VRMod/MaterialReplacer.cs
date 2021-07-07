@@ -5,13 +5,11 @@ using UnityEngine;
 namespace VRMod
 {
     [RequireComponent(typeof(Hand))]
-    class ResourceMaterialReplacer : MonoBehaviour
+    class MaterialReplacer : MonoBehaviour
     {
         private void Awake()
         {
             Hand hand = GetComponent<Hand>();
-
-            GameObject bodyPrefab = Resources.Load<GameObject>("prefabs/characterbodies/" + hand.bodyName);
 
             CharacterBody body = LocalUserManager.GetFirstLocalUser().cachedBody;
 

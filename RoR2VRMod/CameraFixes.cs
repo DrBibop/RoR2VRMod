@@ -560,7 +560,7 @@ namespace VRMod
         {
 			if (MotionControls.HandsReady)
             {
-				return MotionControls.GetHandRayByDominance(true);
+				return MotionControls.GetHandByDominance(true).aimRay;
             }
 
             if (!self.sceneCam)

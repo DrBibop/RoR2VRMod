@@ -1,0 +1,25 @@
+﻿{
+    "ManifestVersion": 2,
+    "AuthorName": "DrBibop",
+    "Name": "DrBibop-VRAPI",
+    "DisplayName": "VR API",
+    "Version": "1.0.0",
+    "Licence": "MIT",
+    "WebsiteURL": "https://github.com/DrBibop/RoR2VRMod",
+    "Description": "Modding API for VR-compatible mods.",
+    "GameVersion": "N/A",
+    "Dependencies": [
+		"bbepis-BepInExPack-5.4.9"
+	],
+    "OptionalDependencies": [
+		"DrBibop-VRMod-2.1.1"
+	],
+    "Incompatibilities": [],
+    "NetworkMode": "client",
+    "PackageType": "mod",
+    "InstallMode": "managed",
+    "Loaders": [
+        "bepinex"
+    ],
+    "ExtraData": {}
+}

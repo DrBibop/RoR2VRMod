@@ -65,6 +65,27 @@ namespace VRMod
 				RoR2Application.onUpdate -= FindStateMachine;
 		}
 
+		/// <summary>
+		/// Adds to the list of states that activates the confort vignette. Recommended for mobility skills.
+		/// </summary>
+		/// <param name="stateType">The state type that will use the vignette.</param>
+		public static void AddVignetteState(Type stateType)
+        {
+			if (!stateType.IsSubclassOf(typeof(EntityStates.EntityState)))
+            {
+				VRMod.StaticLogger.LogWarning("The type " + stateType.ToString() + " doesn't inherit from EntityState and cannot be added as a vignette state.");
+				return;
+            }
+
+			if (vignetteAbilities.Contains(stateType))
+            {
+				VRMod.StaticLogger.LogWarning("The state type " + stateType.ToString() + " is already set as a vignette state and cannot be added twice.");
+				return;
+			}
+
+			vignetteAbilities.Add(stateType);
+        }
+
 		private void FindStateMachine()
         {
 			CharacterBody body = LocalUserManager.GetFirstLocalUser().cachedBody;

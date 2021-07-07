@@ -27,20 +27,12 @@ namespace VRMod
         
         private void Awake()
         {
+            animator = GetComponent<Animator>();
+
             if (muzzles == null || muzzles.Length <= 0)
                 throw new NullReferenceException("This hand has no muzzle! Aiming won't be possible that way and other errors may appear.");
 
-            animator = GetComponent<Animator>();
-
             currentMuzzle = muzzles[0];
-        }
-
-        internal void SetMuzzle(uint index)
-        {
-            if (index >= muzzles.Length)
-                throw new ArgumentOutOfRangeException("Cannot set the muzzle using an out-of-range index.");
-
-            currentMuzzle = muzzles[index];
         }
     }
 

@@ -31,7 +31,7 @@ namespace VRMod
 
         private static List<SkillRemap> skillRemaps = new List<SkillRemap>()
         {
-            new SkillRemap() { bodyName = "LoaderBody", skill1 = SkillSlot.Utility, skill2 = SkillSlot.Special }
+            new SkillRemap("LoaderBody", SkillSlot.Utility, SkillSlot.Special)
         };
 
         internal static void Init()
@@ -60,6 +60,11 @@ namespace VRMod
             SetupControllerInputs();
 
             glyphsSpriteAsset = VRMod.VRAssetBundle.LoadAsset<TMP_SpriteAsset>("sprVRGlyphs");
+        }
+
+        public static void AddSkillRemap(string bodyName, SkillSlot skill1, SkillSlot skill2)
+        {
+            skillRemaps.Add(new SkillRemap(bodyName, skill1, skill2));
         }
 
         private static void SubscribeToBodyEvents(PlayerCharacterMasterController obj)
@@ -113,7 +118,7 @@ namespace VRMod
 
                 if (MotionControls.HandsReady)
                 {
-                    Vector3 controllerDirection = MotionControls.GetHandCurrentMuzzle(false).forward;
+                    Vector3 controllerDirection = MotionControls.GetHandByDominance(false).muzzle.forward;
                     Vector3 cameraDirection = Camera.main.transform.forward;
 
                     controllerDirection.y = 0;
@@ -530,6 +535,13 @@ namespace VRMod
             public string bodyName;
             public SkillSlot skill1;
             public SkillSlot skill2;
+
+            public SkillRemap(string bodyName, SkillSlot skill1, SkillSlot skill2)
+            {
+                this.bodyName = bodyName;
+                this.skill1 = skill1;
+                this.skill2 = skill2;
+            }
         }
     }
 }

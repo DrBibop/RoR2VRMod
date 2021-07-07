@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace VRMod
 {
-    internal static class ModConfig
+    public static class ModConfig
     {
         private const string CONFIG_FILE_NAME = "VRMod.cfg";
 
@@ -260,5 +260,8 @@ namespace VRMod
                 WatchHUD.Value = false;
             }
         }
+
+        public static bool MotionControlsEnabled => UseMotionControls.Value;
+        public static bool LeftHanded => LeftDominantHand.Value;
     }
 }
