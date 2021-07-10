@@ -7,13 +7,21 @@ namespace VRMod
     [RequireComponent(typeof(Hand))]
     class MaterialReplacer : MonoBehaviour
     {
-        private void Awake()
+        private void OnEnable()
+        {
+            MotionControls.onSkinApplied += ApplySkin;
+        }
+
+        private void OnDisable()
+        {
+            MotionControls.onSkinApplied -= ApplySkin;
+        }
+
+        private void ApplySkin()
         {
             Hand hand = GetComponent<Hand>();
 
-            CharacterBody body = LocalUserManager.GetFirstLocalUser().cachedBody;
-
-            CharacterModel model = body.modelLocator.modelTransform.GetComponent<CharacterModel>();
+            CharacterModel model = MotionControls.currentBody.modelLocator.modelTransform.GetComponent<CharacterModel>();
 
             for (int i = 0; i < hand.rendererInfos.Length; i++)
             {
@@ -34,7 +42,7 @@ namespace VRMod
                 {
                     if (rendererInfo.renderer is SkinnedMeshRenderer)
                     {
-                        bodyRendererInfos = model.baseRendererInfos.Where(x => x.renderer is SkinnedMeshRenderer && (x.renderer as SkinnedMeshRenderer).sharedMesh.name == (rendererInfo.renderer as SkinnedMeshRenderer).sharedMesh.name);
+                        bodyRendererInfos = model.baseRendererInfos.Where(x => x.renderer is SkinnedMeshRenderer && x.renderer.name == rendererInfo.renderer.name);
 
                         if (bodyRendererInfos == null || bodyRendererInfos.Count() <= 0) continue;
                     }

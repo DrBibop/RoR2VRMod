@@ -215,7 +215,7 @@ namespace VRMod
 
         private static void ForceShotgunMuzzle(On.EntityStates.GenericBulletBaseState.orig_FireBullet orig, EntityStates.GenericBulletBaseState self, Ray aimRay)
         {
-            if (IsLocalPlayer(self.characterBody))
+            if (IsLocalPlayer(self.characterBody) && self is EntityStates.Commando.CommandoWeapon.FireShotgunBlast)
             {
                 self.muzzleName = "MuzzleLeft";
             }
@@ -363,7 +363,7 @@ namespace VRMod
         private static void AnimateBombCast(On.EntityStates.Mage.Weapon.BaseThrowBombState.orig_OnEnter orig, EntityStates.Mage.Weapon.BaseThrowBombState self)
         {
             orig(self);
-            if (IsLocalPlayer(self.characterBody))
+            if (IsLocalPlayer(self.characterBody) && (self is EntityStates.Mage.Weapon.ThrowNovabomb || self is EntityStates.Mage.Weapon.ThrowIcebomb))
             {
                 GetHandByDominance(false).animator.SetTrigger("Cast");
             }

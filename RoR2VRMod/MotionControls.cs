@@ -28,6 +28,12 @@ namespace VRMod
 
         public static SetHandPairEventHandler onHandPairSet;
 
+        internal delegate void SkinAppliedEventHandler();
+
+        internal static SkinAppliedEventHandler onSkinApplied;
+
+        internal static CharacterBody currentBody;
+
         private static List<HUDQueueEntry> wristHudQueue = new List<HUDQueueEntry>();
 
         private static List<HUDQueueEntry> watchHudQueue = new List<HUDQueueEntry>();
@@ -46,14 +52,37 @@ namespace VRMod
 
         internal static void Init()
         {
-            On.RoR2.CameraRigController.Start += SetupVRHands;
-            On.RoR2.CharacterBody.OnSprintStart += OnSprintStart;
+            On.RoR2.CameraRigController.Start += InitWristHUD;
 
+            On.RoR2.CharacterBody.OnSprintStart += OnSprintStart;
             On.RoR2.CharacterBody.OnSprintStop += OnSprintStop;
 
-            IL.RoR2.CharacterMaster.OnInventoryChanged += TransformHereticHandsIL;
+            //IL.RoR2.CharacterMaster.OnInventoryChanged += TransformHereticHandsIL;
 
             On.RoR2.CharacterModel.UpdateMaterials += UpdateHandMaterials;
+
+            PlayerCharacterMasterController.onPlayerAdded += (pcmc) =>
+            {
+                pcmc.master.onBodyStart += (body) =>
+                {
+                    if (body.master != LocalUserManager.GetFirstLocalUser().cachedMaster) return;
+
+                    currentBody = body;
+                    string bodyName = body.name.Substring(0, body.name.IndexOf("(Clone)"));
+                    VRMod.StaticLogger.LogInfo(String.Format("Local cached body \'{0}\' found. Applying hand pair.", bodyName));
+
+                    SetHandPair(body);
+                };
+            };
+
+            On.RoR2.ModelSkinController.ApplySkin += (orig, self, index) =>
+            {
+                orig(self, index);
+                if (self.characterModel.body == currentBody && onSkinApplied != null)
+                {
+                    onSkinApplied();
+                }
+            };
 
             handSelectorPrefab = VRMod.VRAssetBundle.LoadAsset<GameObject>("VRHand");
 
@@ -291,12 +320,41 @@ namespace VRMod
             return hand.bodyName == prefabHand.bodyName && (prefabHand.handType == HandType.Both || hand.handType == HandType.Both || prefabHand.handType == hand.handType);
         }
 
-        private static void SetupVRHands(On.RoR2.CameraRigController.orig_Start orig, RoR2.CameraRigController self)
+        private static void InitWristHUD(On.RoR2.CameraRigController.orig_Start orig, RoR2.CameraRigController self)
         {
             orig(self);
 
             if (!Run.instance) return;
 
+            if (!HandsReady)
+            {
+                VRMod.StaticLogger.LogInfo("Setting up hands from camera");
+                SetupHands();
+            }
+
+            dominantHand.smallHud.Init(self);
+            nonDominantHand.smallHud.Init(self);
+
+            foreach (HUDQueueEntry queueEntry in wristHudQueue)
+            {
+                GetHandBySide(queueEntry.left).smallHud.AddHUDCluster(queueEntry.transform);
+            }
+
+            wristHudQueue.Clear();
+
+            dominantHand.watchHud.Init(self);
+            nonDominantHand.watchHud.Init(self);
+
+            foreach (HUDQueueEntry queueEntry in watchHudQueue)
+            {
+                GetHandBySide(queueEntry.left).watchHud.AddHUDCluster(queueEntry.transform);
+            }
+
+            watchHudQueue.Clear();
+        }
+
+        private static void SetupHands()
+        {
             HandController leftHand = GameObject.Instantiate(handSelectorPrefab).GetComponent<HandController>();
             leftHand.xrNode = XRNode.LeftHand;
             Vector3 mirroredScale = leftHand.transform.localScale;
@@ -315,27 +373,7 @@ namespace VRMod
             dominantHand.oppositeHand = nonDominantHand;
             nonDominantHand.oppositeHand = dominantHand;
 
-            dominantHand.smallHud.Init(self);
-            nonDominantHand.smallHud.Init(self);
-
-            foreach (HUDQueueEntry queueEntry in wristHudQueue)
-            {
-                (queueEntry.left ? leftHand : rightHand).smallHud.AddHUDCluster(queueEntry.transform);
-            }
-
-            wristHudQueue.Clear();
-
-            dominantHand.watchHud.Init(self);
-            nonDominantHand.watchHud.Init(self);
-
-            foreach (HUDQueueEntry queueEntry in watchHudQueue)
-            {
-                (queueEntry.left ? leftHand : rightHand).watchHud.AddHUDCluster(queueEntry.transform);
-            }
-
-            watchHudQueue.Clear();
-
-            RoR2Application.onFixedUpdate += CheckForLocalBody;
+            //RoR2Application.onFixedUpdate += CheckForLocalBody;
         }
 
         private static void CheckForLocalBody()
@@ -345,7 +383,7 @@ namespace VRMod
             {
                 RoR2Application.onFixedUpdate -= CheckForLocalBody;
                 VRMod.StaticLogger.LogInfo(String.Format("Local cached body \'{0}\' found. Applying hand pair.", localBody.name));
-                SetHandPair(localBody.name.Substring(0, localBody.name.IndexOf("(Clone)")));
+                SetHandPair(localBody);
             }
         }
 
@@ -356,87 +394,89 @@ namespace VRMod
             return hand.handType == HandType.Both || (dominant == (hand.handType == HandType.Dominant));
         }
 
-        internal static void SetHandPair(string bodyName)
+        internal static void SetHandPair(CharacterBody body)
         {
-            if (!HandsReady) return;
+            if (!HandsReady)
+            {
+                VRMod.StaticLogger.LogInfo("Setting up hands from hand pair");
+                SetupHands();
+            }
+
+            string bodyName = body.name.Substring(0, body.name.IndexOf("(Clone)"));
 
             dominantHand.SetCurrentHand(bodyName);
             nonDominantHand.SetCurrentHand(bodyName);
 
-            CharacterBody localBody = LocalUserManager.GetFirstLocalUser().cachedBody;
-            if (localBody)
+            body.aimOriginTransform = dominantHand.currentHand.currentMuzzle.transform;
+
+            ChildLocator childLocator = body.modelLocator.modelTransform.GetComponent<ChildLocator>();
+
+            if (childLocator)
             {
-                localBody.aimOriginTransform = dominantHand.currentHand.currentMuzzle.transform;
+                List<ChildLocator.NameTransformPair> transformPairList = childLocator.transformPairs.ToList();
 
-                ChildLocator childLocator = localBody.modelLocator.modelTransform.GetComponent<ChildLocator>();
-
-                if (childLocator)
+                if (!transformPairList.Exists((x) => x.name == "CurrentDominantMuzzle"))
                 {
-                    List<ChildLocator.NameTransformPair> transformPairList = childLocator.transformPairs.ToList();
+                    transformPairList.Add(new ChildLocator.NameTransformPair() { name = "CurrentDominantMuzzle", transform = dominantHand.currentHand.currentMuzzle.transform });
+                    transformPairList.Add(new ChildLocator.NameTransformPair() { name = "CurrentNonDominantMuzzle", transform = nonDominantHand.currentHand.currentMuzzle.transform });
+                    childLocator.transformPairs = transformPairList.ToArray();
+                }
+                else
+                {
+                    int index1 = transformPairList.FindIndex(x => x.name == "CurrentDominantMuzzle");
+                    int index2 = transformPairList.FindIndex(x => x.name == "CurrentNonDominantMuzzle");
 
-                    if (!transformPairList.Exists((x) => x.name == "CurrentDominantMuzzle"))
+                    childLocator.transformPairs[index1].transform = dominantHand.currentHand.currentMuzzle.transform;
+                    childLocator.transformPairs[index2].transform = nonDominantHand.currentHand.currentMuzzle.transform;
+                }
+
+                foreach (Muzzle muzzle in dominantHand.currentHand.muzzles)
+                {
+                    for (int i = 0; i < childLocator.transformPairs.Length; i++)
                     {
-                        transformPairList.Add(new ChildLocator.NameTransformPair() { name = "CurrentDominantMuzzle", transform = dominantHand.currentHand.currentMuzzle.transform });
-                        transformPairList.Add(new ChildLocator.NameTransformPair() { name = "CurrentNonDominantMuzzle", transform = nonDominantHand.currentHand.currentMuzzle.transform });
+                        if (muzzle.entriesToReplaceIfDominant.Contains(childLocator.transformPairs[i].name))
+                        {
+                            childLocator.transformPairs[i].transform = muzzle.transform;
+                        }
+                    }
+
+                    transformPairList = childLocator.transformPairs.ToList();
+
+                    string pairName = muzzle.transform.name + "_Dominant";
+
+                    if (!transformPairList.Exists((x) => x.name == pairName))
+                    {
+                        transformPairList.Add(new ChildLocator.NameTransformPair() { name = pairName, transform = muzzle.transform });
+
                         childLocator.transformPairs = transformPairList.ToArray();
-                    }
-                    else
-                    {
-                        int index1 = transformPairList.FindIndex(x => x.name == "CurrentDominantMuzzle");
-                        int index2 = transformPairList.FindIndex(x => x.name == "CurrentNonDominantMuzzle");
-
-                        childLocator.transformPairs[index1].transform = dominantHand.currentHand.currentMuzzle.transform;
-                        childLocator.transformPairs[index2].transform = nonDominantHand.currentHand.currentMuzzle.transform;
-                    }
-
-                    foreach (Muzzle muzzle in dominantHand.currentHand.muzzles)
-                    {
-                        for (int i = 0; i < childLocator.transformPairs.Length; i++)
-                        {
-                            if (muzzle.entriesToReplaceIfDominant.Contains(childLocator.transformPairs[i].name))
-                            {
-                                childLocator.transformPairs[i].transform = muzzle.transform;
-                            }
-                        }
-
-                        transformPairList = childLocator.transformPairs.ToList();
-
-                        string pairName = muzzle.transform.name + "_Dominant";
-
-                        if (!transformPairList.Exists((x) => x.name == pairName))
-                        {
-                            transformPairList.Add(new ChildLocator.NameTransformPair() { name = pairName, transform = muzzle.transform });
-
-                            childLocator.transformPairs = transformPairList.ToArray();
-                        }
-                    }
-
-                    foreach (Muzzle muzzle in nonDominantHand.currentHand.muzzles)
-                    {
-                        for (int i = 0; i < childLocator.transformPairs.Length; i++)
-                        {
-                            if (muzzle.entriesToReplaceIfNonDominant.Contains(childLocator.transformPairs[i].name))
-                            {
-                                childLocator.transformPairs[i].transform = muzzle.transform;
-                            }
-                        }
-
-                        transformPairList = childLocator.transformPairs.ToList();
-
-                        string pairName = muzzle.transform.name + "_NonDominant";
-
-                        if (!transformPairList.Exists((x) => x.name == pairName))
-                        {
-                            transformPairList.Add(new ChildLocator.NameTransformPair() { name = pairName, transform = muzzle.transform });
-
-                            childLocator.transformPairs = transformPairList.ToArray();
-                        }
                     }
                 }
 
-                if (onHandPairSet != null)
-                    onHandPairSet(localBody);
+                foreach (Muzzle muzzle in nonDominantHand.currentHand.muzzles)
+                {
+                    for (int i = 0; i < childLocator.transformPairs.Length; i++)
+                    {
+                        if (muzzle.entriesToReplaceIfNonDominant.Contains(childLocator.transformPairs[i].name))
+                        {
+                            childLocator.transformPairs[i].transform = muzzle.transform;
+                        }
+                    }
+
+                    transformPairList = childLocator.transformPairs.ToList();
+
+                    string pairName = muzzle.transform.name + "_NonDominant";
+
+                    if (!transformPairList.Exists((x) => x.name == pairName))
+                    {
+                        transformPairList.Add(new ChildLocator.NameTransformPair() { name = pairName, transform = muzzle.transform });
+
+                        childLocator.transformPairs = transformPairList.ToArray();
+                    }
+                }
             }
+
+            if (onHandPairSet != null)
+                onHandPairSet(body);
         }
 
         internal static void ResetToPointer()

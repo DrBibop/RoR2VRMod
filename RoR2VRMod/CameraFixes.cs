@@ -4,6 +4,7 @@ using Rewired;
 using RoR2;
 using RoR2.Networking;
 using RoR2.UI;
+using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
@@ -56,22 +57,51 @@ namespace VRMod
                     if (VRCameraWrapper.instance)
                         GameObject.Destroy(VRCameraWrapper.instance.gameObject);
                 };
+
+				On.RoR2.CharacterModel.SetEquipmentDisplay += HideFloatingEquipment;
+
+				On.RoR2.HealingFollowerController.OnStartClient += HideWoodsprite;
             }
 
             On.RoR2.CameraRigController.GetCrosshairRaycastRay += GetVRCrosshairRaycastRay;
 
 			if (ModConfig.HideDecals.Value)
             {
-				On.ThreeEyedGames.DecaliciousRenderer.OnEnable += DisableDecal;
+				On.ThreeEyedGames.DecaliciousRenderer.OnEnable += (orig, self) => { self.enabled = false; };
 				On.ThreeEyedGames.DecaliciousRenderer.Add += (orig, self, decal, limitTo) => { };
 				On.ThreeEyedGames.DecaliciousRenderer.AddDeferred += (orig, self, decal) => { };
 				On.ThreeEyedGames.DecaliciousRenderer.AddUnlit += (orig, self, decal) => { };
 			}
 		}
 
-        private static void DisableDecal(On.ThreeEyedGames.DecaliciousRenderer.orig_OnEnable orig, ThreeEyedGames.DecaliciousRenderer self)
+        private static void HideWoodsprite(On.RoR2.HealingFollowerController.orig_OnStartClient orig, HealingFollowerController self)
         {
-			self.enabled = false;
+			orig(self);
+
+			if (self.ownerBodyObject != LocalUserManager.GetFirstLocalUser().cachedBodyObject) return;
+
+			Renderer[] renderers = self.GetComponentsInChildren<Renderer>();
+
+			foreach (Renderer renderer in renderers)
+			{
+				renderer.enabled = false;
+			}
+		}
+
+        private static void HideFloatingEquipment(On.RoR2.CharacterModel.orig_SetEquipmentDisplay orig, CharacterModel self, EquipmentIndex newEquipmentIndex)
+        {
+			EquipmentIndex[] equipmentsToHide = new EquipmentIndex[]
+			{
+				RoR2Content.Equipment.Blackhole.equipmentIndex,
+				RoR2Content.Equipment.Saw.equipmentIndex,
+				RoR2Content.Equipment.PassiveHealing.equipmentIndex,
+				RoR2Content.Equipment.Meteor.equipmentIndex
+			};
+			
+			if (self.body != LocalUserManager.GetFirstLocalUser().cachedBody || !equipmentsToHide.Contains(newEquipmentIndex))
+            {
+				orig(self, newEquipmentIndex);
+            }
         }
 
         private static void InitCamera(On.RoR2.CameraRigController.orig_Start orig, CameraRigController self)
