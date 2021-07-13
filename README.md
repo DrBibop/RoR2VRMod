@@ -165,7 +165,7 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - Added a smooth HUD setting that adds smoothing to the camera HUD when moving the headset.
 - Added a spectator screen that appears in front of you when spectating players.
 - Added "Ray color" and "Ray opacity" settings to customize the aim ray.
-- Added new HD models for Loader's hands, Bandit's shotgun and Bandit's revolver.
+- Added more detailed models for Loader's hands, Bandit's shotgun and Bandit's revolver.
 - Removed "UI scale" setting as it already exists in-game.
 - Removed the center smoke effect on Bandit's stealth ability for improved visibility.
 - Possibly fixed a bug that caused the Heretic wings to appear on the wrong player which would break some abilities.
@@ -179,3 +179,10 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - Fixed a bug that caused the spectator screen to not appear in multiplayer for non-host players.
 - Fixed a bug that caused the shield effect to appear abnormally large on Bandit's new weapon models.
 - Fixed a bug that caused MUL-T's left hand animations to break when activating power mode right before transport mode.
+
+### 2.2.0
+- Compatibility with the new VR API which adds the possibility of VR compatible custom characters.
+- New hand models for all survivors.
+- Equipments that float next to the survivor (woodsprite, saw, meteorite and cube) are now hidden for better visibility.
+- Fixed a bug that made bullets and projectiles no longer appear from weapon muzzles after reviving.
+- Fixed a bug that made bullets no longer appear from the main weapon's muzzle on Bandit when disabling Commando's dual wield setting.
