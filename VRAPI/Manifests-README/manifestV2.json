@@ -9,11 +9,11 @@
     "Description": "Modding API for VR-compatible mods.",
     "GameVersion": "N/A",
     "Dependencies": [
-		"bbepis-BepInExPack-5.4.9"
-	],
+        "bbepis-BepInExPack-5.4.9"
+    ],
     "OptionalDependencies": [
-		"DrBibop-VRMod-2.1.1"
-	],
+        "DrBibop-VRMod-2.1.1"
+    ],
     "Incompatibilities": [],
     "NetworkMode": "client",
     "PackageType": "mod",

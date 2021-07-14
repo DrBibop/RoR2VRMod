@@ -31,11 +31,11 @@ namespace VRAPI
         }
 
         /// <summary>
-		/// Prevents the mod from disabling the specified renderer in the body while in first person.
-		/// </summary>
-		/// <param name="bodyName">The name of the character body object.</param>
-		/// <param name="rendererObjectName">The name of the renderer object.</param>
-		public static void PreventRendererDisable(string bodyName, string rendererObjectName)
+        /// Prevents the mod from disabling the specified renderer in the body while in first person.
+        /// </summary>
+        /// <param name="bodyName">The name of the character body object.</param>
+        /// <param name="rendererObjectName">The name of the renderer object.</param>
+        public static void PreventRendererDisable(string bodyName, string rendererObjectName)
         {
             VRMod.CameraFixes.PreventRendererDisable(bodyName, rendererObjectName);
         }
