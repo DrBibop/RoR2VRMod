@@ -5,13 +5,14 @@ using RoR2;
 using RoR2.Networking;
 using RoR2.UI;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
 
 namespace VRMod
 {
-    internal static class CameraFixes
+    public static class CameraFixes
     {
         private static bool isTurningLeft;
         private static bool wasTurningLeft;
@@ -28,6 +29,22 @@ namespace VRMod
 		private static GameObject spectatorCameraPrefab;
 		private static GameObject spectatorScreenPrefab;
 
+		private static Transform cachedCameraTargetTransform;
+
+		private static CharacterBody _cachedBody;
+		private static CharacterBody cachedBody
+		{
+			get
+			{
+				if (!_cachedBody)
+				{
+					_cachedBody = LocalUserManager.GetFirstLocalUser().cachedBody;
+				}
+				return _cachedBody;
+			}
+		}
+
+		private static List<ForcedVisibleRenderer> forcedVisibleRenderers;
 		internal static void Init()
         {
 			spectatorCameraPrefab = VRMod.VRAssetBundle.LoadAsset<GameObject>("SpectatorCamera");
@@ -49,7 +66,7 @@ namespace VRMod
 
 			if (ModConfig.FirstPerson.Value)
             {
-                On.RoR2.Run.Update += SetBodyInvisible;
+				On.RoR2.Run.Update += SetBodyInvisible;
 
                 On.RoR2.CameraRigController.OnDestroy += (orig, self) =>
                 {
@@ -61,6 +78,12 @@ namespace VRMod
 				On.RoR2.CharacterModel.SetEquipmentDisplay += HideFloatingEquipment;
 
 				On.RoR2.HealingFollowerController.OnStartClient += HideWoodsprite;
+
+				IL.RoR2.CharacterBody.UpdateSingleTemporaryVisualEffect += HideTempEffect;
+
+				On.EntityStates.VagrantNovaItem.BaseVagrantNovaItemState.OnEnter += HideSparks;
+
+				On.EntityStates.LaserTurbine.LaserTurbineBaseState.OnEnter += HideDisc;
             }
 
             On.RoR2.CameraRigController.GetCrosshairRaycastRay += GetVRCrosshairRaycastRay;
@@ -73,6 +96,64 @@ namespace VRMod
 				On.ThreeEyedGames.DecaliciousRenderer.AddUnlit += (orig, self, decal) => { };
 			}
 		}
+
+        private static void HideDisc(On.EntityStates.LaserTurbine.LaserTurbineBaseState.orig_OnEnter orig, EntityStates.LaserTurbine.LaserTurbineBaseState self)
+        {
+			orig(self);
+			if (self.ownerBody == cachedBody)
+            {
+				self.laserTurbineController.showTurbineDisplay = false;
+            }
+        }
+
+        private static void HideSparks(On.EntityStates.VagrantNovaItem.BaseVagrantNovaItemState.orig_OnEnter orig, EntityStates.VagrantNovaItem.BaseVagrantNovaItemState self)
+        {
+			orig(self);
+			if (self.attachedBody == cachedBody)
+            {
+				if (self.chargeSparks)
+                {
+					self.chargeSparks.Stop();
+                }
+            }
+        }
+
+        private static void HideTempEffect(ILContext il)
+        {
+			ILCursor c = new ILCursor(il);
+
+			c.GotoNext(x => x.MatchStfld<TemporaryVisualEffect>("radius"));
+
+			c.Index++;
+
+			c.Emit(OpCodes.Ldarg_0);
+			c.Emit(OpCodes.Ldarg_1);
+			c.Emit(OpCodes.Ldind_Ref);
+			c.EmitDelegate<Action<CharacterBody, TemporaryVisualEffect>>((body, effect) =>
+			{
+				if (body == cachedBody)
+                {
+					Renderer[] renderers = effect.GetComponentsInChildren<Renderer>();
+					foreach (Renderer renderer in renderers)
+                    {
+						renderer.enabled = false;
+                    }
+                }
+			});
+        }
+
+        /// <summary>
+        /// Prevents the mod from disabling the specified renderer in the body.
+        /// </summary>
+        /// <param name="bodyName">The name of the character body object.</param>
+        /// <param name="rendererObjectName">The name of the renderer object.</param>
+        public static void PreventRendererDisable(string bodyName, string rendererObjectName)
+        {
+			if (forcedVisibleRenderers == null)
+				forcedVisibleRenderers = new List<ForcedVisibleRenderer>();
+
+			forcedVisibleRenderers.Add(new ForcedVisibleRenderer(bodyName, rendererObjectName));
+        }
 
         private static void HideWoodsprite(On.RoR2.HealingFollowerController.orig_OnStartClient orig, HealingFollowerController self)
         {
@@ -486,17 +567,33 @@ namespace VRMod
 
         private static void SetBodyInvisible(On.RoR2.Run.orig_Update orig, Run self)
         {
-            Renderer[] renderers = LocalUserManager.GetFirstLocalUser()?.cachedBody?.modelLocator?.modelTransform?.gameObject.GetComponentsInChildren<Renderer>(true);
-            if (renderers != null)
+			if (cachedBody)
             {
-                foreach (Renderer renderer in renderers)
+				Renderer[] renderers;
+
+				if (forcedVisibleRenderers != null)
                 {
-                    if (renderer.gameObject.activeSelf)
-                    {
-                        renderer.gameObject.SetActive(false);
-                    }
-                }
-            }
+					ForcedVisibleRenderer[] visibleBodyRenderers = forcedVisibleRenderers.Where(x => x.bodyName == cachedBody.name.Substring(0, cachedBody.name.IndexOf("(Clone)"))).ToArray();
+
+					renderers = cachedBody.modelLocator?.modelTransform?.gameObject.GetComponentsInChildren<Renderer>().Where(x => !Array.Exists(visibleBodyRenderers, vren => vren.rendererObjectName == x.gameObject.name)).ToArray();
+				}
+				else
+                {
+					renderers = cachedBody.modelLocator?.modelTransform?.gameObject.GetComponentsInChildren<Renderer>();
+
+				}
+				
+				if (renderers != null)
+				{
+					foreach (Renderer renderer in renderers)
+					{
+						if (renderer.gameObject.activeSelf)
+						{
+							renderer.gameObject.SetActive(false);
+						}
+					}
+				}
+			}
 
             orig(self);
         }
@@ -519,19 +616,34 @@ namespace VRMod
 
 						cameraState.rotation = self.sceneCam.transform.rotation;
 
-						Vector3 pos = VRCameraWrapper.instance.transform.position;
-
 						if (self.targetBody)
 						{
-							pos = self.targetBody.transform.position;
+							if (!cachedCameraTargetTransform)
+                            {
+								ChildLocator childLocator = self.targetBody.modelLocator.modelTransform.GetComponent<ChildLocator>();
+								if (childLocator)
+								{
+									cachedCameraTargetTransform = childLocator.FindChild("VRCamera");
+								}
 
-							CapsuleCollider collider = self.targetBody.GetComponent<CapsuleCollider>();
+								if (!cachedCameraTargetTransform)
+								{
+									cachedCameraTargetTransform = new GameObject("VRCamera").transform;
+									cachedCameraTargetTransform.SetParent(self.targetBody.transform);
+									cachedCameraTargetTransform.localPosition = Vector3.zero;
+									cachedCameraTargetTransform.localRotation = Quaternion.identity;
 
-							if (collider)
-								pos.y += (collider.height) / 2;
+									CapsuleCollider collider = self.targetBody.GetComponent<CapsuleCollider>();
+
+									if (collider)
+									{
+										cachedCameraTargetTransform.Translate(collider.center + new Vector3(0, collider.height / 2, 0), Space.Self);
+									}
+								}
+							}
+
+							VRCameraWrapper.instance.transform.position = cachedCameraTargetTransform.position;
 						}
-
-						VRCameraWrapper.instance.transform.position = pos;
 					}
 				}
 
@@ -602,6 +714,18 @@ namespace VRMod
             Quaternion quaternion = Quaternion.Euler(crosshairOffset.y * fieldOfView, crosshairOffset.x * num, 0f);
             quaternion = self.sceneCam.transform.rotation * quaternion;
             return new Ray(Vector3.ProjectOnPlane(self.sceneCam.transform.position - raycastStartPlanePoint, self.sceneCam.transform.rotation * Vector3.forward) + raycastStartPlanePoint, quaternion * Vector3.forward);
+        }
+
+		internal struct ForcedVisibleRenderer
+        {
+			internal string bodyName;
+			internal string rendererObjectName;
+
+			internal ForcedVisibleRenderer(string bodyName, string rendererObjectName)
+            {
+				this.bodyName = bodyName;
+				this.rendererObjectName = rendererObjectName;
+            }
         }
     }
 }
