@@ -181,8 +181,8 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - Fixed a bug that caused MUL-T's left hand animations to break when activating power mode right before transport mode.
 
 ### 2.2.0
-- Compatibility with the new VR API which adds the possibility of VR compatible custom characters.
+- Compatibility with the new VR API which adds the possibility of VR compatible mods such as custom characters.
 - New hand models for all survivors.
-- Equipments that float next to the survivor (woodsprite, saw, meteorite and cube) are now hidden for better visibility.
+- Equipments, items and body effects that were obstructing vision are now hidden for better visibility.
 - Fixed a bug that made bullets and projectiles no longer appear from weapon muzzles after reviving.
 - Fixed a bug that made bullets no longer appear from the main weapon's muzzle on Bandit when disabling Commando's dual wield setting.

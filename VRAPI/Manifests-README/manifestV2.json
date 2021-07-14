@@ -12,7 +12,7 @@
         "bbepis-BepInExPack-5.4.9"
     ],
     "OptionalDependencies": [
-        "DrBibop-VRMod-2.1.1"
+        "DrBibop-VRMod-2.2.0"
     ],
     "Incompatibilities": [],
     "NetworkMode": "client",
