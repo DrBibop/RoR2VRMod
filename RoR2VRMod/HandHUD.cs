@@ -61,7 +61,7 @@ namespace VRMod
         {
             if (hideWhenFacingAway && cameraRig && canvas)
             {
-                bool show = Vector3.Angle(transform.forward, transform.position - cameraRig.sceneCam.transform.position) <= 25;
+                bool show = Vector3.Angle(transform.forward, transform.position - cameraRig.sceneCam.transform.position) <= 30;
 
                 targetScale = show ? origScale : Vector3.zero;
 
