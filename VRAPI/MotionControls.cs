@@ -49,6 +49,11 @@ namespace VRAPI
         {
             get
             {
+                if (_nonDominantHand == null)
+                {
+                    _nonDominantHand = new HandController();
+                }
+
                 if (_nonDominantHand.handController == null)
                 {
                     _nonDominantHand.handController = VRMod.MotionControls.GetHandByDominance(false);

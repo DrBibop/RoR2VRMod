@@ -148,26 +148,6 @@ namespace VRMod
             }
         }
 
-        private static void TransformHereticHandsIL(ILContext il)
-        {
-            ILCursor c = new ILCursor(il);
-
-            c.GotoNext(
-                x => x.MatchCall(typeof(CharacterMaster), "TransformBody")
-            );
-
-            c.Index++;
-
-            c.Emit(OpCodes.Ldarg_0);
-            c.EmitDelegate<Action<CharacterMaster>>((cm) =>
-            {
-                if (cm == LocalUserManager.GetFirstLocalUser().cachedMaster)
-                {
-                    RoR2Application.onFixedUpdate += CheckForLocalBody;
-                }
-            });
-        }
-
         internal static void SetSprintIcon(Image sprintIcon)
         {
             cachedSprintIcon = sprintIcon;
@@ -326,11 +306,7 @@ namespace VRMod
 
             if (!Run.instance) return;
 
-            if (!HandsReady)
-            {
-                VRMod.StaticLogger.LogInfo("Setting up hands from camera");
-                SetupHands();
-            }
+            if (!HandsReady) SetupHands();
 
             dominantHand.smallHud.Init(self);
             nonDominantHand.smallHud.Init(self);
@@ -372,19 +348,6 @@ namespace VRMod
 
             dominantHand.oppositeHand = nonDominantHand;
             nonDominantHand.oppositeHand = dominantHand;
-
-            //RoR2Application.onFixedUpdate += CheckForLocalBody;
-        }
-
-        private static void CheckForLocalBody()
-        {
-            CharacterBody localBody = LocalUserManager.GetFirstLocalUser().cachedBody;
-            if (localBody)
-            {
-                RoR2Application.onFixedUpdate -= CheckForLocalBody;
-                VRMod.StaticLogger.LogInfo(String.Format("Local cached body \'{0}\' found. Applying hand pair.", localBody.name));
-                SetHandPair(localBody);
-            }
         }
 
         private static bool CheckDominance(GameObject prefab, bool dominant)
@@ -398,7 +361,6 @@ namespace VRMod
         {
             if (!HandsReady)
             {
-                VRMod.StaticLogger.LogInfo("Setting up hands from hand pair");
                 SetupHands();
             }
 
