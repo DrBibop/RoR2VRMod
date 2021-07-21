@@ -1,18 +1,19 @@
 ﻿{
     "ManifestVersion": 2,
     "AuthorName": "DrBibop",
-    "Name": "DrBibop-VRMod",
-    "DisplayName": "VR Mod",
-    "Version": "2.2.0",
+    "Name": "DrBibop-VRAPI",
+    "DisplayName": "VRAPI",
+    "Version": "1.0.0",
     "Licence": "MIT",
     "WebsiteURL": "https://github.com/DrBibop/RoR2VRMod",
-    "Description": "Play Risk of Rain 2 in virtual reality! Now with motion controls!",
+    "Description": "Modding API for VR-compatible mods.",
     "GameVersion": "N/A",
     "Dependencies": [
-		"bbepis-BepInExPack-5.4.9",
-		"RiskofThunder-HookGenPatcher-1.2.1"
-	],
-    "OptionalDependencies": [],
+        "bbepis-BepInExPack-5.4.9"
+    ],
+    "OptionalDependencies": [
+        "DrBibop-VRMod-2.2.0"
+    ],
     "Incompatibilities": [],
     "NetworkMode": "client",
     "PackageType": "mod",

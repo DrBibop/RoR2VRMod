@@ -65,6 +65,7 @@ namespace VRMod
             On.RoR2.UI.PauseScreenController.OnEnable += (orig, self) =>
             {
                 orig(self);
+                if (!GetUICamera()) return;
                 camRotation = new Vector3(0, cachedUICam.transform.eulerAngles.y, 0);
                 SetRenderMode(self.gameObject, hdResolution, menuPosition, menuScale, true);
             };
@@ -76,6 +77,7 @@ namespace VRMod
             On.RoR2.UI.GameEndReportPanelController.Awake += (orig, self) =>
             {
                 orig(self);
+                if (!GetUICamera()) return;
                 camRotation = new Vector3(0, cachedUICam.transform.eulerAngles.y, 0);
                 SetRenderMode(self.gameObject, hdResolution, menuPosition, menuScale, true);
             };
@@ -161,8 +163,14 @@ namespace VRMod
         {
             if (cachedUICam == null)
             {
-                GameObject cameraObject = Camera.main.transform.parent.gameObject;
-                cachedUICam = cameraObject.name.Contains("Wrapper") ? cameraObject.GetComponent<VRCameraWrapper>().cameraRigController.uiCam : cameraObject.GetComponent<CameraRigController>().uiCam;
+                if (Camera.main)
+                {
+                    SceneCamera sceneCamera = Camera.main.GetComponent<SceneCamera>();
+                    if (sceneCamera)
+                    {
+                        cachedUICam = sceneCamera.cameraRigController.uiCam;
+                    }
+                }
             }
             return cachedUICam != null;
         }

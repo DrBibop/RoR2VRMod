@@ -1,19 +1,17 @@
 ﻿using RoR2;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 
 namespace VRMod
 {
-    internal class MeleeSwingAbility : MonoBehaviour
+    internal class MeleeSkill : MonoBehaviour
     {
         [SerializeField]
         private Transform weaponTip;
 
         [SerializeField]
-        internal float speedThreshold;
+        public float speedThreshold;
 
         [SerializeField]
         private string[] activatedSkills;
@@ -27,7 +25,7 @@ namespace VRMod
 
         private static CharacterBody body;
 
-        private static List<MeleeSwingAbility> instanceList = new List<MeleeSwingAbility>();
+        private static List<MeleeSkill> instanceList = new List<MeleeSkill>();
 
         private Vector3[] tipPath = new Vector3[3];
 

@@ -199,18 +199,23 @@ namespace VRMod
                     isSwapping = false;
                     RoR2Application.instance.StartCoroutine(ExtendAfterDelay());
                 }
-                else if (GetHandAnimator(false).GetInteger("ToolID") != 0)
+                else
                 {
-                    GetHandAnimator(false).SetFloat("RetoolSpeed", 4f);
-                    GetHandAnimator(false).SetTrigger("RetoolRetract");
-                    RoR2Application.instance.StartCoroutine(ExtendAfterDelay());
+                    Animator animator = GetHandByDominance(false).animator;
+
+                    if (animator.GetInteger("ToolID") != 0)
+                    {
+                        animator.SetFloat("RetoolSpeed", 4f);
+                        animator.SetTrigger("RetoolRetract");
+                        RoR2Application.instance.StartCoroutine(ExtendAfterDelay());
+                    }
                 }
             }
         }
 
         private static void ForceShotgunMuzzle(On.EntityStates.GenericBulletBaseState.orig_FireBullet orig, EntityStates.GenericBulletBaseState self, Ray aimRay)
         {
-            if (IsLocalPlayer(self.characterBody))
+            if (IsLocalPlayer(self.characterBody) && self is EntityStates.Commando.CommandoWeapon.FireShotgunBlast)
             {
                 self.muzzleName = "MuzzleLeft";
             }
@@ -256,8 +261,8 @@ namespace VRMod
             orig(self);
             if (IsLocalPlayer(self.characterBody))
             {
-                GetHandAnimator(true).SetFloat("ShootSpeed", 1f / self.duration);
-                GetHandAnimator(true).SetTrigger("Shoot");
+                GetHandByDominance(true).animator.SetFloat("ShootSpeed", 1f / self.duration);
+                GetHandByDominance(true).animator.SetTrigger("Shoot");
             }
         }
 
@@ -266,8 +271,8 @@ namespace VRMod
             orig(self);
             if (IsLocalPlayer(self.characterBody))
             {
-                GetHandAnimator(true).SetTrigger("Rest");
-                GetHandAnimator(false).SetTrigger("Rest");
+                GetHandByDominance(true).animator.SetTrigger("Rest");
+                GetHandByDominance(false).animator.SetTrigger("Rest");
             }
         }
 
@@ -276,7 +281,7 @@ namespace VRMod
             orig(self);
             if (IsLocalPlayer(self.characterBody))
             {
-                GetHandAnimator(true).SetBool("Ray", false);
+                GetHandByDominance(true).animator.SetBool("Ray", false);
             }
         }
 
@@ -285,7 +290,7 @@ namespace VRMod
             orig(self);
             if (IsLocalPlayer(self.characterBody))
             {
-                GetHandAnimator(true).SetBool("Ray", true);
+                GetHandByDominance(true).animator.SetBool("Ray", true);
             }
         }
 
@@ -294,7 +299,7 @@ namespace VRMod
             orig(self);
             if (IsLocalPlayer(self.characterBody))
             {
-                GetHandAnimator(false).SetBool("Hook", false);
+                GetHandByDominance(false).animator.SetBool("Hook", false);
             }
         }
 
@@ -303,7 +308,7 @@ namespace VRMod
             orig(self);
             if (IsLocalPlayer(self.characterBody))
             {
-                GetHandAnimator(false).SetBool("Hook", true);
+                GetHandByDominance(false).animator.SetBool("Hook", true);
             }
         }
 
@@ -311,7 +316,7 @@ namespace VRMod
         {
             if (IsLocalPlayer(self.characterBody))
             {
-                GetHandAnimator(false).SetTrigger("Push");
+                GetHandByDominance(false).animator.SetTrigger("Push");
             }
             orig(self);
         }
@@ -321,11 +326,11 @@ namespace VRMod
             orig(self);
             if (IsLocalPlayer(self.characterBody))
             {
-                GetHandAnimator(true).SetInteger("SyringeShots", 0);
+                GetHandByDominance(true).animator.SetInteger("SyringeShots", 0);
 
                 if (self.projectilesFired < EntityStates.Treebot.Weapon.FireSyringe.projectileCount)
                 {
-                    GetHandAnimator(true).SetTrigger("ForceReload");
+                    GetHandByDominance(true).animator.SetTrigger("ForceReload");
                 }
             }
         }
@@ -340,10 +345,10 @@ namespace VRMod
 
             if (self.projectilesFired <= 0)
             {
-                GetHandAnimator(true).SetFloat("ReloadSpeed", self.attackSpeedStat);
+                GetHandByDominance(true).animator.SetFloat("ReloadSpeed", self.attackSpeedStat);
             }
             orig(self);
-            GetHandAnimator(true).SetInteger("SyringeShots", self.projectilesFired);
+            GetHandByDominance(true).animator.SetInteger("SyringeShots", self.projectilesFired);
         }
 
         private static void AnimateWallCast(On.EntityStates.Mage.Weapon.PrepWall.orig_OnExit orig, EntityStates.Mage.Weapon.PrepWall self)
@@ -351,16 +356,16 @@ namespace VRMod
             orig(self);
             if (IsLocalPlayer(self.characterBody))
             {
-                GetHandAnimator(false).SetTrigger("Cast");
+                GetHandByDominance(false).animator.SetTrigger("Cast");
             }
         }
 
         private static void AnimateBombCast(On.EntityStates.Mage.Weapon.BaseThrowBombState.orig_OnEnter orig, EntityStates.Mage.Weapon.BaseThrowBombState self)
         {
             orig(self);
-            if (IsLocalPlayer(self.characterBody))
+            if (IsLocalPlayer(self.characterBody) && (self is EntityStates.Mage.Weapon.ThrowNovabomb || self is EntityStates.Mage.Weapon.ThrowIcebomb))
             {
-                GetHandAnimator(false).SetTrigger("Cast");
+                GetHandByDominance(false).animator.SetTrigger("Cast");
             }
         }
 
@@ -369,8 +374,8 @@ namespace VRMod
             orig(self);
             if (IsLocalPlayer(self.characterBody))
             {
-                GetHandAnimator(true).ResetTrigger("Cast");
-                GetHandAnimator(true).SetBool("HoldCast", false);
+                GetHandByDominance(true).animator.ResetTrigger("Cast");
+                GetHandByDominance(true).animator.SetBool("HoldCast", false);
             }
         }
 
@@ -379,7 +384,7 @@ namespace VRMod
             orig(self);
             if (IsLocalPlayer(self.characterBody))
             {
-                GetHandAnimator(true).SetTrigger("Release");
+                GetHandByDominance(true).animator.SetTrigger("Release");
             }
         }
 
@@ -388,7 +393,7 @@ namespace VRMod
             orig(self);
             if (IsLocalPlayer(self.characterBody))
             {
-                GetHandAnimator(true).SetTrigger("Release");
+                GetHandByDominance(true).animator.SetTrigger("Release");
             }
         }
 
@@ -397,7 +402,7 @@ namespace VRMod
             orig(self);
             if (IsLocalPlayer(self.characterBody))
             {
-                GetHandAnimator(true).SetTrigger("Release");
+                GetHandByDominance(true).animator.SetTrigger("Release");
             }
         }
 
@@ -410,14 +415,7 @@ namespace VRMod
                 {
                     self.muzzleName = self.baseMuzzleName;
 
-                    if (self.activatorSkillSlot == self.skillLocator.primary)
-                    {
-                        self.muzzleTransform = GetHandMuzzleByIndex(true, 1);
-                    }
-                    else
-                    {
-                        self.muzzleTransform = GetHandMuzzleByIndex(false, 1);
-                    }
+                    self.muzzleTransform = GetHandByDominance(self.activatorSkillSlot == self.skillLocator.primary).GetMuzzleByIndex(1);
                 }
             }
         }
@@ -427,7 +425,7 @@ namespace VRMod
             orig(self);
             if (IsLocalPlayer(self.characterBody))
             {
-                GetHandAnimator(false).SetFloat("RetoolSpeed", 4f);
+                GetHandByDominance(false).animator.SetFloat("RetoolSpeed", 4f);
                 RoR2Application.instance.StartCoroutine(ExtendAfterDelay());
             }
         }
@@ -435,8 +433,8 @@ namespace VRMod
         private static IEnumerator ExtendAfterDelay()
         {
             yield return new WaitForSeconds(0.25f);
-            GetHandAnimator(false).SetInteger("ToolID", 0);
-            GetHandAnimator(false).SetTrigger("RetoolExtend");
+            GetHandByDominance(false).animator.SetInteger("ToolID", 0);
+            GetHandByDominance(false).animator.SetTrigger("RetoolExtend");
         }
 
         private static void AnimateDualWieldExtend(On.EntityStates.Toolbot.ToolbotDualWieldStart.orig_FixedUpdate orig, EntityStates.Toolbot.ToolbotDualWieldStart self)
@@ -452,8 +450,8 @@ namespace VRMod
 
                     if (currentSkill)
                     {
-                        GetHandAnimator(false).SetInteger("ToolID", Array.IndexOf(multPrimarySkills, currentSkill.skillDef.skillName));
-                        GetHandAnimator(false).SetTrigger("RetoolExtend");
+                        GetHandByDominance(false).animator.SetInteger("ToolID", Array.IndexOf(multPrimarySkills, currentSkill.skillDef.skillName));
+                        GetHandByDominance(false).animator.SetTrigger("RetoolExtend");
                     }
                 }
             }
@@ -466,8 +464,8 @@ namespace VRMod
             {
                 isSwapping = true;
                 halfTime = Run.FixedTimeStamp.now + (self.duration / 2);
-                GetHandAnimator(false).SetFloat("RetoolSpeed", 2f / self.duration);
-                GetHandAnimator(false).SetTrigger("RetoolRetract");
+                GetHandByDominance(false).animator.SetFloat("RetoolSpeed", 2f / self.duration);
+                GetHandByDominance(false).animator.SetTrigger("RetoolRetract");
             }
         }
 
@@ -478,7 +476,7 @@ namespace VRMod
             CharacterBody body = self.characterBody;
             if (IsLocalPlayer(body))
             {
-                GetHandAnimator(body.skillLocator.FindSkillSlot(self.activatorSkillSlot) == SkillSlot.Primary).SetTrigger("BuzzsawSlowdown");
+                GetHandByDominance(body.skillLocator.FindSkillSlot(self.activatorSkillSlot) == SkillSlot.Primary).animator.SetTrigger("BuzzsawSlowdown");
             }
         }
 
@@ -487,8 +485,8 @@ namespace VRMod
             orig(self);
             if (IsLocalPlayer(self.characterBody))
             {
-                GetHandAnimator(true).ResetTrigger("AimGrenade");
-                GetHandAnimator(false).SetTrigger("ThrowGrenade");
+                GetHandByDominance(true).animator.ResetTrigger("AimGrenade");
+                GetHandByDominance(false).animator.SetTrigger("ThrowGrenade");
             }
         }
 
@@ -500,8 +498,8 @@ namespace VRMod
             if (IsLocalPlayer(body))
             {
                 bool dominant = body.skillLocator.FindSkillSlot(self.activatorSkillSlot) == SkillSlot.Primary;
-                GetHandAnimator(dominant).SetFloat("SpearChargeSpeed", 1f / self.duration);
-                GetHandAnimator(dominant).SetTrigger("SpearCharge");
+                GetHandByDominance(dominant).animator.SetFloat("SpearChargeSpeed", 1f / self.duration);
+                GetHandByDominance(dominant).animator.SetTrigger("SpearCharge");
             }
         }
 
@@ -513,7 +511,7 @@ namespace VRMod
 
                 if (currentSkill)
                 {
-                    GetHandAnimator(true).SetInteger("ToolID", Array.IndexOf(multPrimarySkills, currentSkill.skillDef.skillName));
+                    GetHandByDominance(true).animator.SetInteger("ToolID", Array.IndexOf(multPrimarySkills, currentSkill.skillDef.skillName));
                 }
             }
         }
@@ -531,8 +529,8 @@ namespace VRMod
 
                     if (currentSkill)
                     {
-                        GetHandAnimator(true).SetInteger("ToolID", Array.IndexOf(multPrimarySkills, currentSkill.skillDef.skillName));
-                        GetHandAnimator(true).SetTrigger("RetoolExtend");
+                        GetHandByDominance(true).animator.SetInteger("ToolID", Array.IndexOf(multPrimarySkills, currentSkill.skillDef.skillName));
+                        GetHandByDominance(true).animator.SetTrigger("RetoolExtend");
                     }
                 }
             }
@@ -545,8 +543,8 @@ namespace VRMod
             {
                 isSwapping = false;
                 halfTime = Run.FixedTimeStamp.now + (self.baseDuration / (self.attackSpeedStat * 2));
-                GetHandAnimator(true).SetFloat("RetoolSpeed", 2f / (self.baseDuration / self.attackSpeedStat));
-                GetHandAnimator(true).SetTrigger("RetoolRetract");
+                GetHandByDominance(true).animator.SetFloat("RetoolSpeed", 2f / (self.baseDuration / self.attackSpeedStat));
+                GetHandByDominance(true).animator.SetTrigger("RetoolRetract");
             }
         }
 
@@ -557,7 +555,7 @@ namespace VRMod
             CharacterBody body = self.characterBody;
             if (IsLocalPlayer(body))
             {
-                GetHandAnimator(body.skillLocator.FindSkillSlot(self.activatorSkillSlot) == SkillSlot.Primary).SetTrigger("NailgunSlowdown");
+                GetHandByDominance(body.skillLocator.FindSkillSlot(self.activatorSkillSlot) == SkillSlot.Primary).animator.SetTrigger("NailgunSlowdown");
             }
         }
 
@@ -575,7 +573,7 @@ namespace VRMod
             orig(self);
             if (IsLocalPlayer(self.characterBody) && self.hasSuccessfullyThrownGlaive)
             {
-                GetHandAnimator(false).SetTrigger("ThrowGlaive");
+                GetHandByDominance(false).animator.SetTrigger("ThrowGlaive");
             }
         }
 
@@ -584,8 +582,8 @@ namespace VRMod
             orig(self);
             if (IsLocalPlayer(self.characterBody))
             {
-                GetHandAnimator(true).SetFloat("SpinSpeed", 1f / self.duration);
-                GetHandAnimator(true).SetTrigger("RevolverSpin");
+                GetHandByDominance(true).animator.SetFloat("SpinSpeed", 1f / self.duration);
+                GetHandByDominance(true).animator.SetTrigger("RevolverSpin");
             }
         }
 
@@ -609,7 +607,7 @@ namespace VRMod
         {
             if (IsLocalPlayer(self.characterBody))
             {
-                GetHandAnimator(false).SetTrigger("Rest");
+                GetHandByDominance(false).animator.SetTrigger("Rest");
                 string muzzleString = EntityStates.Captain.Weapon.FireTazer.targetMuzzle;
                 EntityStates.Captain.Weapon.FireTazer.targetMuzzle = "CurrentNonDominantMuzzle";
                 orig(self);
@@ -649,7 +647,7 @@ namespace VRMod
 
             if (!IsLocalPlayer(self.characterBody)) return;
 
-            self.dashVector = GetHandCurrentMuzzle(false).forward;
+            self.dashVector = GetHandByDominance(false).muzzle.forward;
         }
 
         private static void ForceFocusedDashDirection(On.EntityStates.Merc.FocusedAssaultDash.orig_OnEnter orig, EntityStates.Merc.FocusedAssaultDash self)
@@ -658,7 +656,7 @@ namespace VRMod
 
             if (!IsLocalPlayer(self.characterBody)) return;
 
-            self.dashVector = GetHandCurrentMuzzle(false).forward;
+            self.dashVector = GetHandByDominance(false).muzzle.forward;
         }
 
         private static void ForceWhirlwindDirection(On.EntityStates.Merc.WhirlwindBase.orig_FixedUpdate orig, EntityStates.Merc.WhirlwindBase self)
@@ -678,7 +676,7 @@ namespace VRMod
 
             if (!IsLocalPlayer(self.characterBody)) return;
 
-            abilityDirection = GetHandCurrentMuzzle(false).forward;
+            abilityDirection = GetHandByDominance(false).muzzle.forward;
 
             if (self.characterDirection)
                 self.characterDirection.forward = abilityDirection;
@@ -690,7 +688,7 @@ namespace VRMod
 
             if (!IsLocalPlayer(self.characterBody)) return;
 
-            abilityDirection = GetHandCurrentMuzzle(false).forward;
+            abilityDirection = GetHandByDominance(false).muzzle.forward;
 
             if (self.characterDirection)
                 self.characterDirection.forward = abilityDirection;
@@ -702,7 +700,7 @@ namespace VRMod
 
             if (!IsLocalPlayer(self.characterBody)) return;
 
-            abilityDirection = GetHandCurrentMuzzle(false).forward;
+            abilityDirection = GetHandByDominance(false).muzzle.forward;
 
             if (self.characterDirection)
                 self.characterDirection.forward = abilityDirection;
@@ -733,7 +731,7 @@ namespace VRMod
         private static Ray GetLeftAimRay(On.RoR2.EquipmentSlot.orig_GetAimRay orig, EquipmentSlot self)
         {
             if (IsLocalPlayer(self.characterBody))
-                return GetHandRayBySide(true);
+                return GetHandBySide(true).aimRay;
             else
                 return orig(self);
         }
@@ -750,7 +748,7 @@ namespace VRMod
                 bool useLeftHand;
                 if (forceAimRaySideTypes.TryGetValue(callerType, out useLeftHand))
                 {
-                    return GetHandRayBySide(useLeftHand);
+                    return GetHandBySide(useLeftHand).aimRay;
                 }
                 
                 return originalAimRay;
@@ -769,7 +767,7 @@ namespace VRMod
 
             if (self.hasEffectiveAuthority && self.body && self.bodyInputs && self.bodyInputs.ping.justPressed)
             {
-                self.pingerController.AttemptPing(GetHandRayBySide(false), self.body.gameObject);
+                self.pingerController.AttemptPing(GetHandBySide(false).aimRay, self.body.gameObject);
             }
         }
 
@@ -821,7 +819,7 @@ namespace VRMod
         {
             if (IsLocalPlayer(self.characterBody))
             {
-                return GetHandCurrentMuzzle(false).transform.forward;
+                return GetHandByDominance(false).muzzle.forward;
             }
             return orig(self);
         }
@@ -830,19 +828,18 @@ namespace VRMod
         {
             if (IsLocalPlayer(self.characterBody))
             {
-                if (self.outer.customName == "Weapon2" || nonDominantHandStateTypes.Contains(self.GetType()))
-                    return GetHandRayByDominance(false);
+                bool isMULT = self.characterBody.name.Contains("ToolbotBody");
 
-                if (self is EntityStates.GenericProjectileBaseState)
+                if (nonDominantHandStateTypes.Contains(self.GetType()) || (isMULT && self.outer.customName == "Weapon2"))
+                    return GetHandByDominance(false).aimRay;
+
+                if (isMULT && self is EntityStates.GenericProjectileBaseState)
                 {
                     EntityStates.GenericProjectileBaseState projSelf = (EntityStates.GenericProjectileBaseState)self;
 
-                    if (projSelf.targetMuzzle.Contains("Left") || projSelf.targetMuzzle == "DualWieldMuzzleR")
-                        return GetHandRayByDominance(false);
+                    if (isMULT && projSelf.targetMuzzle == "DualWieldMuzzleR")
+                        return GetHandByDominance(false).aimRay;
                 }
-
-                if (self is EntityStates.GenericBulletBaseState && ((EntityStates.GenericBulletBaseState)self).muzzleName.Contains("Left"))
-                    return GetHandRayByDominance(false);
             }
             return orig(self);
         }
@@ -851,7 +848,7 @@ namespace VRMod
         {
             if (IsLocalPlayer(self.characterBody))
             {
-                GetHandAnimator(true).SetBool("ShowCluster", false);
+                GetHandByDominance(true).animator.SetBool("ShowCluster", false);
             }
             orig(self);
         }
@@ -861,10 +858,10 @@ namespace VRMod
             orig(self);
             if (IsLocalPlayer(self.characterBody))
             {
-                GetHandAnimator(true).SetTrigger("Primary");
+                GetHandByDominance(true).animator.SetTrigger("Primary");
 
                 if (self.primarySkillSlot.stock > 0)
-                    GetHandAnimator(true).SetTrigger("Pull");
+                    GetHandByDominance(true).animator.SetTrigger("Pull");
             }
         }
 
@@ -873,7 +870,7 @@ namespace VRMod
             orig(self);
             if (IsLocalPlayer(self.characterBody))
             {
-                GetHandAnimator(true).SetTrigger("Primary");
+                GetHandByDominance(true).animator.SetTrigger("Primary");
             }
         }
 
@@ -881,8 +878,8 @@ namespace VRMod
         {
             if (IsLocalPlayer(self.characterBody))
             {
-                GetHandAnimator(true).SetBool("ShowCluster", true);
-                GetHandAnimator(true).SetTrigger("Pull");
+                GetHandByDominance(true).animator.SetBool("ShowCluster", true);
+                GetHandByDominance(true).animator.SetTrigger("Pull");
             }
             orig(self);
         }
@@ -904,10 +901,10 @@ namespace VRMod
 
             if (IsLocalPlayer(self.characterBody))
             {
-                GetHandAnimator(true).SetTrigger("Primary");
+                GetHandByDominance(true).animator.SetTrigger("Primary");
 
                 if (!preventBowPull && self.firedArrowCount < self.maxArrowCount)
-                    GetHandAnimator(true).SetTrigger("Pull");
+                    GetHandByDominance(true).animator.SetTrigger("Pull");
             }
         }
 
@@ -938,7 +935,7 @@ namespace VRMod
                 c.Remove();
                 c.EmitDelegate<Func<Player, int, bool>>((player, button) =>
                     {
-                        return player.GetButton(button) || MeleeSwingAbility.skillStates[button - 7];
+                        return player.GetButton(button) || MeleeSkill.skillStates[button - 7];
                     }
                 );
             }
@@ -948,7 +945,7 @@ namespace VRMod
         {
             if (IsLocalPlayer(self.characterBody))
             {
-                GetHandAnimator(false).SetTrigger("Primary");
+                GetHandByDominance(false).animator.SetTrigger("Primary");
             }
             orig(self, duration);
         }
@@ -957,7 +954,7 @@ namespace VRMod
         {
             if (IsLocalPlayer(self.characterBody))
             {
-                GetHandAnimator(true).SetTrigger("Primary");
+                GetHandByDominance(true).animator.SetTrigger("Primary");
             }
             orig(self);
         }
@@ -971,8 +968,8 @@ namespace VRMod
             if (self.leftFlamethrowerTransform)
                 GameObject.Destroy(self.leftFlamethrowerTransform.gameObject);
 
-            GetHandAnimator(true).SetBool("HoldCast", true);
-            GetHandAnimator(true).SetTrigger("Cast");
+            GetHandByDominance(true).animator.SetBool("HoldCast", true);
+            GetHandByDominance(true).animator.SetTrigger("Cast");
         }
         private static void SetFMJMuzzle(On.EntityStates.GenericProjectileBaseState.orig_FireProjectile orig, EntityStates.GenericProjectileBaseState self)
         {
@@ -991,10 +988,14 @@ namespace VRMod
                 if (!ModConfig.CommandoDualWield.Value)
                 {
                     self.muzzleName = "MuzzleLeft";
-                    aimRay = GetHandRayByDominance(false);
                 }
 
-                Animator animator = GetHandAnimator(!self.muzzleName.Contains("Left") && ModConfig.CommandoDualWield.Value);
+                if (self.muzzleName == "MuzzleLeft")
+                {
+                    aimRay = GetHandByDominance(false).aimRay;
+                }
+
+                Animator animator = GetHandByDominance(!self.muzzleName.Contains("Left") && ModConfig.CommandoDualWield.Value).animator;
 
                 if (animator)
                     animator.SetTrigger("Primary");
@@ -1012,16 +1013,16 @@ namespace VRMod
 
                 if (targetMuzzle.Contains("Left"))
                 {
-                    self.aimRay = GetHandRayByDominance(false);
+                    self.aimRay = GetHandByDominance(false).aimRay;
 
-                    Animator animator = GetHandAnimator(false);
+                    Animator animator = GetHandByDominance(false).animator;
 
                     if (animator)
                         animator.SetTrigger("Primary");
                 }
                 else
                 {
-                    Animator animator = GetHandAnimator(true);
+                    Animator animator = GetHandByDominance(true).animator;
 
                     if (animator)
                         animator.SetTrigger("Primary");

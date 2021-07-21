@@ -5,7 +5,7 @@ using UnityEngine.XR;
 
 namespace VRMod
 {
-    internal class HandSelector : MonoBehaviour
+    public class HandController : MonoBehaviour
     {
         [SerializeField]
         private LineRenderer ray;
@@ -19,11 +19,24 @@ namespace VRMod
         [SerializeField]
         internal HandHUD watchHud;
 
+        public Animator animator => currentHand.animator;
+
+        public Ray aimRay
+        {
+            get
+            {
+                Transform muzzle = currentHand.currentMuzzle.transform;
+                return new Ray(muzzle.position, muzzle.forward);
+            }
+        }
+
+        public Transform muzzle => currentHand.currentMuzzle.transform;
+
         internal Hand currentHand { get; private set; }
 
         internal XRNode xrNode;
 
-        internal HandSelector oppositeHand;
+        internal HandController oppositeHand;
 
         internal bool forceRay;
 
@@ -47,8 +60,8 @@ namespace VRMod
 
             if (XRSettings.loadedDeviceName == "OpenVR")
             {
-                transform.Rotate(new Vector3(35, 0, 0), Space.Self);
-                transform.Translate(new Vector3(0, -0.04f, -0.02f), Space.Self);
+                transform.Rotate(new Vector3(40, 0, 0), Space.Self);
+                transform.Translate(new Vector3(0, -0.03f, -0.05f), Space.Self);
             }
         }
 
@@ -71,6 +84,16 @@ namespace VRMod
                 ray.SetPosition(0, currentHand.currentMuzzle.transform.position);
                 ray.SetPosition(1, GetRayHitPosition());
             }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public Transform GetMuzzleByIndex(uint index)
+        {
+            return currentHand.muzzles[index].transform;
         }
 
         internal void ResetToPointer()
@@ -117,12 +140,6 @@ namespace VRMod
             handPrefabs = prefabs;
         }
 
-        internal Ray GetRay()
-        {
-            Transform muzzle = currentHand.currentMuzzle.transform;
-            return new Ray(muzzle.position, muzzle.forward);
-        }
-
         private void SetCurrentHand(Hand hand)
         {
             if (currentHand)
@@ -140,7 +157,7 @@ namespace VRMod
                 return Vector3.zero;
 
             RaycastHit hitInfo;
-            if (Physics.Raycast(GetRay(), out hitInfo, 300, LayerMask.GetMask("Ragdoll")))
+            if (Physics.Raycast(aimRay, out hitInfo, 300, LayerMask.GetMask("Ragdoll")))
             {
                 return hitInfo.point;
             }

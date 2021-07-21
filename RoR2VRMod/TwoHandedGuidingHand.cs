@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace VRMod
 {
-    internal class TwoHandedAimTarget : MonoBehaviour
+    internal class TwoHandedGuidingHand : MonoBehaviour
     {
         [SerializeField]
         internal Transform guidingTransform;
