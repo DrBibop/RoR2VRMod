@@ -267,6 +267,10 @@ namespace VRMod
                 }
             }
 
+            Transform steamBuild = hud.mainContainer.transform.Find("SteamBuildLabel");
+            if (steamBuild)
+                steamBuild.gameObject.SetActive(false);
+
             RectTransform springCanvas = hud.mainUIPanel.transform.Find("SpringCanvas") as RectTransform;
             springCanvas.anchorMin = ModConfig.AnchorMin;
             springCanvas.anchorMax = ModConfig.AnchorMax;
@@ -356,7 +360,8 @@ namespace VRMod
                 MotionControls.AddWatchHUD(false, alliesCluster);
             }
 
-            hud.gameObject.AddComponent<SmoothHUD>().Init(hud.cameraRigController);
+            if (ModConfig.SmoothHUD.Value)
+                hud.gameObject.AddComponent<SmoothHUD>().Init(hud.cameraRigController);
         }
 
         private static void UpdateAllHealthBarPositionsVR(On.RoR2.UI.CombatHealthBarViewer.orig_UpdateAllHealthbarPositions orig, RoR2.UI.CombatHealthBarViewer self, Camera sceneCam, Camera uiCam)

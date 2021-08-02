@@ -44,6 +44,19 @@ namespace VRMod
             }
         }
 
+        private static CharacterMaster _cachedMaster;
+        private static CharacterMaster cachedMaster
+        {
+            get
+            {
+                if (!_cachedMaster)
+                {
+                    _cachedMaster = LocalUserManager.GetFirstLocalUser().cachedMaster;
+                }
+                return _cachedMaster;
+            }
+        }
+
         private static List<ForcedVisibleRenderer> forcedVisibleRenderers;
         internal static void Init()
         {
@@ -179,7 +192,7 @@ namespace VRMod
                 RoR2Content.Equipment.Meteor.equipmentIndex
             };
             
-            if (self.body != LocalUserManager.GetFirstLocalUser().cachedBody || !equipmentsToHide.Contains(newEquipmentIndex))
+            if (!self.body.master || self.body.master != cachedMaster || !equipmentsToHide.Contains(newEquipmentIndex))
             {
                 orig(self, newEquipmentIndex);
             }
