@@ -186,3 +186,7 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - Equipments, items and body effects that were obstructing vision are now hidden for better visibility.
 - Fixed a bug that made bullets and projectiles no longer appear from weapon muzzles after reviving.
 - Fixed a bug that made bullets no longer appear from the main weapon's muzzle on Bandit when disabling Commando's dual wield setting.
+
+### 2.2.1
+- Fixed a bug that caused the Smooth HUD config to be ineffective.
+- Fixed a bug that caused floating equipments to re-appear when teleporting to a new stage.
