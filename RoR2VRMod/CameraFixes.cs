@@ -20,8 +20,10 @@ namespace VRMod
         private static bool isTurningRight;
         private static bool wasTurningRight;
 
-        private static bool justTurnedLeft => isTurningLeft && !wasTurningLeft;
-        private static bool justTurnedRight => isTurningRight && !wasTurningRight;
+        private static bool justTurnedLeft => isTurningLeft && (!wasTurningLeft || timeSinceLastSnapTurn > ModConfig.SnapTurnHoldDelay.Value);
+        private static bool justTurnedRight => isTurningRight && (!wasTurningRight || timeSinceLastSnapTurn > ModConfig.SnapTurnHoldDelay.Value);
+
+        private static float timeSinceLastSnapTurn = 0f;
 
         private static GameObject spectatorCamera;
         private static GameObject spectatorScreen;
@@ -90,6 +92,8 @@ namespace VRMod
 
                 On.RoR2.CharacterModel.SetEquipmentDisplay += HideFloatingEquipment;
 
+                On.RoR2.ItemFollower.Start += HideFloatingItems;
+
                 On.RoR2.HealingFollowerController.OnStartClient += HideWoodsprite;
 
                 IL.RoR2.CharacterBody.UpdateSingleTemporaryVisualEffect += HideTempEffect;
@@ -108,6 +112,22 @@ namespace VRMod
                 On.ThreeEyedGames.DecaliciousRenderer.AddDeferred += (orig, self, decal) => { };
                 On.ThreeEyedGames.DecaliciousRenderer.AddUnlit += (orig, self, decal) => { };
             }
+        }
+
+        private static void HideFloatingItems(On.RoR2.ItemFollower.orig_Start orig, ItemFollower self)
+        {
+            CharacterModel componentInParent = self.GetComponentInParent<CharacterModel>();
+            if (componentInParent)
+            {
+                CharacterBody body = componentInParent.body;
+                if (body && body == cachedBody)
+                {
+                    self.enabled = false;
+                    return;
+                }
+            }
+
+            orig(self);
         }
 
         private static void HideDisc(On.EntityStates.LaserTurbine.LaserTurbineBaseState.orig_OnEnter orig, EntityStates.LaserTurbine.LaserTurbineBaseState self)
@@ -391,6 +411,15 @@ namespace VRMod
                         num14 = -ModConfig.SnapTurnAngle.Value;
                     else if (justTurnedRight)
                         num14 = ModConfig.SnapTurnAngle.Value;
+
+                    if ((isTurningLeft || isTurningRight) && timeSinceLastSnapTurn <= ModConfig.SnapTurnHoldDelay.Value)
+                    {
+                        timeSinceLastSnapTurn += Time.deltaTime;
+                    }
+                    else
+                    {
+                        timeSinceLastSnapTurn = 0;
+                    }
 
                     num15 = 0f;
                 }

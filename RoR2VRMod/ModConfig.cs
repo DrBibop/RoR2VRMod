@@ -38,6 +38,7 @@ namespace VRMod
 
         internal static ConfigEntry<bool> SnapTurn { get; private set; }
         internal static ConfigEntry<float> SnapTurnAngle { get; private set; }
+        internal static ConfigEntry<float> SnapTurnHoldDelay { get; private set; }
         internal static ConfigEntry<bool> LockedCameraPitch { get; private set; }
         internal static ConfigEntry<bool> UseMotionControls { get; private set; }
         internal static ConfigEntry<bool> LeftDominantHand { get; private set; }
@@ -221,6 +222,12 @@ namespace VRMod
                 "Snap turn angle",
                 45,
                 "Rotation in degrees of each snap turn."
+            );
+            SnapTurnHoldDelay = configFile.Bind<float>(
+                "Controls",
+                "Snap turn hold delay",
+                0.33f,
+                "Time in seconds between each snap turn when holding a direction."
             );
 
             LockedCameraPitch = configFile.Bind<bool>(
