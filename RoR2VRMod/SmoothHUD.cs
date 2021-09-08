@@ -24,7 +24,7 @@ namespace VRMod
             float delta = Quaternion.Angle(smoothHUDRotation, cameraRig.uiCam.transform.rotation);
             if (delta > 0f)
             {
-                float t = Mathf.Lerp(delta, 0f, 1f - Mathf.Pow(0.03f, Time.deltaTime));
+                float t = Mathf.Lerp(delta, 0f, 1f - Mathf.Pow(0.03f, Time.unscaledDeltaTime));
                 t = 1.0f - (t / delta);
                 smoothHUDRotation = Quaternion.Slerp(smoothHUDRotation, cameraRig.uiCam.transform.rotation, t);
             }

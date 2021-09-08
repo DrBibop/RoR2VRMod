@@ -57,8 +57,6 @@ namespace VRMod
             On.RoR2.CharacterBody.OnSprintStart += OnSprintStart;
             On.RoR2.CharacterBody.OnSprintStop += OnSprintStop;
 
-            //IL.RoR2.CharacterMaster.OnInventoryChanged += TransformHereticHandsIL;
-
             On.RoR2.CharacterModel.UpdateMaterials += UpdateHandMaterials;
 
             PlayerCharacterMasterController.onPlayerAdded += (pcmc) =>
@@ -83,6 +81,8 @@ namespace VRMod
                     onSkinApplied();
                 }
             };
+
+            On.RoR2.CharacterBody.OnInventoryChanged += OnInventoryChanged;
 
             handSelectorPrefab = VRMod.VRAssetBundle.LoadAsset<GameObject>("VRHand");
 
@@ -146,6 +146,37 @@ namespace VRMod
                     AddHandPrefab(prefab);
                 }
             }
+        }
+
+        private static void OnInventoryChanged(On.RoR2.CharacterBody.orig_OnInventoryChanged orig, CharacterBody self)
+        {
+            orig(self);
+
+            if (self != currentBody) return;
+
+            EquipmentDef[] aimableEquipments = new EquipmentDef[]
+            {
+                RoR2Content.Equipment.Blackhole,
+                RoR2Content.Equipment.BFG,
+                RoR2Content.Equipment.GoldGat,
+                RoR2Content.Equipment.CrippleWard,
+                RoR2Content.Equipment.Gateway,
+                RoR2Content.Equipment.Saw
+            };
+
+            EquipmentDef currentEquipment = EquipmentCatalog.GetEquipmentDef(self.inventory.currentEquipmentIndex);
+
+            dominantHand.forceRay = false;
+            nonDominantHand.forceRay = false;
+
+            if (aimableEquipments.Contains(currentEquipment))
+                (ModConfig.LeftDominantHand.Value != (currentEquipment == RoR2Content.Equipment.GoldGat) ? dominantHand : nonDominantHand).forceRay = true;
+
+            if (self.inventory.GetItemCount(RoR2Content.Items.LunarPrimaryReplacement.itemIndex) > 0)
+                dominantHand.forceRay = true;
+
+            if (self.inventory.GetItemCount(RoR2Content.Items.LunarSecondaryReplacement.itemIndex) > 0)
+                nonDominantHand.forceRay = true;
         }
 
         internal static void SetSprintIcon(Image sprintIcon)

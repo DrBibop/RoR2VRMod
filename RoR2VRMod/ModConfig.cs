@@ -26,6 +26,7 @@ namespace VRMod
 
         internal static ConfigEntry<bool> WristHUD { get; private set; }
         internal static ConfigEntry<bool> WatchHUD { get; private set; }
+        internal static ConfigEntry<bool> BetterHealthBar { get; private set; }
         internal static ConfigEntry<bool> SmoothHUD { get; private set; }
         internal static ConfigEntry<int> HUDWidth { get; private set; }
         internal static ConfigEntry<int> HUDHeight { get; private set; }
@@ -164,6 +165,12 @@ namespace VRMod
                 "Watch HUD",
                 true,
                 "TRUE: Attaches the inventory, chat, objective and allies to a watch that appears when looking at it. FALSE: Attaches the inventory, chat, objective and allies to the camera."
+            );
+            BetterHealthBar = configFile.Bind<bool>(
+                "HUD Settings",
+                "Camera Health Bar",
+                true,
+                "TRUE: Makes the health bar more visible by placing it on the bottom-middle of the camera HUD. FALSE: Places the healthbar on the left wrist HUD (if the wrist HUD setting is enabled)."
             );
             SmoothHUD = configFile.Bind<bool>(
                 "HUD Settings",

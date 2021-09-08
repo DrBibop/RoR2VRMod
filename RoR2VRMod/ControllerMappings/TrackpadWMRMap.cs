@@ -24,10 +24,13 @@ namespace VRMod.ControllerMappings
                     { 10, "<sprite name=\"texVRGlyphs_LMenu\">" },
                     { 11, "<sprite name=\"texVRGlyphs_RTouchUp\">" },
                     { 12, "<sprite name=\"texVRGlyphs_LTouchPress\">" },
-                    { 13, "<sprite name=\"texVRGlyphs_RMenu\">" }
+                    { 13, "<sprite name=\"texVRGlyphs_RMenu\">" },
+                    { 14, "<sprite name=\"texVRGlyphs_LMenuHold\">" }
                 };
 
             leftTouchpadDoublePress = new DoublePressButton(leftID, 8);
+
+            base.holdableMenuButton.buttonId = 2;
         }
 
         internal override float GetLeftJoyX()
@@ -48,11 +51,6 @@ namespace VRMod.ControllerMappings
         internal override bool GetRightPrimary()
         {
             return UnityInputHelper.GetJoystickButtonValueByJoystickIndex(rightJoyID, 9) && UnityInputHelper.GetJoystickAxisRawValueByJoystickIndex(rightJoyID, 19) > 0.5f;
-        }
-
-        internal override bool GetLeftSecondary()
-        {
-            return UnityInputHelper.GetJoystickButtonValueByJoystickIndex(leftJoyID, 2);
         }
 
         internal override bool GetRightSecondary()

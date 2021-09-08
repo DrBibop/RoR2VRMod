@@ -113,7 +113,7 @@ namespace VRMod
             if (!currentHand) return;
 
             if (ray.gameObject.activeSelf != (currentHand.useRay || forceRay))
-                ray.gameObject.SetActive(currentHand.useRay);
+                ray.gameObject.SetActive(currentHand.useRay || forceRay);
 
             if (ray.gameObject.activeSelf)
             {

@@ -243,6 +243,7 @@ namespace VRMod
                 new ActionElementMap(9 , ControllerElementType.Button, (ModConfig.LeftDominantHand.Value ? 7 : 6) , Pole.Positive, AxisRange.Positive, false),
                 new ActionElementMap(10, ControllerElementType.Button, (ModConfig.LeftDominantHand.Value ? 6 : 7) , Pole.Positive, AxisRange.Positive, false),
                 new ActionElementMap(18, ControllerElementType.Button, 12, Pole.Positive, AxisRange.Full, false),
+                new ActionElementMap(19, ControllerElementType.Button, 14, Pole.Positive, AxisRange.Full, false),
                 new ActionElementMap(28, ControllerElementType.Button, 13, Pole.Positive, AxisRange.Full, false)
             };
 
@@ -293,9 +294,10 @@ namespace VRMod
                     new ControllerElementIdentifier(10, "LeftSecondary", "", "", ControllerElementType.Button, true),
                     new ControllerElementIdentifier(11, "RightSecondary", "", "", ControllerElementType.Button, true),
                     new ControllerElementIdentifier(12, "LeftStickPress", "", "", ControllerElementType.Button, true),
-                    new ControllerElementIdentifier(13, "RightStickPress", "", "", ControllerElementType.Button, true)
+                    new ControllerElementIdentifier(13, "RightStickPress", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(14, "LeftSecondaryHold", "", "", ControllerElementType.Button, true),
                 },
-                new int[] { 8, 9, 10, 11, 12, 13 },
+                new int[] { 8, 9, 10, 11, 12, 13, 14 },
                 new int[] { 0, 1, 2, 3, 4, 5, 6, 7 },
                 new AxisCalibrationData[]
                 {
@@ -332,6 +334,7 @@ namespace VRMod
                 },
                 new HardwareButtonInfo[]
                 {
+                    new HardwareButtonInfo(false, false),
                     new HardwareButtonInfo(false, false),
                     new HardwareButtonInfo(false, false),
                     new HardwareButtonInfo(false, false),
@@ -493,6 +496,7 @@ namespace VRMod
             vrControllers.SetButtonValue(3, controllerMap.GetRightSecondary());
             vrControllers.SetButtonValue(4, controllerMap.GetLeftJoyPress());
             vrControllers.SetButtonValue(5, controllerMap.GetRightJoyPress());
+            vrControllers.SetButtonValue(6, controllerMap.GetLeftSecondaryHold());
         }
 
         private static void SelectMapFromName(string name, int leftID, int rightID)

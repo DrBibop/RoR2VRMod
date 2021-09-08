@@ -283,6 +283,10 @@ namespace VRMod
             mapNameCluster.anchorMin = new Vector2(0.5f, (ModConfig.AnchorMax.y - 0.5f) * 0.54f + 0.5f);
             mapNameCluster.anchorMax = new Vector2(0.5f, (ModConfig.AnchorMax.y - 0.5f) * 0.54f + 0.5f);
 
+            RectTransform scoreboardPanel = springCanvas.Find("ScoreboardPanel") as RectTransform;
+            scoreboardPanel.offsetMin = new Vector2(0, scoreboardPanel.offsetMin.y);
+            scoreboardPanel.offsetMax = new Vector2(0, scoreboardPanel.offsetMax.y);
+
             if (!GetUICamera()) return;
 
             hud.canvas.renderMode = RenderMode.WorldSpace;
@@ -300,8 +304,18 @@ namespace VRMod
                 RectTransform healthCluster = springCanvas.Find("BottomLeftCluster/BarRoots") as RectTransform;
                 healthCluster.localRotation = Quaternion.identity;
                 healthCluster.pivot = new Vector2(0.5f, 0f);
-                healthCluster.localPosition = Vector3.zero;
-                MotionControls.AddWristHUD(true, healthCluster);
+
+                if (ModConfig.BetterHealthBar.Value)
+                {
+                    healthCluster.SetParent(springCanvas);
+                    healthCluster.offsetMin = new Vector2(300, healthCluster.offsetMin.y);
+                    healthCluster.offsetMax = new Vector2(-300, healthCluster.offsetMax.y);
+                }
+                else
+                {
+                    healthCluster.localPosition = Vector3.zero;
+                    MotionControls.AddWristHUD(true, healthCluster);
+                }
 
                 RectTransform moneyCluster = springCanvas.Find("UpperLeftCluster") as RectTransform;
                 moneyCluster.localRotation = Quaternion.identity;

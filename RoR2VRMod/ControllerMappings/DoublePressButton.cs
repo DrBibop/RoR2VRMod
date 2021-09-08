@@ -50,13 +50,13 @@ namespace VRMod.ControllerMappings
 
             if (doublePressTimer > 0 && doublePressTimer <= 0.3f)
             {
-                doublePressTimer += Time.deltaTime;
+                doublePressTimer += Time.unscaledDeltaTime;
 
                 if (justPressed)
                     hasDoublePressed = true;
             }
             else if (justPressed)
-                doublePressTimer = Time.deltaTime;
+                doublePressTimer = Time.unscaledDeltaTime;
 
             return;
         }
