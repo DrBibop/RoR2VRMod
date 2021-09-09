@@ -302,17 +302,18 @@ namespace VRMod
             if (ModConfig.WristHUD.Value)
             {
                 RectTransform healthCluster = springCanvas.Find("BottomLeftCluster/BarRoots") as RectTransform;
-                healthCluster.localRotation = Quaternion.identity;
                 healthCluster.pivot = new Vector2(0.5f, 0f);
 
                 if (ModConfig.BetterHealthBar.Value)
                 {
                     healthCluster.SetParent(springCanvas);
+                    healthCluster.localRotation = Quaternion.identity;
                     healthCluster.offsetMin = new Vector2(300, healthCluster.offsetMin.y);
                     healthCluster.offsetMax = new Vector2(-300, healthCluster.offsetMax.y);
                 }
                 else
                 {
+                    healthCluster.localRotation = Quaternion.identity;
                     healthCluster.localPosition = Vector3.zero;
                     MotionControls.AddWristHUD(true, healthCluster);
                 }
