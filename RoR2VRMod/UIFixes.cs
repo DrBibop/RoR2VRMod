@@ -47,6 +47,11 @@ namespace VRMod
                 orig(self, controller);
                 SetRenderMode(self.gameObject, menuResolution, menuPosition, menuScale);
             };
+            On.RoR2.UI.MainMenu.MultiplayerMenuController.Awake += (orig, self) =>
+            {
+                orig(self);
+                self.gameObject.layer = LayerMask.NameToLayer("UI");
+            };
             On.RoR2.UI.LogBook.LogBookController.Start += (orig, self) =>
             {
                 orig(self);

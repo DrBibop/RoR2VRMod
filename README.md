@@ -199,3 +199,4 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - The aim ray will now activate on the appropriate hand when you have an aimable equipment or heresy skills.
 - The Soulbound Catalyst and the Frost Relic no longer appear around the player.
 - Fixed a bug that caused the camera HUD to freeze in place while paused.
+- Fixed a bug that caused parts of the multiplayer menu to not render properly creating an offset.
