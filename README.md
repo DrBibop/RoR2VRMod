@@ -196,6 +196,8 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - Snap turns will now repeat when holding a direction.
 - Added a "Snap Turn Hold Delay" setting.
 - Added a "Camera Health Bar" setting which puts the health bar at the bottom-middle of the camera HUD for better visibility.
+- Added a new EXPERIMENTAL "Roomscale Tracking Space" setting.
+- Added a new EXPERIMENTAL "Player Height" setting.
 - The aim ray will now activate on the appropriate hand when you have an aimable equipment or heresy skills.
 - The Soulbound Catalyst and the Frost Relic no longer appear around the player.
 - Fixed a bug that caused the camera HUD to freeze in place while paused.
