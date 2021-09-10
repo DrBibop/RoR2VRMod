@@ -662,10 +662,13 @@ namespace VRMod
                         {
                             if (!cachedCameraTargetTransform)
                             {
-                                ChildLocator childLocator = self.targetBody.modelLocator.modelTransform.GetComponent<ChildLocator>();
-                                if (childLocator)
+                                if (!ModConfig.Roomscale.Value)
                                 {
-                                    cachedCameraTargetTransform = childLocator.FindChild("VRCamera");
+                                    ChildLocator childLocator = self.targetBody.modelLocator.modelTransform.GetComponent<ChildLocator>();
+                                    if (childLocator)
+                                    {
+                                        cachedCameraTargetTransform = childLocator.FindChild("VRCamera");
+                                    }
                                 }
 
                                 if (!cachedCameraTargetTransform)
@@ -679,7 +682,16 @@ namespace VRMod
 
                                     if (collider)
                                     {
-                                        cachedCameraTargetTransform.Translate(collider.center + new Vector3(0, collider.height / 2, 0), Space.Self);
+                                        if (ModConfig.Roomscale.Value)
+                                        {
+                                            cachedCameraTargetTransform.Translate(collider.center + new Vector3(0, -collider.height / 2, 0), Space.Self);
+                                            VRCameraWrapper.instance.transform.localScale = Vector3.one * (collider.height / ModConfig.PlayerHeight.Value);
+                                        }
+                                        else
+                                        {
+                                            cachedCameraTargetTransform.Translate(collider.center + new Vector3(0, collider.height / 2, 0), Space.Self);
+                                        }
+
                                     }
                                 }
                             }

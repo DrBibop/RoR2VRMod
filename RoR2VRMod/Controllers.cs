@@ -507,7 +507,7 @@ namespace VRMod
                 return;
             }
 
-            if (!ModConfig.ConfigUseOculus.Value)
+            if (!ModConfig.OculusMode.Value)
             {
                 if (name.Contains("vive") && !name.Contains("cosmos"))
                 {

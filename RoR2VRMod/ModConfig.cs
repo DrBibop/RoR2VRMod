@@ -10,10 +10,12 @@ namespace VRMod
         private const string CONFIG_FILE_NAME = "VRMod.cfg";
 
         private static readonly ConfigFile configFile = new ConfigFile(System.IO.Path.Combine(Paths.ConfigPath, CONFIG_FILE_NAME), true);
-        internal static ConfigEntry<bool> ConfigUseOculus { get; private set; }
+        internal static ConfigEntry<bool> OculusMode { get; private set; }
         internal static ConfigEntry<bool> FirstPerson { get; private set; }
         internal static ConfigEntry<bool> ConfortVignette { get; private set; }
         internal static ConfigEntry<bool> HideDecals { get; private set; }
+        internal static ConfigEntry<bool> Roomscale { get; private set; }
+        internal static ConfigEntry<float> PlayerHeight { get; private set; }
 
         internal static ConfigEntry<string> RayColorHex { get; private set; }
         internal static ConfigEntry<float> RayOpacity { get; private set; }
@@ -47,7 +49,7 @@ namespace VRMod
 
         internal static void Init()
         {
-            ConfigUseOculus = configFile.Bind<bool>(
+            OculusMode = configFile.Bind<bool>(
                 "VR Settings",
                 "Use Oculus mode",
                 false,
@@ -70,6 +72,18 @@ namespace VRMod
                 "Hide broken decal textures",
                 false,
                 "Decals only render on the left eye. You can completely hide them while waiting for a potential fix."
+            );
+            Roomscale = configFile.Bind<bool>(
+                "VR Settings",
+                "Roomscale Tracking Space",
+                false,
+                "EXPERIMENTAL: Changes the tracking space to roomscale. Your real height will be used in-game to scale the view properly. This should also fix a rare gray screen glitch."
+            );
+            PlayerHeight = configFile.Bind<float>(
+                "VR Settings",
+                "Player Height in meters",
+                1.82f,
+                "EXPERIMENTAL: Used for roomscale tracking. Your view scale will be adjusted to make you feel as tall as the survivor you're playing. Most survivors have a height of 1.82 meters which means keeping the default value will keep your view scale multiplier at 1 on most survivors"
             );
 
             RayColorHex = configFile.Bind<string>(

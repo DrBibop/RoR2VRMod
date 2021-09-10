@@ -54,6 +54,9 @@
     <Reference Include="Rewired_Core">
       <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\stubs\Rewired_Core.refstub.dll</HintPath>
     </Reference>
+    <Reference Include="SteamVR">
+      <HintPath>..\..\..\Unity\vrtest\build\vrtest_Data\Managed\SteamVR.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.Postprocessing.Runtime">
       <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\Unity.Postprocessing.Runtime.dll</HintPath>
     </Reference>

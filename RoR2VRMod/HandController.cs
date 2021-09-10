@@ -101,7 +101,7 @@ namespace VRMod
             transform.localPosition = InputTracking.GetLocalPosition(xrNode);
             transform.localRotation = InputTracking.GetLocalRotation(xrNode);
 
-            if (!ModConfig.ConfigUseOculus.Value)
+            if (!ModConfig.OculusMode.Value)
             {
                 transform.Rotate(new Vector3(40, 0, 0), Space.Self);
                 transform.Translate(new Vector3(0, -0.03f, -0.05f), Space.Self);

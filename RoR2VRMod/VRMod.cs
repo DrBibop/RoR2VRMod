@@ -38,7 +38,7 @@ namespace VRMod
 
             RoR2.RoR2Application.onLoad += () =>
             {
-                StartCoroutine(SetVRDevice(ModConfig.ConfigUseOculus.Value));
+                StartCoroutine(SetVRDevice(ModConfig.OculusMode.Value));
                 VRManager.Init();
                 Controllers.Init();
             };
@@ -51,7 +51,7 @@ namespace VRMod
             if (XRSettings.loadedDeviceName == (useOculus ? "Oculus" : "OpenVR"))
             {
                 XRSettings.enabled = true;
-                XRDevice.SetTrackingSpaceType(TrackingSpaceType.Stationary);
+                XRDevice.SetTrackingSpaceType(ModConfig.Roomscale.Value ? TrackingSpaceType.RoomScale : TrackingSpaceType.Stationary);
             }
         }
     }
