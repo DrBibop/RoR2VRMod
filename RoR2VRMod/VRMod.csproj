@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VREnabler\VREnabler.csproj" />
+    <ProjectReference Include="..\VREnabler\VRPatcher.csproj" />
   </ItemGroup>
 
   <ItemGroup>
