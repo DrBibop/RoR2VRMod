@@ -91,7 +91,8 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 **dotflare:** 3D artist\
 **Ncognito:** 3D artist\
 **eliotttate:** Original creator, code assist\
-**HutchyBen:** Code assist
+**HutchyBen:** Code assist\
+**Daerst:** Fixed the biggest and oldest bug of this mod. Thank you so much.
 
 # Changelog
 ### 1.0.0
