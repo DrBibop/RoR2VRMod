@@ -13,7 +13,6 @@ namespace VRMod
         internal static ConfigEntry<bool> OculusMode { get; private set; }
         internal static ConfigEntry<bool> FirstPerson { get; private set; }
         internal static ConfigEntry<bool> ConfortVignette { get; private set; }
-        internal static ConfigEntry<bool> HideDecals { get; private set; }
         internal static ConfigEntry<bool> Roomscale { get; private set; }
         internal static ConfigEntry<float> PlayerHeight { get; private set; }
 
@@ -66,12 +65,6 @@ namespace VRMod
                 "Confort Vignette",
                 true,
                 "Adds a black vignette during high-mobility abilities to reduce motion sickness."
-            );
-            HideDecals = configFile.Bind<bool>(
-                "VR Settings",
-                "Hide broken decal textures",
-                false,
-                "Decals only render on the left eye. You can completely hide them while waiting for a potential fix."
             );
             Roomscale = configFile.Bind<bool>(
                 "VR Settings",

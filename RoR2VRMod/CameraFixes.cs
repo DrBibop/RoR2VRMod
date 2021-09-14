@@ -25,6 +25,8 @@ namespace VRMod
 
         private static float timeSinceLastSnapTurn = 0f;
 
+        private static int lastFrameCount = -1;
+
         private static GameObject spectatorCamera;
         private static GameObject spectatorScreen;
 
@@ -105,13 +107,38 @@ namespace VRMod
 
             On.RoR2.CameraRigController.GetCrosshairRaycastRay += GetVRCrosshairRaycastRay;
 
-            if (ModConfig.HideDecals.Value)
+            IL.ThreeEyedGames.DecaliciousRenderer.OnPreRender += OnPreRenderIL;
+        }
+
+        private static void OnPreRenderIL(ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
+
+            c.GotoNext(x => x.MatchCall<ThreeEyedGames.DecaliciousRenderer>("DrawUnlitDecals"));
+
+            c.Index++;
+
+            c.EmitDelegate<Func<bool>>(() =>
             {
-                On.ThreeEyedGames.DecaliciousRenderer.OnEnable += (orig, self) => { self.enabled = false; };
-                On.ThreeEyedGames.DecaliciousRenderer.Add += (orig, self, decal, limitTo) => { };
-                On.ThreeEyedGames.DecaliciousRenderer.AddDeferred += (orig, self, decal) => { };
-                On.ThreeEyedGames.DecaliciousRenderer.AddUnlit += (orig, self, decal) => { };
-            }
+                bool result = lastFrameCount == Time.renderedFrameCount;
+                if (result)
+                {
+                    lastFrameCount = Time.renderedFrameCount;
+                }
+                return result;
+            });
+
+            int lastIndex = c.Index;
+
+            c.GotoNext(x => x.MatchLdfld<ThreeEyedGames.DecaliciousRenderer>("_limitToGameObjects"));
+
+            c.Index--;
+
+            ILLabel label = c.MarkLabel();
+
+            c.Index = lastIndex;
+
+            c.Emit(OpCodes.Brfalse_S, label);
         }
 
         private static void HideFloatingItems(On.RoR2.ItemFollower.orig_Start orig, ItemFollower self)
