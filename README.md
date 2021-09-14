@@ -17,13 +17,13 @@ For manual download, make sure to have [BepInEx](https://thunderstore.io/package
 Shoutout to laila, HutchyBen, Skarl1n, Geb, Popzix and Terrorcotta211 for helping me add support for all these controllers! Some controllers need special SteamVR bindings.
 
 ## Oculus Touch controllers
-![](https://i.imgur.com/QRmmopA.png)
+![](https://i.imgur.com/5ZY5mQc.png)
 
 ## Vive controllers
-![](https://i.imgur.com/lINFo0A.png)
+![](https://i.imgur.com/ApqDR5O.png)
 
 ## WMR controllers with trackpads
-![](https://i.imgur.com/W6XW6d1.png)
+![](https://i.imgur.com/lBDaQJ6.png)
 
 ## Index Knuckles/Reverb G2 controllers
 The Index Knuckles and the Reverb G2 controllers use the same binds as the Oculus Touch controllers but need special bindings in SteamVR in order to function properly. Their support in this version of Unity isn't well implemented out of the box. There are two ways to correctly bind your controllers:
@@ -86,11 +86,11 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 
 # Credits
 
-**DrBibop:** Mod/patcher programmer, animator, 3D artist
-**MrPurple6411:** Patcher programmer
-**dotflare:** 3D artist
-**Ncognito:** 3D artist
-**eliotttate:** Original creator, code assist
+**DrBibop:** Mod/patcher programmer, animator, 3D artist\
+**MrPurple6411:** Patcher programmer\
+**dotflare:** 3D artist\
+**Ncognito:** 3D artist\
+**eliotttate:** Original creator, code assist\
 **HutchyBen:** Code assist
 
 # Changelog
@@ -190,3 +190,17 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 ### 2.2.1
 - Fixed a bug that caused the Smooth HUD config to be ineffective.
 - Fixed a bug that caused floating equipments to re-appear when teleporting to a new stage.
+
+### 2.3.0
+- The scoreboard and the profile menu can now be accessed by holding the menu button.
+- Snap turns will now repeat when holding a direction.
+- Added a "Snap Turn Hold Delay" setting.
+- Added a "Camera Health Bar" setting which puts the health bar at the bottom-middle of the camera HUD for better visibility.
+- Added a new EXPERIMENTAL "Roomscale Tracking Space" setting.
+- Added a new EXPERIMENTAL "Player Height" setting.
+- The aim ray will now activate on the appropriate hand when you have an aimable equipment or heresy skills.
+- The Soulbound Catalyst and the Frost Relic no longer appear around the player.
+- Removed "Hide broken decal textures" config.
+- Fixed a bug that caused decals to only render on the left eye.
+- Fixed a bug that caused the camera HUD to freeze in place while paused.
+- Fixed a bug that caused parts of the multiplayer menu to not render properly creating an offset.

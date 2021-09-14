@@ -74,6 +74,20 @@ namespace VRPatcher
                     }
                 }
             }
+            directoryInfo = new DirectoryInfo(VREnabler.ManagedPath);
+            files = directoryInfo.GetFiles();
+            if (!Array.Exists<FileInfo>(files, (FileInfo file) => file.Name == "SteamVR.dll"))
+            {
+                flag = true;
+                using (Stream manifestResourceStream = executingAssembly.GetManifestResourceStream(name + ".Plugins.SteamVR.dll"))
+                {
+                    using (FileStream fileStream = new FileStream(Path.Combine(directoryInfo.FullName, "SteamVR.dll"), FileMode.Create, FileAccess.Write, FileShare.Delete))
+                    {
+                        VREnabler.Logger.LogInfo("Copying SteamVR.dll");
+                        manifestResourceStream.CopyTo(fileStream);
+                    }
+                }
+            }
             if (flag)
             {
                 VREnabler.Logger.LogInfo("Successfully copied VR plugins!");
@@ -82,7 +96,6 @@ namespace VRPatcher
             VREnabler.Logger.LogInfo("VR plugins already present");
         }
 
-        // Token: 0x06000005 RID: 5 RVA: 0x0000221C File Offset: 0x0000041C
         private static bool EnableVROptions(string path)
         {
             AssetsManager assetsManager = new AssetsManager();

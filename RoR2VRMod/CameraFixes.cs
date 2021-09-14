@@ -20,8 +20,12 @@ namespace VRMod
         private static bool isTurningRight;
         private static bool wasTurningRight;
 
-        private static bool justTurnedLeft => isTurningLeft && !wasTurningLeft;
-        private static bool justTurnedRight => isTurningRight && !wasTurningRight;
+        private static bool justTurnedLeft => isTurningLeft && (!wasTurningLeft || timeSinceLastSnapTurn > ModConfig.SnapTurnHoldDelay.Value);
+        private static bool justTurnedRight => isTurningRight && (!wasTurningRight || timeSinceLastSnapTurn > ModConfig.SnapTurnHoldDelay.Value);
+
+        private static float timeSinceLastSnapTurn = 0f;
+
+        private static int lastFrameCount = -1;
 
         private static GameObject spectatorCamera;
         private static GameObject spectatorScreen;
@@ -90,6 +94,8 @@ namespace VRMod
 
                 On.RoR2.CharacterModel.SetEquipmentDisplay += HideFloatingEquipment;
 
+                On.RoR2.ItemFollower.Start += HideFloatingItems;
+
                 On.RoR2.HealingFollowerController.OnStartClient += HideWoodsprite;
 
                 IL.RoR2.CharacterBody.UpdateSingleTemporaryVisualEffect += HideTempEffect;
@@ -101,13 +107,54 @@ namespace VRMod
 
             On.RoR2.CameraRigController.GetCrosshairRaycastRay += GetVRCrosshairRaycastRay;
 
-            if (ModConfig.HideDecals.Value)
+            IL.ThreeEyedGames.DecaliciousRenderer.OnPreRender += OnPreRenderIL;
+        }
+
+        private static void OnPreRenderIL(ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
+
+            c.GotoNext(x => x.MatchCall<ThreeEyedGames.DecaliciousRenderer>("DrawUnlitDecals"));
+
+            c.Index++;
+
+            c.EmitDelegate<Func<bool>>(() =>
             {
-                On.ThreeEyedGames.DecaliciousRenderer.OnEnable += (orig, self) => { self.enabled = false; };
-                On.ThreeEyedGames.DecaliciousRenderer.Add += (orig, self, decal, limitTo) => { };
-                On.ThreeEyedGames.DecaliciousRenderer.AddDeferred += (orig, self, decal) => { };
-                On.ThreeEyedGames.DecaliciousRenderer.AddUnlit += (orig, self, decal) => { };
+                bool result = lastFrameCount == Time.renderedFrameCount;
+                if (result)
+                {
+                    lastFrameCount = Time.renderedFrameCount;
+                }
+                return result;
+            });
+
+            int lastIndex = c.Index;
+
+            c.GotoNext(x => x.MatchLdfld<ThreeEyedGames.DecaliciousRenderer>("_limitToGameObjects"));
+
+            c.Index--;
+
+            ILLabel label = c.MarkLabel();
+
+            c.Index = lastIndex;
+
+            c.Emit(OpCodes.Brfalse_S, label);
+        }
+
+        private static void HideFloatingItems(On.RoR2.ItemFollower.orig_Start orig, ItemFollower self)
+        {
+            CharacterModel componentInParent = self.GetComponentInParent<CharacterModel>();
+            if (componentInParent)
+            {
+                CharacterBody body = componentInParent.body;
+                if (body && body == cachedBody)
+                {
+                    self.enabled = false;
+                    return;
+                }
             }
+
+            orig(self);
         }
 
         private static void HideDisc(On.EntityStates.LaserTurbine.LaserTurbineBaseState.orig_OnEnter orig, EntityStates.LaserTurbine.LaserTurbineBaseState self)
@@ -392,6 +439,15 @@ namespace VRMod
                     else if (justTurnedRight)
                         num14 = ModConfig.SnapTurnAngle.Value;
 
+                    if ((isTurningLeft || isTurningRight) && timeSinceLastSnapTurn <= ModConfig.SnapTurnHoldDelay.Value)
+                    {
+                        timeSinceLastSnapTurn += Time.deltaTime;
+                    }
+                    else
+                    {
+                        timeSinceLastSnapTurn = 0;
+                    }
+
                     num15 = 0f;
                 }
             }
@@ -633,10 +689,13 @@ namespace VRMod
                         {
                             if (!cachedCameraTargetTransform)
                             {
-                                ChildLocator childLocator = self.targetBody.modelLocator.modelTransform.GetComponent<ChildLocator>();
-                                if (childLocator)
+                                if (!ModConfig.Roomscale.Value)
                                 {
-                                    cachedCameraTargetTransform = childLocator.FindChild("VRCamera");
+                                    ChildLocator childLocator = self.targetBody.modelLocator.modelTransform.GetComponent<ChildLocator>();
+                                    if (childLocator)
+                                    {
+                                        cachedCameraTargetTransform = childLocator.FindChild("VRCamera");
+                                    }
                                 }
 
                                 if (!cachedCameraTargetTransform)
@@ -650,7 +709,16 @@ namespace VRMod
 
                                     if (collider)
                                     {
-                                        cachedCameraTargetTransform.Translate(collider.center + new Vector3(0, collider.height / 2, 0), Space.Self);
+                                        if (ModConfig.Roomscale.Value)
+                                        {
+                                            cachedCameraTargetTransform.Translate(collider.center + new Vector3(0, -collider.height / 2, 0), Space.Self);
+                                            VRCameraWrapper.instance.transform.localScale = Vector3.one * (collider.height / ModConfig.PlayerHeight.Value);
+                                        }
+                                        else
+                                        {
+                                            cachedCameraTargetTransform.Translate(collider.center + new Vector3(0, collider.height / 2, 0), Space.Self);
+                                        }
+
                                     }
                                 }
                             }

@@ -10,10 +10,11 @@ namespace VRMod
         private const string CONFIG_FILE_NAME = "VRMod.cfg";
 
         private static readonly ConfigFile configFile = new ConfigFile(System.IO.Path.Combine(Paths.ConfigPath, CONFIG_FILE_NAME), true);
-        internal static ConfigEntry<bool> ConfigUseOculus { get; private set; }
+        internal static ConfigEntry<bool> OculusMode { get; private set; }
         internal static ConfigEntry<bool> FirstPerson { get; private set; }
         internal static ConfigEntry<bool> ConfortVignette { get; private set; }
-        internal static ConfigEntry<bool> HideDecals { get; private set; }
+        internal static ConfigEntry<bool> Roomscale { get; private set; }
+        internal static ConfigEntry<float> PlayerHeight { get; private set; }
 
         internal static ConfigEntry<string> RayColorHex { get; private set; }
         internal static ConfigEntry<float> RayOpacity { get; private set; }
@@ -26,6 +27,7 @@ namespace VRMod
 
         internal static ConfigEntry<bool> WristHUD { get; private set; }
         internal static ConfigEntry<bool> WatchHUD { get; private set; }
+        internal static ConfigEntry<bool> BetterHealthBar { get; private set; }
         internal static ConfigEntry<bool> SmoothHUD { get; private set; }
         internal static ConfigEntry<int> HUDWidth { get; private set; }
         internal static ConfigEntry<int> HUDHeight { get; private set; }
@@ -38,6 +40,7 @@ namespace VRMod
 
         internal static ConfigEntry<bool> SnapTurn { get; private set; }
         internal static ConfigEntry<float> SnapTurnAngle { get; private set; }
+        internal static ConfigEntry<float> SnapTurnHoldDelay { get; private set; }
         internal static ConfigEntry<bool> LockedCameraPitch { get; private set; }
         internal static ConfigEntry<bool> UseMotionControls { get; private set; }
         internal static ConfigEntry<bool> LeftDominantHand { get; private set; }
@@ -45,7 +48,7 @@ namespace VRMod
 
         internal static void Init()
         {
-            ConfigUseOculus = configFile.Bind<bool>(
+            OculusMode = configFile.Bind<bool>(
                 "VR Settings",
                 "Use Oculus mode",
                 false,
@@ -63,11 +66,17 @@ namespace VRMod
                 true,
                 "Adds a black vignette during high-mobility abilities to reduce motion sickness."
             );
-            HideDecals = configFile.Bind<bool>(
+            Roomscale = configFile.Bind<bool>(
                 "VR Settings",
-                "Hide broken decal textures",
+                "Roomscale Tracking Space",
                 false,
-                "Decals only render on the left eye. You can completely hide them while waiting for a potential fix."
+                "EXPERIMENTAL: Changes the tracking space to roomscale. Your real height will be used in-game to scale the view properly. This should also fix a rare gray screen glitch."
+            );
+            PlayerHeight = configFile.Bind<float>(
+                "VR Settings",
+                "Player Height in meters",
+                1.82f,
+                "EXPERIMENTAL: Used for roomscale tracking. Your view scale will be adjusted to make you feel as tall as the survivor you're playing. Most survivors have a height of 1.82 meters which means keeping the default value will keep your view scale multiplier at 1 on most survivors"
             );
 
             RayColorHex = configFile.Bind<string>(
@@ -164,6 +173,12 @@ namespace VRMod
                 true,
                 "TRUE: Attaches the inventory, chat, objective and allies to a watch that appears when looking at it. FALSE: Attaches the inventory, chat, objective and allies to the camera."
             );
+            BetterHealthBar = configFile.Bind<bool>(
+                "HUD Settings",
+                "Camera Health Bar",
+                true,
+                "TRUE: Makes the health bar more visible by placing it on the bottom-middle of the camera HUD. FALSE: Places the healthbar on the left wrist HUD (if the wrist HUD setting is enabled)."
+            );
             SmoothHUD = configFile.Bind<bool>(
                 "HUD Settings",
                 "Smooth HUD",
@@ -221,6 +236,12 @@ namespace VRMod
                 "Snap turn angle",
                 45,
                 "Rotation in degrees of each snap turn."
+            );
+            SnapTurnHoldDelay = configFile.Bind<float>(
+                "Controls",
+                "Snap turn hold delay",
+                0.33f,
+                "Time in seconds between each snap turn when holding a direction."
             );
 
             LockedCameraPitch = configFile.Bind<bool>(

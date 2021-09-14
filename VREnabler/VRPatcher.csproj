@@ -5,17 +5,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="VRPlugins\AudioPluginOculusSpatializer.dll" />
-    <None Remove="VRPlugins\openvr_api.dll" />
-    <None Remove="VRPlugins\OVRGamepad.dll" />
-    <None Remove="VRPlugins\OVRPlugin.dll" />
+    <None Remove="Plugins\AudioPluginOculusSpatializer.dll" />
+    <None Remove="Plugins\openvr_api.dll" />
+    <None Remove="Plugins\OVRGamepad.dll" />
+    <None Remove="Plugins\OVRPlugin.dll" />
+    <None Remove="Plugins\SteamVR.dll" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="VRPlugins\AudioPluginOculusSpatializer.dll" />
-    <EmbeddedResource Include="VRPlugins\openvr_api.dll" />
-    <EmbeddedResource Include="VRPlugins\OVRGamepad.dll" />
-    <EmbeddedResource Include="VRPlugins\OVRPlugin.dll" />
+    <EmbeddedResource Include="Plugins\AudioPluginOculusSpatializer.dll" />
+    <EmbeddedResource Include="Plugins\openvr_api.dll" />
+    <EmbeddedResource Include="Plugins\OVRGamepad.dll" />
+    <EmbeddedResource Include="Plugins\OVRPlugin.dll" />
+    <EmbeddedResource Include="Plugins\SteamVR.dll" />
   </ItemGroup>
 
   <ItemGroup>

@@ -8,6 +8,8 @@ namespace VRMod.ControllerMappings
         protected int leftJoyID;
         protected int rightJoyID;
 
+        protected HoldableButton holdableMenuButton;
+
         internal bool Ready => leftJoyID != -1 && rightJoyID != -1;
 
         internal Dictionary<int, string> mapGlyphs;
@@ -33,12 +35,15 @@ namespace VRMod.ControllerMappings
                     { 10, "<sprite name=\"texVRGlyphs_LSecondary\">" },
                     { 11, "<sprite name=\"texVRGlyphs_RSecondary\">" },
                     { 12, "<sprite name=\"texVRGlyphs_LStickPress\">" },
-                    { 13, "<sprite name=\"texVRGlyphs_RStickPress\">" }
+                    { 13, "<sprite name=\"texVRGlyphs_RStickPress\">" },
+                    { 14, "<sprite name=\"texVRGlyphs_LSecondaryHold\">" }
                 };
             }
 
             SetJoystickIDs(leftID, rightID);
             cachedName = name;
+
+            holdableMenuButton = new HoldableButton(leftID, 3);
         }
 
         internal bool CheckJoyNames(string[] joyNames)
@@ -104,7 +109,12 @@ namespace VRMod.ControllerMappings
 
         internal virtual bool GetLeftSecondary()
         {
-            return UnityInputHelper.GetJoystickButtonValueByJoystickIndex(leftJoyID, 3);
+            return holdableMenuButton.HasShortPressed;
+        }
+
+        internal virtual bool GetLeftSecondaryHold()
+        {
+            return holdableMenuButton.IsHolding;
         }
 
         internal virtual bool GetRightSecondary()

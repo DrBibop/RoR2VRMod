@@ -4,7 +4,7 @@ namespace VRMod.ControllerMappings
 {
     internal class ReverbG2Map : GenericVRMap
     {
-        internal ReverbG2Map(int leftID, int rightID, string name) : base(leftID, rightID, name, true) { }
+        internal ReverbG2Map(int leftID, int rightID, string name) : base(leftID, rightID, name, true) { base.holdableMenuButton.buttonId = 2; }
 
         internal override bool GetLeftPrimary()
         {
@@ -14,11 +14,6 @@ namespace VRMod.ControllerMappings
         internal override bool GetRightPrimary()
         {
             return UnityInputHelper.GetJoystickButtonValueByJoystickIndex(rightJoyID, 1);
-        }
-
-        internal override bool GetLeftSecondary()
-        {
-            return UnityInputHelper.GetJoystickButtonValueByJoystickIndex(leftJoyID, 2);
         }
 
         internal override bool GetRightSecondary()

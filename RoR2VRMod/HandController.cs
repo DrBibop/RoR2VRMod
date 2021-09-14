@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using RoR2;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.XR;
@@ -25,7 +26,6 @@ namespace VRMod
         {
             get
             {
-                Transform muzzle = currentHand.currentMuzzle.transform;
                 return new Ray(muzzle.position, muzzle.forward);
             }
         }
@@ -40,25 +40,68 @@ namespace VRMod
 
         internal bool forceRay;
 
+        private bool _uiMode;
+
+        internal bool uiMode
+        {
+            get { return _uiMode; }
+            set
+            {
+                if (_uiMode == value) return;
+
+                _uiMode = value;
+
+                if (_uiMode)
+                {
+                    int uiLayer = LayerMask.NameToLayer("UI");
+
+                    ray.gameObject.layer = uiLayer;
+                    ray.sortingOrder = 1;
+                    pointerHand.gameObject.layer = uiLayer;
+                    foreach (Renderer renderer in pointerRenderers)
+                    {
+                        renderer.gameObject.layer = uiLayer;
+                    }
+                }
+                else
+                {
+                    ray.gameObject.layer = 0;
+                    ray.sortingOrder = 999;
+                    pointerHand.gameObject.layer = 0;
+                    foreach (Renderer renderer in pointerRenderers)
+                    {
+                        renderer.gameObject.layer = 0;
+                    }
+                }
+            }
+        }
+
         private List<GameObject> handPrefabs;
 
         private List<Hand> instantiatedHands = new List<Hand>();
+
+        private Renderer[] pointerRenderers;
 
         private void Awake()
         {
             SetCurrentHand(pointerHand);
             ray.material.color = ModConfig.RayColor;
+            pointerRenderers = pointerHand.GetComponentsInChildren<Renderer>();
         }
 
         private void Update()
         {
-            if (transform.parent != Camera.main.transform.parent)
+            uiMode = false;/*!RoR2.Run.instance || RoR2.PauseManager.isPaused;*/
+
+            if (!uiMode && transform.parent != Camera.main.transform.parent)
                 transform.SetParent(Camera.main.transform.parent);
+            else if (uiMode && transform.parent)
+                transform.SetParent(null);
 
             transform.localPosition = InputTracking.GetLocalPosition(xrNode);
             transform.localRotation = InputTracking.GetLocalRotation(xrNode);
 
-            if (XRSettings.loadedDeviceName == "OpenVR")
+            if (!ModConfig.OculusMode.Value)
             {
                 transform.Rotate(new Vector3(40, 0, 0), Space.Self);
                 transform.Translate(new Vector3(0, -0.03f, -0.05f), Space.Self);
@@ -69,15 +112,8 @@ namespace VRMod
         {
             if (!currentHand) return;
 
-            if (!forceRay)
-            {
-                if (ray.gameObject.activeSelf != currentHand.useRay)
-                    ray.gameObject.SetActive(currentHand.useRay);
-            }
-            else if (!ray.gameObject.activeSelf)
-            {
-                ray.gameObject.SetActive(true);
-            }
+            if (ray.gameObject.activeSelf != (currentHand.useRay || forceRay))
+                ray.gameObject.SetActive(currentHand.useRay || forceRay);
 
             if (ray.gameObject.activeSelf)
             {
