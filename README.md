@@ -86,11 +86,11 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 
 # Credits
 
-**DrBibop:** Mod/patcher programmer, animator, 3D artist
-**MrPurple6411:** Patcher programmer
-**dotflare:** 3D artist
-**Ncognito:** 3D artist
-**eliotttate:** Original creator, code assist
+**DrBibop:** Mod/patcher programmer, animator, 3D artist\
+**MrPurple6411:** Patcher programmer\
+**dotflare:** 3D artist\
+**Ncognito:** 3D artist\
+**eliotttate:** Original creator, code assist\
 **HutchyBen:** Code assist
 
 # Changelog
