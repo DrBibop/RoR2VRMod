@@ -11,7 +11,9 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.XR;
-using VRMod.ControllerMappings;
+using Valve.VR;
+using VRMod.Inputs;
+using VRMod.Inputs.Legacy;
 
 namespace VRMod
 {
@@ -21,18 +23,23 @@ namespace VRMod
         private static CustomControllerMap vrDefaultMap;
         private static CustomControllerMap vrUIMap;
 
-        private static GenericVRMap controllerMap;
-
         private static bool isUsingMotionControls;
         private static bool hasRecentered;
         private static bool initializedMainPlayer;
 
         private static TMP_SpriteAsset glyphsSpriteAsset;
 
+        internal static string[] inputGlyphs;
+
         private static List<SkillRemap> skillRemaps = new List<SkillRemap>()
         {
             new SkillRemap("LoaderBody", SkillSlot.Utility, SkillSlot.Special)
         };
+
+        private static BaseInput[] inputs;
+
+        internal static int leftJoystickID { get; private set; }
+        internal static int rightJoystickID { get; private set; }
 
         internal static void Init()
         {
@@ -147,27 +154,25 @@ namespace VRMod
 
             hasRecentered = true;
 
-            string glyphString;
-            if (controllerMap.mapGlyphs.TryGetValue(13, out glyphString))
+            string glyphString = inputGlyphs[25];
+            
+            SimpleDialogBox dialogBox = SimpleDialogBox.Create(null);
+            dialogBox.headerToken = new SimpleDialogBox.TokenParamsPair()
             {
-                SimpleDialogBox dialogBox = SimpleDialogBox.Create(null);
-                dialogBox.headerToken = new SimpleDialogBox.TokenParamsPair()
-                {
-                    token = "Recenter",
-                    formatParams = null
-                };
+                token = "Recenter",
+                formatParams = null
+            };
 
-                if (glyphsSpriteAsset)
-                    dialogBox.descriptionLabel.spriteAsset = glyphsSpriteAsset;
+            if (glyphsSpriteAsset)
+                dialogBox.descriptionLabel.spriteAsset = glyphsSpriteAsset;
 
-                dialogBox.descriptionToken = new SimpleDialogBox.TokenParamsPair()
-                {
-                    token = "Use {0} to recenter your HMD.",
-                    formatParams = new object[] { glyphString }
-                };
+            dialogBox.descriptionToken = new SimpleDialogBox.TokenParamsPair()
+            {
+                token = "Use {0} to recenter your HMD.",
+                formatParams = new object[] { glyphString }
+            };
 
-                dialogBox.AddCancelButton(CommonLanguageTokens.ok, Array.Empty<object>());
-            }
+            dialogBox.AddCancelButton(CommonLanguageTokens.ok, Array.Empty<object>());
         }
 
         private static void DisableControllerBinds(On.RoR2.UI.InputBindingControl.orig_Awake orig, InputBindingControl self)
@@ -212,42 +217,92 @@ namespace VRMod
 
             List<ActionElementMap> uiElementMaps = new List<ActionElementMap>()
             {
-                new ActionElementMap(11, ControllerElementType.Button, 10, Pole.Positive, AxisRange.Full, false),
-                new ActionElementMap(12, ControllerElementType.Axis  , 0 , Pole.Positive, AxisRange.Full, false),
-                new ActionElementMap(13, ControllerElementType.Axis  , 1 , Pole.Positive, AxisRange.Full, false),
-                new ActionElementMap(14, ControllerElementType.Button, 9 , Pole.Positive, AxisRange.Positive, false),
-                new ActionElementMap(15, ControllerElementType.Button, 11, Pole.Positive, AxisRange.Positive, false),
-                new ActionElementMap(25, ControllerElementType.Button, 10, Pole.Positive, AxisRange.Full, false),
-                new ActionElementMap(29, ControllerElementType.Button, 4 , Pole.Positive, AxisRange.Positive, false),
-                new ActionElementMap(30, ControllerElementType.Button, 5 , Pole.Positive, AxisRange.Positive, false),
-                new ActionElementMap(31, ControllerElementType.Button, 8, Pole.Positive, AxisRange.Full, false),
-                new ActionElementMap(32, ControllerElementType.Button, 6 , Pole.Positive, AxisRange.Positive, false),
-                new ActionElementMap(33, ControllerElementType.Button, 7 , Pole.Positive, AxisRange.Positive, false),
-                new ActionElementMap(150, ControllerElementType.Button, 13 , Pole.Positive, AxisRange.Positive, false)
+                new ActionElementMap(11, ControllerElementType.Button, 24, Pole.Positive, AxisRange.Positive, false), //Start
+                new ActionElementMap(12, ControllerElementType.Axis  , 4 , Pole.Positive, AxisRange.Full, false), //UIHor
+                new ActionElementMap(13, ControllerElementType.Axis  , 5 , Pole.Positive, AxisRange.Full, false), //UIVer
+                new ActionElementMap(14, ControllerElementType.Button, 17 , Pole.Positive, AxisRange.Positive, false), //Submit
+                new ActionElementMap(15, ControllerElementType.Button, 18, Pole.Positive, AxisRange.Positive, false), //Cancel
+                new ActionElementMap(25, ControllerElementType.Button, 24, Pole.Positive, AxisRange.Positive, false), //Pause
+                new ActionElementMap(29, ControllerElementType.Button, 20, Pole.Positive, AxisRange.Positive, false), //TabLeft
+                new ActionElementMap(30, ControllerElementType.Button, 21, Pole.Positive, AxisRange.Positive, false), //TabRight
+                new ActionElementMap(31, ControllerElementType.Button, 19, Pole.Positive, AxisRange.Positive, false), //AltSubmit
+                new ActionElementMap(32, ControllerElementType.Button, 22, Pole.Positive, AxisRange.Positive, false), //SubmenuLeft
+                new ActionElementMap(33, ControllerElementType.Button, 23, Pole.Positive, AxisRange.Positive, false), //SubmenuRight
+                new ActionElementMap(150, ControllerElementType.Button, 25, Pole.Positive, AxisRange.Positive, false) //Recenter
             };
 
             vrUIMap = CreateCustomMap("VRUI", 2, vrControllers.id, uiElementMaps);
 
-
             List<ActionElementMap> defaultElementMaps = new List<ActionElementMap>()
             {
-                new ActionElementMap(0 , ControllerElementType.Axis  , 0 , Pole.Positive, AxisRange.Full, false),
-                new ActionElementMap(1 , ControllerElementType.Axis  , 1 , Pole.Positive, AxisRange.Full, false),
-                new ActionElementMap(16, ControllerElementType.Axis  , 2 , Pole.Positive, AxisRange.Full, false),
-                new ActionElementMap(17, ControllerElementType.Axis  , 3 , Pole.Positive, AxisRange.Full, false),
-                new ActionElementMap(4 , ControllerElementType.Button, 11 , Pole.Positive, AxisRange.Full, false),
-                new ActionElementMap(5 , ControllerElementType.Button, 9, Pole.Positive, AxisRange.Full, false),
-                new ActionElementMap(6 , ControllerElementType.Button, 8 , Pole.Positive, AxisRange.Full, false),
-                new ActionElementMap(7 , ControllerElementType.Button, (ModConfig.LeftDominantHand.Value ? 4 : 5) , Pole.Positive, AxisRange.Positive, false),
-                new ActionElementMap(8 , ControllerElementType.Button, (ModConfig.LeftDominantHand.Value ? 5 : 4) , Pole.Positive, AxisRange.Positive, false),
-                new ActionElementMap(9 , ControllerElementType.Button, (ModConfig.LeftDominantHand.Value ? 7 : 6) , Pole.Positive, AxisRange.Positive, false),
-                new ActionElementMap(10, ControllerElementType.Button, (ModConfig.LeftDominantHand.Value ? 6 : 7) , Pole.Positive, AxisRange.Positive, false),
-                new ActionElementMap(18, ControllerElementType.Button, 12, Pole.Positive, AxisRange.Full, false),
-                new ActionElementMap(19, ControllerElementType.Button, 14, Pole.Positive, AxisRange.Full, false),
-                new ActionElementMap(28, ControllerElementType.Button, 13, Pole.Positive, AxisRange.Full, false)
+                new ActionElementMap(0 , ControllerElementType.Axis  , 0 , Pole.Positive, AxisRange.Full, false), //MoveHor
+                new ActionElementMap(1 , ControllerElementType.Axis  , 1 , Pole.Positive, AxisRange.Full, false), //MoveVer
+                new ActionElementMap(16, ControllerElementType.Axis  , 2 , Pole.Positive, AxisRange.Full, false), //LookHor
+                new ActionElementMap(17, ControllerElementType.Axis  , 3 , Pole.Positive, AxisRange.Full, false), //LookVer
+                new ActionElementMap(4 , ControllerElementType.Button, 7 , Pole.Positive, AxisRange.Full, false), //Jump
+                new ActionElementMap(5 , ControllerElementType.Button, 6, Pole.Positive, AxisRange.Full, false), //Interact
+                new ActionElementMap(6 , ControllerElementType.Button, 12 , Pole.Positive, AxisRange.Full, false), //Equipment
+                new ActionElementMap(7 , ControllerElementType.Button, (ModConfig.LeftDominantHand.Value ? 9 : 8) , Pole.Positive, AxisRange.Positive, false), //Primary
+                new ActionElementMap(8 , ControllerElementType.Button, (ModConfig.LeftDominantHand.Value ? 8 : 9) , Pole.Positive, AxisRange.Positive, false), //Secondary
+                new ActionElementMap(9 , ControllerElementType.Button, (ModConfig.LeftDominantHand.Value ? 11 : 10) , Pole.Positive, AxisRange.Positive, false), //Utility
+                new ActionElementMap(10, ControllerElementType.Button, (ModConfig.LeftDominantHand.Value ? 10 : 11) , Pole.Positive, AxisRange.Positive, false), //Special
+                new ActionElementMap(18, ControllerElementType.Button, 13, Pole.Positive, AxisRange.Full, false), //Sprint
+                new ActionElementMap(19, ControllerElementType.Button, 15, Pole.Positive, AxisRange.Full, false), //Scoreboard or Profile
+                new ActionElementMap(28, ControllerElementType.Button, 14, Pole.Positive, AxisRange.Full, false) //Ping
             };
 
             vrDefaultMap = CreateCustomMap("VRDefault", 0, vrControllers.id, defaultElementMaps);
+
+            if (ModConfig.OculusMode.Value)
+            {
+                inputs = new BaseInput[]
+                {
+                    new LegacyAxisInput(true, 0, false, 0, 4), //LJoyX = MoveHor, UIHor
+                    new LegacyAxisInput(true, 1, true, 1, 5), //LJoyY = MoveVer, UIVer
+                    new LegacyAxisInput(false, 3, false, 2), //RJoyX = LookHor
+                    new LegacyAxisInput(false, 4, true, 3), //RJoyY = LookVer
+                    new LegacyButtonInput(true, 2, 12, 19), //X = Equipment, Ready
+                    new LegacyHoldableButtonInput(true, 3, 15, 24), //Y = Pause, (Hold)Scoreboard/Profile
+                    new LegacyButtonInput(false, 0, 6, 17), //A = Interact, Submit
+                    new LegacyButtonInput(false, 1, 7, 18), //B = Jump, Cancel
+                    new LegacyButtonInput(true, 8, 13), //LClick = Sprint
+                    new LegacyButtonInput(false, 9, 14, 25), //RClick = Ping, Recenter
+                    new LegacyButtonInput(true, 14, 9, 20), //LTrigger = Secondary, Tab Left
+                    new LegacyButtonInput(true, 4, 10, 22), //LGrip = Utility, Submenu Left
+                    new LegacyButtonInput(false, 15, 8, 21), //RTrigger = Primary, Tab Right
+                    new LegacyButtonInput(false, 5, 11, 23) //RGrip = Special, Submenu Right
+                };
+
+                inputGlyphs = ControllerGlyphs.standardGlyphs;
+            }
+            else
+            {
+                inputs = new BaseInput[]
+                {
+                    new VectorInput(SteamVR_Actions.gameplay_Move, 0, 1),
+                    new SimulatedVectorInput(SteamVR_Actions.gameplay_Look, 2, 3, null, SteamVR_Actions.gameplay_LookRight, null, SteamVR_Actions.gameplay_LookLeft),
+                    new VectorInput(SteamVR_Actions.ui_Navigate, 4, 5),
+                    new ButtonInput(SteamVR_Actions.gameplay_Interact, 6),
+                    new ButtonInput(SteamVR_Actions.gameplay_Jump, 7),
+                    new ButtonInput(SteamVR_Actions.gameplay_PrimarySkill, 8),
+                    new ButtonInput(SteamVR_Actions.gameplay_SecondarySkill, 9),
+                    new ButtonInput(SteamVR_Actions.gameplay_UtilitySkill, 10),
+                    new ButtonInput(SteamVR_Actions.gameplay_SpecialSkill, 11),
+                    new ButtonInput(SteamVR_Actions.gameplay_UseEquipment, 12),
+                    new ButtonInput(SteamVR_Actions.gameplay_Sprint, 13),
+                    new ButtonInput(SteamVR_Actions.gameplay_Ping, 14),
+                    new HoldableButtonInput(SteamVR_Actions.gameplay_ScoreboardAndProfile, 15, SteamVR_Actions.gameplay_HoldScoreboardAndProfile),
+                    new ButtonInput(SteamVR_Actions.ui_Submit, 17),
+                    new ButtonInput(SteamVR_Actions.ui_Cancel, 18),
+                    new ButtonInput(SteamVR_Actions.ui_ReadyAndContinue, 19),
+                    new ButtonInput(SteamVR_Actions.ui_TabLeft, 20),
+                    new ButtonInput(SteamVR_Actions.ui_TabRight, 21),
+                    new ButtonInput(SteamVR_Actions.ui_SubmenuLeft, 22),
+                    new ButtonInput(SteamVR_Actions.ui_SubmenuRight, 23),
+                    new ReleaseButtonInput(SteamVR_Actions.ui_Pause, 24),
+                    new ButtonInput(SteamVR_Actions.ui_RecenterHMD, 25)
+                };
+            }
         }
 
         private static string GetCustomGlyphString(On.RoR2.Glyphs.orig_GetGlyphString_MPEventSystem_string_AxisRange_InputSource orig, MPEventSystem eventSystem, string actionName, AxisRange axisRange, MPEventSystem.InputSource currentInputSource)
@@ -264,51 +319,59 @@ namespace VRMod
                 if (Glyphs.resultsList.Count() > 0)
                 {
                     ActionElementMap displayedMap = Glyphs.resultsList.First();
-                    string result;
-                    if (controllerMap.mapGlyphs.TryGetValue(displayedMap.elementIdentifierId, out result))
+                    if (displayedMap.elementIdentifierId > 0 && displayedMap.elementIdentifierId < inputGlyphs.Length)
                     {
-                        return result;
+                        return inputGlyphs[displayedMap.elementIdentifierId];
                     }
                 }
             }
 
             return orig(eventSystem, actionName, axisRange, currentInputSource);
         }
-
+        
         private static CustomController CreateVRControllers()
         {
             HardwareControllerMap_Game hcMap = new HardwareControllerMap_Game(
                 "VRControllers",
                 new ControllerElementIdentifier[]
                 {
-                    new ControllerElementIdentifier(0, "LeftStickX", "LeftStickXPos", "LeftStickXNeg", ControllerElementType.Axis, true),
-                    new ControllerElementIdentifier(1, "LeftStickY", "LeftStickYPos", "LeftStickYNeg", ControllerElementType.Axis, true),
-                    new ControllerElementIdentifier(2, "RightStickX", "RightStickXPos", "RightStickXNeg", ControllerElementType.Axis, true),
-                    new ControllerElementIdentifier(3, "RightStickY", "RightStickYPos", "RightStickYNeg", ControllerElementType.Axis, true),
-                    new ControllerElementIdentifier(4, "LeftTrigger", "", "", ControllerElementType.Axis, true),
-                    new ControllerElementIdentifier(5, "RightTrigger", "", "", ControllerElementType.Axis, true),
-                    new ControllerElementIdentifier(6, "LeftGrip", "", "", ControllerElementType.Axis, true),
-                    new ControllerElementIdentifier(7, "RightGrip", "", "", ControllerElementType.Axis, true),
-                    new ControllerElementIdentifier(8, "LeftPrimary", "", "", ControllerElementType.Button, true),
-                    new ControllerElementIdentifier(9, "RightPrimary", "", "", ControllerElementType.Button, true),
-                    new ControllerElementIdentifier(10, "LeftSecondary", "", "", ControllerElementType.Button, true),
-                    new ControllerElementIdentifier(11, "RightSecondary", "", "", ControllerElementType.Button, true),
-                    new ControllerElementIdentifier(12, "LeftStickPress", "", "", ControllerElementType.Button, true),
-                    new ControllerElementIdentifier(13, "RightStickPress", "", "", ControllerElementType.Button, true),
-                    new ControllerElementIdentifier(14, "LeftSecondaryHold", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(0, "MoveX", "MoveXPos", "MoveXNeg", ControllerElementType.Axis, true),
+                    new ControllerElementIdentifier(1, "MoveY", "MoveYPos", "MoveYNeg", ControllerElementType.Axis, true),
+                    new ControllerElementIdentifier(2, "LookX", "LookXPos", "LookXNeg", ControllerElementType.Axis, true),
+                    new ControllerElementIdentifier(3, "LookY", "LookYPos", "LookYNeg", ControllerElementType.Axis, true),
+                    new ControllerElementIdentifier(4, "NavigateX", "NavigateXPos", "NavigateXNeg", ControllerElementType.Axis, true),
+                    new ControllerElementIdentifier(5, "NavigateY", "NavigateYPos", "NavigateYNeg", ControllerElementType.Axis, true),
+                    new ControllerElementIdentifier(6, "Interact", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(7, "Jump", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(8, "PrimarySkill", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(9, "SecondarySkill", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(10, "UtilitySkill", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(11, "SpecialSkill", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(12, "Equipment", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(13, "Sprint", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(14, "Ping", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(15, "Info", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(16, "HoldInfo", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(17, "Submit", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(18, "Cancel", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(19, "Ready", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(20, "TabLeft", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(21, "TabRight", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(22, "SubmenuLeft", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(23, "SubmenuRight", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(24, "Pause", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(25, "RecenterHMD", "", "", ControllerElementType.Button, true)
                 },
-                new int[] { 8, 9, 10, 11, 12, 13, 14 },
-                new int[] { 0, 1, 2, 3, 4, 5, 6, 7 },
+                new int[] {6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22 },
+                new int[] { 0, 1, 2, 3, 4, 5 },
                 new AxisCalibrationData[]
                 {
                     new AxisCalibrationData(true, 0.1f, 0, -1, 1, false, true),
-                    new AxisCalibrationData(true, 0.1f, 0, -1, 1, true, true),
                     new AxisCalibrationData(true, 0.1f, 0, -1, 1, false, true),
-                    new AxisCalibrationData(true, 0.1f, 0, -1, 1, true, true),
-                    new AxisCalibrationData(true, 0.1f, 0, 0, 1, false, true),
-                    new AxisCalibrationData(true, 0.1f, 0, 0, 1, false, true),
-                    new AxisCalibrationData(true, 0.1f, 0, 0, 1, false, true),
-                    new AxisCalibrationData(true, 0.1f, 0, 0, 1, false, true)
+                    new AxisCalibrationData(true, 0.1f, 0, -1, 1, false, true),
+                    new AxisCalibrationData(true, 0.1f, 0, -1, 1, false, true),
+                    new AxisCalibrationData(true, 0.1f, 0, -1, 1, false, true),
+                    new AxisCalibrationData(true, 0.1f, 0, -1, 1, false, true)
                 },
                 new AxisRange[]
                 {
@@ -316,15 +379,11 @@ namespace VRMod
                     AxisRange.Full,
                     AxisRange.Full,
                     AxisRange.Full,
-                    AxisRange.Positive,
-                    AxisRange.Positive,
-                    AxisRange.Positive,
-                    AxisRange.Positive
+                    AxisRange.Full,
+                    AxisRange.Full
                 },
                 new HardwareAxisInfo[]
                 {
-                    new HardwareAxisInfo(AxisCoordinateMode.Absolute, false, SpecialAxisType.None),
-                    new HardwareAxisInfo(AxisCoordinateMode.Absolute, false, SpecialAxisType.None),
                     new HardwareAxisInfo(AxisCoordinateMode.Absolute, false, SpecialAxisType.None),
                     new HardwareAxisInfo(AxisCoordinateMode.Absolute, false, SpecialAxisType.None),
                     new HardwareAxisInfo(AxisCoordinateMode.Absolute, false, SpecialAxisType.None),
@@ -334,6 +393,15 @@ namespace VRMod
                 },
                 new HardwareButtonInfo[]
                 {
+                    new HardwareButtonInfo(false, false),
+                    new HardwareButtonInfo(false, false),
+                    new HardwareButtonInfo(false, false),
+                    new HardwareButtonInfo(false, false),
+                    new HardwareButtonInfo(false, false),
+                    new HardwareButtonInfo(false, false),
+                    new HardwareButtonInfo(false, false),
+                    new HardwareButtonInfo(false, false),
+                    new HardwareButtonInfo(false, false),
                     new HardwareButtonInfo(false, false),
                     new HardwareButtonInfo(false, false),
                     new HardwareButtonInfo(false, false),
@@ -377,7 +445,11 @@ namespace VRMod
                 }
             }
 
-            return ReInput.controllers.CreateCustomController(newController.id);
+            CustomController customController = ReInput.controllers.CreateCustomController(newController.id);
+
+            customController.erysJAiDEvGlnFNklzMyeuFJkdrW(new VRRumbleExtension(new VRRumbleExtensionSource()));
+
+            return customController;
         }
 
         private static CustomControllerMap CreateCustomMap(string mapName, int categoryId, int controllerId, List<ActionElementMap> actionElementMaps)
@@ -457,81 +529,55 @@ namespace VRMod
 
         private static void UpdateVRInputs()
         {
-            string[] joyNames = Input.GetJoystickNames();
-            if (controllerMap == null|| !controllerMap.CheckJoyNames(joyNames))
+            if (ModConfig.OculusMode.Value)
             {
-                int leftJoystickId = -1;
-                int rightJoystickId = -1;
-                for (int i = 0; i < joyNames.Length; i++)
+                string[] joyNames = Input.GetJoystickNames();
+                if (!joyNames[leftJoystickID].ToLower().Contains("left") || !joyNames[rightJoystickID].ToLower().Contains("right"))
                 {
-                    string joyName = joyNames[i].ToLower();
-                    if (joyName.Contains("left"))
+                    int leftJoystickId = -1;
+                    int rightJoystickId = -1;
+                    for (int i = 0; i < joyNames.Length; i++)
                     {
-                        leftJoystickId = i;
+                        string joyName = joyNames[i].ToLower();
+                        if (joyName.Contains("left"))
+                        {
+                            leftJoystickId = i;
+                        }
+
+                        if (joyName.Contains("right"))
+                        {
+                            rightJoystickId = i;
+                        }
                     }
 
-                    if (joyName.Contains("right"))
-                    {
-                        rightJoystickId = i;
-                    }
+                    if (leftJoystickId == -1 || rightJoystickId == -1) return;
                 }
-
-                if (leftJoystickId == -1 || rightJoystickId == -1) return;
-
-                SelectMapFromName(joyNames[leftJoystickId].ToLower(), leftJoystickId, rightJoystickId);
             }
 
-            vrControllers.SetAxisValue(0, controllerMap.GetLeftJoyX());
-            vrControllers.SetAxisValue(1, controllerMap.GetLeftJoyY());
-            vrControllers.SetAxisValue(2, controllerMap.GetRightJoyX());
-            vrControllers.SetAxisValue(3, controllerMap.GetRightJoyY());
-            vrControllers.SetAxisValue(4, controllerMap.GetLeftTrigger());
-            vrControllers.SetAxisValue(5, controllerMap.GetRightTrigger());
-            vrControllers.SetAxisValue(6, controllerMap.GetLeftGrip());
-            vrControllers.SetAxisValue(7, controllerMap.GetRightGrip());
-
-            vrControllers.SetButtonValue(0, controllerMap.GetLeftPrimary());
-            vrControllers.SetButtonValue(1, controllerMap.GetRightPrimary());
-            vrControllers.SetButtonValue(2, controllerMap.GetLeftSecondary());
-            vrControllers.SetButtonValue(3, controllerMap.GetRightSecondary());
-            vrControllers.SetButtonValue(4, controllerMap.GetLeftJoyPress());
-            vrControllers.SetButtonValue(5, controllerMap.GetRightJoyPress());
-            vrControllers.SetButtonValue(6, controllerMap.GetLeftSecondaryHold());
-        }
-
-        private static void SelectMapFromName(string name, int leftID, int rightID)
-        {
-            if (controllerMap != null && controllerMap.cachedName == name)
+            if (inputGlyphs == null)
             {
-                controllerMap.SetJoystickIDs(leftID, rightID);
-                return;
+                List<XRNodeState> states = new List<XRNodeState>();
+                InputTracking.GetNodeStates(states);
+
+                List<XRNodeState> results = states.Where(x => x.nodeType == XRNode.LeftHand).ToList();
+                if (results.Count > 0)
+                {
+                    XRNodeState leftControllerState = results.First();
+                    string controllerName = InputTracking.GetNodeName(leftControllerState.uniqueID);
+
+                    if (controllerName.Contains("vive_controller"))
+                        inputGlyphs = ControllerGlyphs.viveGlyphs;
+                    else if (controllerName.Contains("holographic_controller"))
+                        inputGlyphs = ControllerGlyphs.wmrGlyphs;
+                    else
+                        inputGlyphs = ControllerGlyphs.standardGlyphs;
+                }
             }
 
-            if (!ModConfig.OculusMode.Value)
+            foreach (BaseInput input in inputs)
             {
-                if (name.Contains("vive") && !name.Contains("cosmos"))
-                {
-                    controllerMap = new ViveMap(leftID, rightID, name);
-                    return;
-                }
-
-                if (name.Contains("0x066a"))
-                {
-                    controllerMap = new ReverbG2Map(leftID, rightID, name);
-                    return;
-                }
-
-                if (name.Contains("windows"))
-                {
-                    controllerMap = new TrackpadWMRMap(leftID, rightID, name);
-                    return;
-                }
-
-                controllerMap = new GenericOpenVRMap(leftID, rightID, name);
-                return;
+                input.UpdateValues(vrControllers);
             }
-
-            controllerMap = new GenericVRMap(leftID, rightID, name, true);
         }
 
         public struct SkillRemap

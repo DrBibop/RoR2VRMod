@@ -5,6 +5,9 @@ using UnityEngine.XR;
 using System.Collections;
 using BepInEx.Logging;
 using UnityEngine;
+using System;
+using System.Reflection;
+using System.IO;
 
 [module: UnverifiableCode]
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -38,13 +41,12 @@ namespace VRMod
 
             RoR2.RoR2Application.onLoad += () =>
             {
-                StartCoroutine(SetVRDevice(ModConfig.OculusMode.Value));
+                StartCoroutine(InitVR(ModConfig.OculusMode.Value));
                 VRManager.Init();
-                Controllers.Init();
             };
         }
 
-        private IEnumerator SetVRDevice(bool useOculus)
+        private IEnumerator InitVR(bool useOculus)
         {
             XRSettings.LoadDeviceByName(useOculus ? "Oculus" : "OpenVR");
             yield return null;
@@ -53,6 +55,14 @@ namespace VRMod
                 XRSettings.enabled = true;
                 XRDevice.SetTrackingSpaceType(ModConfig.Roomscale.Value ? TrackingSpaceType.RoomScale : TrackingSpaceType.Stationary);
             }
+
+            if (!useOculus)
+            {
+                Valve.VR.SteamVR.Initialize();
+                Valve.VR.SteamVR_Actions.gameplay.Activate();
+                Valve.VR.SteamVR_Actions.ui.Activate();
+            }
+            Controllers.Init();
         }
     }
 }
