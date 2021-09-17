@@ -8,9 +8,11 @@ namespace VRMod.Inputs.Legacy
 
         internal override void UpdateValues(CustomController vrControllers)
         {
+            bool value = UnityInputHelper.GetJoystickButtonValueByJoystickIndex(joystickID, inputIndex);
+
             foreach (int inputID in inputIDs)
             {
-                vrControllers.SetButtonValueById(inputID, UnityInputHelper.GetJoystickButtonValueByJoystickIndex(joystickID, inputIndex));
+                vrControllers.SetButtonValueById(inputID, value);
             }
         }
     }

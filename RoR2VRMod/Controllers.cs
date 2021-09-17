@@ -61,12 +61,33 @@ namespace VRMod
 
             PlayerCharacterMasterController.onPlayerAdded += SubscribeToBodyEvents;
 
+            if (!ModConfig.OculusMode.Value)
+                On.RoR2.GamepadVibrationManager.Update += VRHaptics;
+
             if (ModConfig.ControllerMovementDirection.Value)
                 IL.RoR2.PlayerCharacterMasterController.Update += ControllerMovementDirection;
 
             SetupControllerInputs();
 
             glyphsSpriteAsset = VRMod.VRAssetBundle.LoadAsset<TMP_SpriteAsset>("sprVRGlyphs");
+        }
+
+        private static void VRHaptics(On.RoR2.GamepadVibrationManager.orig_Update orig)
+        {
+            orig();
+
+            LocalUser localUser = LocalUserManager.GetFirstLocalUser();
+
+            if (localUser == null || localUser.userProfile == null || localUser.cameraRigController == null) return;
+
+            float vibrationScale = localUser.userProfile.gamepadVibrationScale;
+
+            Vector3 rawScreenShakeDisplacement = localUser.cameraRigController.rawScreenShakeDisplacement;
+
+            GamepadVibrationManager.MotorValues motorValues = GamepadVibrationManager.CalculateMotorValuesForCameraDisplacement(vibrationScale, rawScreenShakeDisplacement);
+
+            SteamVR_Actions.gameplay_Haptic.Execute(0, 0, 80, motorValues.quickMotor, SteamVR_Input_Sources.LeftHand);
+            SteamVR_Actions.gameplay_Haptic.Execute(0, 0, 80, motorValues.quickMotor, SteamVR_Input_Sources.RightHand);
         }
 
         public static void AddSkillRemap(string bodyName, SkillSlot skill1, SkillSlot skill2)
@@ -242,10 +263,10 @@ namespace VRMod
                 new ActionElementMap(4 , ControllerElementType.Button, 7 , Pole.Positive, AxisRange.Full, false), //Jump
                 new ActionElementMap(5 , ControllerElementType.Button, 6, Pole.Positive, AxisRange.Full, false), //Interact
                 new ActionElementMap(6 , ControllerElementType.Button, 12 , Pole.Positive, AxisRange.Full, false), //Equipment
-                new ActionElementMap(7 , ControllerElementType.Button, (ModConfig.LeftDominantHand.Value ? 9 : 8) , Pole.Positive, AxisRange.Positive, false), //Primary
-                new ActionElementMap(8 , ControllerElementType.Button, (ModConfig.LeftDominantHand.Value ? 8 : 9) , Pole.Positive, AxisRange.Positive, false), //Secondary
-                new ActionElementMap(9 , ControllerElementType.Button, (ModConfig.LeftDominantHand.Value ? 11 : 10) , Pole.Positive, AxisRange.Positive, false), //Utility
-                new ActionElementMap(10, ControllerElementType.Button, (ModConfig.LeftDominantHand.Value ? 10 : 11) , Pole.Positive, AxisRange.Positive, false), //Special
+                new ActionElementMap(7 , ControllerElementType.Button, (ModConfig.LeftDominantHand.Value ? 9 : 8) , Pole.Positive, AxisRange.Full, false), //Primary
+                new ActionElementMap(8 , ControllerElementType.Button, (ModConfig.LeftDominantHand.Value ? 8 : 9) , Pole.Positive, AxisRange.Full, false), //Secondary
+                new ActionElementMap(9 , ControllerElementType.Button, (ModConfig.LeftDominantHand.Value ? 11 : 10) , Pole.Positive, AxisRange.Full, false), //Utility
+                new ActionElementMap(10, ControllerElementType.Button, (ModConfig.LeftDominantHand.Value ? 10 : 11) , Pole.Positive, AxisRange.Full, false), //Special
                 new ActionElementMap(18, ControllerElementType.Button, 13, Pole.Positive, AxisRange.Full, false), //Sprint
                 new ActionElementMap(19, ControllerElementType.Button, 15, Pole.Positive, AxisRange.Full, false), //Scoreboard or Profile
                 new ActionElementMap(28, ControllerElementType.Button, 14, Pole.Positive, AxisRange.Full, false) //Ping
@@ -262,15 +283,15 @@ namespace VRMod
                     new LegacyAxisInput(false, 3, false, 2), //RJoyX = LookHor
                     new LegacyAxisInput(false, 4, true, 3), //RJoyY = LookVer
                     new LegacyButtonInput(true, 2, 12, 19), //X = Equipment, Ready
-                    new LegacyHoldableButtonInput(true, 3, 15, 24), //Y = Pause, (Hold)Scoreboard/Profile
+                    new LegacyHoldableButtonInput(true, 3, 24, 15), //Y = Pause, (Hold)Scoreboard/Profile
                     new LegacyButtonInput(false, 0, 6, 17), //A = Interact, Submit
                     new LegacyButtonInput(false, 1, 7, 18), //B = Jump, Cancel
                     new LegacyButtonInput(true, 8, 13), //LClick = Sprint
                     new LegacyButtonInput(false, 9, 14, 25), //RClick = Ping, Recenter
-                    new LegacyButtonInput(true, 14, 9, 20), //LTrigger = Secondary, Tab Left
-                    new LegacyButtonInput(true, 4, 10, 22), //LGrip = Utility, Submenu Left
-                    new LegacyButtonInput(false, 15, 8, 21), //RTrigger = Primary, Tab Right
-                    new LegacyButtonInput(false, 5, 11, 23) //RGrip = Special, Submenu Right
+                    new LegacyAxisToButtonInput(true, 8, 9, 20), //LTrigger = Secondary, Tab Left
+                    new LegacyAxisToButtonInput(true, 10, 10, 22), //LGrip = Utility, Submenu Left
+                    new LegacyAxisToButtonInput(false, 9, 8, 21), //RTrigger = Primary, Tab Right
+                    new LegacyAxisToButtonInput(false, 11, 11, 23) //RGrip = Special, Submenu Right
                 };
 
                 inputGlyphs = ControllerGlyphs.standardGlyphs;
@@ -447,8 +468,6 @@ namespace VRMod
 
             CustomController customController = ReInput.controllers.CreateCustomController(newController.id);
 
-            customController.erysJAiDEvGlnFNklzMyeuFJkdrW(new VRRumbleExtension(new VRRumbleExtensionSource()));
-
             return customController;
         }
 
@@ -532,25 +551,26 @@ namespace VRMod
             if (ModConfig.OculusMode.Value)
             {
                 string[] joyNames = Input.GetJoystickNames();
+
                 if (!joyNames[leftJoystickID].ToLower().Contains("left") || !joyNames[rightJoystickID].ToLower().Contains("right"))
                 {
-                    int leftJoystickId = -1;
-                    int rightJoystickId = -1;
+                    leftJoystickID = -1;
+                    rightJoystickID = -1;
                     for (int i = 0; i < joyNames.Length; i++)
                     {
                         string joyName = joyNames[i].ToLower();
                         if (joyName.Contains("left"))
                         {
-                            leftJoystickId = i;
+                            leftJoystickID = i;
                         }
 
                         if (joyName.Contains("right"))
                         {
-                            rightJoystickId = i;
+                            rightJoystickID = i;
                         }
                     }
 
-                    if (leftJoystickId == -1 || rightJoystickId == -1) return;
+                    if (leftJoystickID == -1 || rightJoystickID == -1) return;
                 }
             }
 

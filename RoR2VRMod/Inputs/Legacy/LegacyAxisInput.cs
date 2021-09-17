@@ -13,12 +13,12 @@ namespace VRMod.Inputs.Legacy
 
         internal override void UpdateValues(CustomController vrControllers)
         {
+            float value = UnityInputHelper.GetJoystickAxisRawValueByJoystickIndex(joystickID, inputIndex);
+
+            if (invert) value = -value;
+
             foreach (int inputID in inputIDs)
             {
-                float value = UnityInputHelper.GetJoystickAxisRawValueByJoystickIndex(joystickID, inputIndex);
-
-                if (invert) value = -value;
-
                 vrControllers.SetAxisValueById(inputID, value);
             }
         }
