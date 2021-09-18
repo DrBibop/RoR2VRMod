@@ -37,6 +37,7 @@ namespace VRMod
         };
 
         private static BaseInput[] inputs;
+        private static List<BaseInput> modInputs = new List<BaseInput>();
 
         internal static int leftJoystickID { get; private set; }
         internal static int rightJoystickID { get; private set; }
@@ -273,7 +274,8 @@ namespace VRMod
                 new ActionElementMap(31, ControllerElementType.Button, 19, Pole.Positive, AxisRange.Positive, false), //AltSubmit
                 new ActionElementMap(32, ControllerElementType.Button, 22, Pole.Positive, AxisRange.Positive, false), //SubmenuLeft
                 new ActionElementMap(33, ControllerElementType.Button, 23, Pole.Positive, AxisRange.Positive, false), //SubmenuRight
-                new ActionElementMap(150, ControllerElementType.Button, 25, Pole.Positive, AxisRange.Positive, false) //Recenter
+                new ActionElementMap(150, ControllerElementType.Button, 25, Pole.Positive, AxisRange.Positive, false), //Recenter
+                new ActionElementMap(34, ControllerElementType.Button, 32, Pole.Positive, AxisRange.Positive, false) //Load
             };
 
             vrUIMap = CreateCustomMap("VRUI", 2, vrControllers.id, uiElementMaps);
@@ -293,7 +295,13 @@ namespace VRMod
                 new ActionElementMap(10, ControllerElementType.Button, (ModConfig.LeftDominantHand.Value ? 10 : 11) , Pole.Positive, AxisRange.Full, false), //Special
                 new ActionElementMap(18, ControllerElementType.Button, 13, Pole.Positive, AxisRange.Full, false), //Sprint
                 new ActionElementMap(19, ControllerElementType.Button, 15, Pole.Positive, AxisRange.Full, false), //Scoreboard or Profile
-                new ActionElementMap(28, ControllerElementType.Button, 14, Pole.Positive, AxisRange.Full, false) //Ping
+                new ActionElementMap(28, ControllerElementType.Button, 14, Pole.Positive, AxisRange.Full, false), //Ping
+                new ActionElementMap(100, ControllerElementType.Button, 26, Pole.Positive, AxisRange.Full, false), //ExtraSkill1
+                new ActionElementMap(101, ControllerElementType.Button, 27, Pole.Positive, AxisRange.Full, false), //ExtraSkill2
+                new ActionElementMap(102, ControllerElementType.Button, 28, Pole.Positive, AxisRange.Full, false), //ExtraSkill3
+                new ActionElementMap(103, ControllerElementType.Button, 29, Pole.Positive, AxisRange.Full, false), //ExtraSkill4
+                new ActionElementMap(351, ControllerElementType.Button, 30, Pole.Positive, AxisRange.Full, false), //PushToTalk
+                new ActionElementMap(400, ControllerElementType.Button, 31, Pole.Positive, AxisRange.Full, false) //BuySkill
             };
 
             vrDefaultMap = CreateCustomMap("VRDefault", 0, vrControllers.id, defaultElementMaps);
@@ -347,6 +355,28 @@ namespace VRMod
                     new ReleaseButtonInput(SteamVR_Actions.ui_Pause, 24),
                     new ButtonInput(SteamVR_Actions.ui_RecenterHMD, 25)
                 };
+
+                var plugins = BepInEx.Bootstrap.Chainloader.PluginInfos;
+
+                if (plugins.ContainsKey("com.KingEnderBrine.ExtraSkillSlots"))
+                {
+                    modInputs.Add(new ButtonInput(SteamVR_Actions.gameplay_ExtraSkill1, 26));
+                    modInputs.Add(new ButtonInput(SteamVR_Actions.gameplay_ExtraSkill2, 27));
+                    modInputs.Add(new ButtonInput(SteamVR_Actions.gameplay_ExtraSkill3, 28));
+                    modInputs.Add(new ButtonInput(SteamVR_Actions.gameplay_ExtraSkill4, 29));
+                }
+                if (plugins.ContainsKey("com.evaisa.r2voicechat"))
+                {
+                    modInputs.Add(new ButtonInput(SteamVR_Actions.gameplay_PushToTalk, 30));
+                }
+                if (plugins.ContainsKey("com.cwmlolzlz.skills"))
+                {
+                    modInputs.Add(new ButtonInput(SteamVR_Actions.gameplay_BuySkill, 31));
+                }
+                if (plugins.ContainsKey("com.KingEnderBrine.ProperSave"))
+                {
+                    modInputs.Add(new ButtonInput(SteamVR_Actions.ui_ProperSaveLoad, 32));
+                }
             }
         }
 
@@ -405,10 +435,17 @@ namespace VRMod
                     new ControllerElementIdentifier(22, "SubmenuLeft", "", "", ControllerElementType.Button, true),
                     new ControllerElementIdentifier(23, "SubmenuRight", "", "", ControllerElementType.Button, true),
                     new ControllerElementIdentifier(24, "Pause", "", "", ControllerElementType.Button, true),
-                    new ControllerElementIdentifier(25, "RecenterHMD", "", "", ControllerElementType.Button, true)
+                    new ControllerElementIdentifier(25, "RecenterHMD", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(26, "ExtraSkill1", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(27, "ExtraSkill2", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(28, "ExtraSkill3", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(29, "ExtraSkill4", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(30, "PushToTalk", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(31, "BuySkill", "", "", ControllerElementType.Button, true),
+                    new ControllerElementIdentifier(32, "Load", "", "", ControllerElementType.Button, true),
                 },
-                new int[] {6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22 },
-                new int[] { 0, 1, 2, 3, 4, 5 },
+                new int[] { },
+                new int[] { },
                 new AxisCalibrationData[]
                 {
                     new AxisCalibrationData(true, 0.1f, 0, -1, 1, false, true),
@@ -436,25 +473,7 @@ namespace VRMod
                     new HardwareAxisInfo(AxisCoordinateMode.Absolute, false, SpecialAxisType.None),
                     new HardwareAxisInfo(AxisCoordinateMode.Absolute, false, SpecialAxisType.None)
                 },
-                new HardwareButtonInfo[]
-                {
-                    new HardwareButtonInfo(false, false),
-                    new HardwareButtonInfo(false, false),
-                    new HardwareButtonInfo(false, false),
-                    new HardwareButtonInfo(false, false),
-                    new HardwareButtonInfo(false, false),
-                    new HardwareButtonInfo(false, false),
-                    new HardwareButtonInfo(false, false),
-                    new HardwareButtonInfo(false, false),
-                    new HardwareButtonInfo(false, false),
-                    new HardwareButtonInfo(false, false),
-                    new HardwareButtonInfo(false, false),
-                    new HardwareButtonInfo(false, false),
-                    new HardwareButtonInfo(false, false),
-                    new HardwareButtonInfo(false, false),
-                    new HardwareButtonInfo(false, false),
-                    new HardwareButtonInfo(false, false)
-                },
+                new HardwareButtonInfo[]{ },
                 null
             );
 
@@ -619,6 +638,11 @@ namespace VRMod
             }
 
             foreach (BaseInput input in inputs)
+            {
+                input.UpdateValues(vrControllers);
+            }
+
+            foreach (BaseInput input in modInputs)
             {
                 input.UpdateValues(vrControllers);
             }

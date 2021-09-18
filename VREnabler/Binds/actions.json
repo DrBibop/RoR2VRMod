@@ -71,6 +71,36 @@
       "type": "boolean"
     },
     {
+      "name": "/actions/gameplay/in/ExtraSkill1",
+      "type": "boolean",
+      "requirement": "optional"
+    },
+    {
+      "name": "/actions/gameplay/in/ExtraSkill2",
+      "type": "boolean",
+      "requirement": "optional"
+    },
+    {
+      "name": "/actions/gameplay/in/ExtraSkill3",
+      "type": "boolean",
+      "requirement": "optional"
+    },
+    {
+      "name": "/actions/gameplay/in/ExtraSkill4",
+      "type": "boolean",
+      "requirement": "optional"
+    },
+    {
+      "name": "/actions/gameplay/in/PushToTalk",
+      "type": "boolean",
+      "requirement": "optional"
+    },
+    {
+      "name": "/actions/gameplay/in/BuySkill",
+      "type": "boolean",
+      "requirement": "optional"
+    },
+    {
       "name": "/actions/gameplay/out/Haptic",
       "type": "vibration"
     },
@@ -121,6 +151,11 @@
     {
       "name": "/actions/ui/in/Pause",
       "type": "boolean"
+    },
+    {
+      "name": "/actions/ui/in/ProperSaveLoad",
+      "type": "boolean",
+      "requirement": "optional"
     }
   ],
   "action_sets": [
@@ -190,14 +225,6 @@
   "localization": [
     {
       "language_tag": "en_US",
-      "/actions/Gameplay/in/UseEquipment": "Use Equipment",
-      "/actions/Gameplay/in/PrimarySkill": "Primary Skill",
-      "/actions/Gameplay/in/SecondarySkill": "Secondary Skill",
-      "/actions/Gameplay/in/UtilitySkill": "Utility Skill",
-      "/actions/Gameplay/in/SpecialSkill": "Special Skill",
-      "/actions/Gameplay/in/ScoreboardAndProfile": "Scoreboard/Profile Menu",
-      "/actions/Gameplay/in/HoldScoreboardAndProfile": "(Hold) Scoreboard/Profile Menu",
-      "/actions/UI/in/ReadyAndContinue": "Ready/Continue",
       "/actions/gameplay/in/Move": "Move",
       "/actions/gameplay/in/Look": "Look",
       "/actions/gameplay/in/Sprint": "Sprint",
@@ -222,7 +249,14 @@
       "/actions/ui/in/RecenterHMD": "Recenter HMD",
       "/actions/ui/in/Pause": "Pause",
       "/actions/gameplay/in/LookLeft": "Look Left",
-      "/actions/gameplay/in/LookRight": "Look Right"
+      "/actions/gameplay/in/LookRight": "Look Right",
+      "/actions/ui/in/ProperSaveLoad": "ProperSave: Load",
+      "/actions/gameplay/in/ExtraSkill1": "ExtraSkillSlots: Skill 1",
+      "/actions/gameplay/in/ExtraSkill2": "ExtraSkillSlots: Skill 2",
+      "/actions/gameplay/in/ExtraSkill3": "ExtraSkillSlots: Skill 3",
+      "/actions/gameplay/in/ExtraSkill4": "ExtraSkillSlots: Skill 4",
+      "/actions/gameplay/in/PushToTalk": "VoiceChat: PushToTalk",
+      "/actions/gameplay/in/BuySkill": "Skills++: Buy Skill"
     }
   ]
 }

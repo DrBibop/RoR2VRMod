@@ -33,7 +33,14 @@ namespace VRMod
             "<sprite name=\"texVRGlyphs_LGrip\">",           //SubmenuLeft
             "<sprite name=\"texVRGlyphs_RGrip\">",           //SubmenuRight
             "<sprite name=\"texVRGlyphs_LSecondary\">",      //Pause 
-            "<sprite name=\"texVRGlyphs_RStickPress\">"      //RecenterHMD
+            "<sprite name=\"texVRGlyphs_RStickPress\">",     //RecenterHMD
+            "<sprite name=\"texVRGlyphs_Unknown\">",         //ExtraSkill1
+            "<sprite name=\"texVRGlyphs_Unknown\">",         //ExtraSkill2
+            "<sprite name=\"texVRGlyphs_Unknown\">",         //ExtraSkill3
+            "<sprite name=\"texVRGlyphs_Unknown\">",         //ExtraSkill4
+            "<sprite name=\"texVRGlyphs_Unknown\">",         //PushToTalk
+            "<sprite name=\"texVRGlyphs_Unknown\">",         //BuySkill
+            "<sprite name=\"texVRGlyphs_Unknown\">"          //Load
         };
 
         internal static string[] viveGlyphs = new string[]
@@ -63,15 +70,22 @@ namespace VRMod
             "<sprite name=\"texVRGlyphs_LGrip\">",           //SubmenuLeft
             "<sprite name=\"texVRGlyphs_RGrip\">",           //SubmenuRight
             "<sprite name=\"texVRGlyphs_LMenu\">",           //Pause 
-            "<sprite name=\"texVRGlyphs_RMenu\">"            //RecenterHMD
+            "<sprite name=\"texVRGlyphs_RMenu\">",           //RecenterHMD
+            "<sprite name=\"texVRGlyphs_Unknown\">",         //ExtraSkill1
+            "<sprite name=\"texVRGlyphs_Unknown\">",         //ExtraSkill2
+            "<sprite name=\"texVRGlyphs_Unknown\">",         //ExtraSkill3
+            "<sprite name=\"texVRGlyphs_Unknown\">",         //ExtraSkill4
+            "<sprite name=\"texVRGlyphs_Unknown\">",         //PushToTalk
+            "<sprite name=\"texVRGlyphs_Unknown\">",         //BuySkill
+            "<sprite name=\"texVRGlyphs_Unknown\">"          //Load
         };
 
         internal static string[] wmrGlyphs = new string[]
         {
             "<sprite name=\"texVRGlyphs_LTouch\">",          //MoveX
             "<sprite name=\"texVRGlyphs_LTouch\">",          //MoveY
-            "<sprite name=\"texVRGlyphs_RStick\">",       //LookX
-            "<sprite name=\"texVRGlyphs_RStick\">",       //LookY
+            "<sprite name=\"texVRGlyphs_RStick\">",          //LookX
+            "<sprite name=\"texVRGlyphs_RStick\">",          //LookY
             "<sprite name=\"texVRGlyphs_LStick\">",          //NavigateX
             "<sprite name=\"texVRGlyphs_LStick\">",          //NavigateY
             "<sprite name=\"texVRGlyphs_RTouchDown\">",      //Interact
@@ -93,7 +107,14 @@ namespace VRMod
             "<sprite name=\"texVRGlyphs_LGrip\">",           //SubmenuLeft
             "<sprite name=\"texVRGlyphs_RGrip\">",           //SubmenuRight
             "<sprite name=\"texVRGlyphs_LMenu\">",           //Pause 
-            "<sprite name=\"texVRGlyphs_RMenu\">"            //RecenterHMD
+            "<sprite name=\"texVRGlyphs_RMenu\">",           //RecenterHMD
+            "<sprite name=\"texVRGlyphs_Unknown\">",         //ExtraSkill1
+            "<sprite name=\"texVRGlyphs_Unknown\">",         //ExtraSkill2
+            "<sprite name=\"texVRGlyphs_Unknown\">",         //ExtraSkill3
+            "<sprite name=\"texVRGlyphs_Unknown\">",         //ExtraSkill4
+            "<sprite name=\"texVRGlyphs_Unknown\">",         //PushToTalk
+            "<sprite name=\"texVRGlyphs_Unknown\">",         //BuySkill
+            "<sprite name=\"texVRGlyphs_Unknown\">"          //Load
         };
     }
 }
