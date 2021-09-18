@@ -61,8 +61,7 @@ namespace VRMod
 
             PlayerCharacterMasterController.onPlayerAdded += SubscribeToBodyEvents;
 
-            if (!ModConfig.OculusMode.Value)
-                On.RoR2.GamepadVibrationManager.Update += VRHaptics;
+            On.RoR2.GamepadVibrationManager.Update += VRHaptics;
 
             if (ModConfig.ControllerMovementDirection.Value)
                 IL.RoR2.PlayerCharacterMasterController.Update += ControllerMovementDirection;
@@ -86,8 +85,33 @@ namespace VRMod
 
             GamepadVibrationManager.MotorValues motorValues = GamepadVibrationManager.CalculateMotorValuesForCameraDisplacement(vibrationScale, rawScreenShakeDisplacement);
 
-            SteamVR_Actions.gameplay_Haptic.Execute(0, 0, 80, motorValues.quickMotor, SteamVR_Input_Sources.LeftHand);
-            SteamVR_Actions.gameplay_Haptic.Execute(0, 0, 80, motorValues.quickMotor, SteamVR_Input_Sources.RightHand);
+            if (ModConfig.OculusMode.Value)
+            {
+                InputDevice leftHand = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
+                InputDevice rightHand = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
+
+                HapticCapabilities capabilities;
+
+                if (leftHand.TryGetHapticCapabilities(out capabilities))
+                {
+                    if (capabilities.supportsImpulse)
+                    {
+                        leftHand.SendHapticImpulse(0, motorValues.deepMotor, 0.02f);
+                    }
+                }
+                if (rightHand.TryGetHapticCapabilities(out capabilities))
+                {
+                    if (capabilities.supportsImpulse)
+                    {
+                        rightHand.SendHapticImpulse(0, motorValues.deepMotor, 0.02f);
+                    }
+                }
+            }
+            else
+            {
+                SteamVR_Actions.gameplay_Haptic.Execute(0, 0, 80, motorValues.quickMotor, SteamVR_Input_Sources.LeftHand);
+                SteamVR_Actions.gameplay_Haptic.Execute(0, 0, 80, motorValues.quickMotor, SteamVR_Input_Sources.RightHand);
+            }
         }
 
         public static void AddSkillRemap(string bodyName, SkillSlot skill1, SkillSlot skill2)
@@ -283,7 +307,7 @@ namespace VRMod
                     new LegacyAxisInput(false, 3, false, 2), //RJoyX = LookHor
                     new LegacyAxisInput(false, 4, true, 3), //RJoyY = LookVer
                     new LegacyButtonInput(true, 2, 12, 19), //X = Equipment, Ready
-                    new LegacyHoldableButtonInput(true, 3, 24, 15), //Y = Pause, (Hold)Scoreboard/Profile
+                    new LegacyReleaseAndHoldableButtonInput(true, 3, 24, 15), //Y = Pause, (Hold)Scoreboard/Profile
                     new LegacyButtonInput(false, 0, 6, 17), //A = Interact, Submit
                     new LegacyButtonInput(false, 1, 7, 18), //B = Jump, Cancel
                     new LegacyButtonInput(true, 8, 13), //LClick = Sprint

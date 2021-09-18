@@ -6,7 +6,7 @@ namespace VRMod.Inputs
 {
     internal class ReleaseButtonInput : ButtonInput
     {
-        bool canRelease = false;
+        private bool canRelease = false;
 
         internal ReleaseButtonInput(SteamVR_Action_Boolean buttonAction, int buttonID) : base(buttonAction, buttonID) { }
 
