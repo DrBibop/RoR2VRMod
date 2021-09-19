@@ -28,7 +28,7 @@ namespace VRMod
 
             ModConfig.Init();
             ActionAddons.Init();
-            VRManager.Init();
+            RecenterController.Init();
             SettingsAddon.Init();
             UIFixes.Init();
             CameraFixes.Init();
@@ -42,7 +42,7 @@ namespace VRMod
             RoR2.RoR2Application.onLoad += () =>
             {
                 StartCoroutine(InitVR(ModConfig.OculusMode.Value));
-                VRManager.Init();
+                RecenterController.Init();
             };
         }
 
@@ -63,6 +63,7 @@ namespace VRMod
                 Valve.VR.SteamVR_Actions.ui.Activate();
             }
             Controllers.Init();
+            ControllerGlyphs.Init();
         }
     }
 }

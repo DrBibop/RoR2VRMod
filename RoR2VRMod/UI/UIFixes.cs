@@ -194,8 +194,8 @@ namespace VRMod
                 bool isPingIndicator = PingIndicator.instancesList.Exists((x) => x.positionIndicator == indicator);
 
                 Transform rigTransform = VRCameraWrapper.instance ? VRCameraWrapper.instance.transform : uiCamera.cameraRigController.transform;
-                indicator.transform.position = rigTransform.InverseTransformDirection(position - rigTransform.position);
-                indicator.transform.localScale = (isPingIndicator ? 1: 0.2f) * Vector3.Distance(uiCamera.cameraRigController.sceneCam.transform.position, position) * Vector3.one;
+                indicator.transform.position = rigTransform.InverseTransformDirection((position - rigTransform.position) / rigTransform.localScale.x);
+                indicator.transform.localScale = (isPingIndicator ? 1: 0.2f) * Vector3.Distance(uiCamera.cameraRigController.sceneCam.transform.position, position) * (Vector3.one / rigTransform.localScale.x);
             }
         }
 
@@ -205,12 +205,12 @@ namespace VRMod
             {
                 Vector3 position = self.targetTransform.position;
                 
-                Vector3 vector = sceneCamera.transform.parent.InverseTransformDirection(position - sceneCamera.transform.parent.position);
+                Vector3 vector = sceneCamera.transform.parent.InverseTransformDirection((position - sceneCamera.transform.parent.position) / sceneCamera.transform.parent.localScale.x);
                 if (self.visualizerTransform != null)
                 {
                     self.visualizerTransform.position = vector;
                     self.visualizerTransform.rotation = Quaternion.LookRotation((vector - uiCamera.transform.position).normalized);
-                    self.visualizerTransform.localScale = (self is EntityStates.Engi.EngiMissilePainter.Paint.EngiMissileIndicator ? 1 : 0.1f) * Vector3.Distance(sceneCamera.transform.position, position) * Vector3.one;
+                    self.visualizerTransform.localScale = (self is EntityStates.Engi.EngiMissilePainter.Paint.EngiMissileIndicator ? 1 : 0.1f) * Vector3.Distance(sceneCamera.transform.position, position) * (Vector3.one / sceneCamera.transform.parent.localScale.x);
                 }
             }
         }
@@ -393,7 +393,7 @@ namespace VRMod
                 Vector3 vector = sceneCam.WorldToScreenPoint(position);
                 Vector3 position2 = uiCam.ScreenToWorldPoint(vector);
                 healthBarInfo.healthBarRootObjectTransform.position = position2;
-                healthBarInfo.healthBarRootObjectTransform.localScale = 0.1f * Vector3.Distance(sceneCam.transform.position, position) * Vector3.one;
+                healthBarInfo.healthBarRootObjectTransform.localScale = 0.1f * Vector3.Distance(uiCam.transform.position, position2) * Vector3.one;
             }
         }
     }
