@@ -13,7 +13,7 @@ using System.IO;
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
 namespace VRMod
 {
-    [BepInPlugin("com.DrBibop.VRMod", "VRMod", "2.3.0")]
+    [BepInPlugin("com.DrBibop.VRMod", "VRMod", "2.4.0")]
     public class VRMod : BaseUnityPlugin
     {
         internal static ManualLogSource StaticLogger;
