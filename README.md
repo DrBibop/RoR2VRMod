@@ -19,6 +19,9 @@ Shoutout to laila, HutchyBen, Skarl1n, Geb, Popzix and Terrorcotta211 for helpin
 ## Oculus Touch/Reverb G2/Vive Cosmos controllers
 ![](https://i.imgur.com/5ZY5mQc.png)
 
+## Index Knuckles
+![](https://i.imgur.com/fEv3KAH.png)
+
 ## Vive controllers
 ![](https://i.imgur.com/ApqDR5O.png)
 
