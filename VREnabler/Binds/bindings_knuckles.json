@@ -159,128 +159,137 @@
          "sources" : []
       },
       "/actions/ui" : {
-         "sources" : [
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/ui/in/tableft"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/left/input/trigger"
+        "sources": [
+          {
+            "inputs": {
+              "click": {
+                "output": "/actions/ui/in/tableft"
+              }
             },
-            {
-               "inputs" : {
-                  "center" : {
-                     "output" : "/actions/ui/in/recenterhmd"
-                  }
-               },
-               "mode" : "dpad",
-               "parameters" : {
-                  "sub_mode" : "click"
-               },
-               "path" : "/user/hand/left/input/trackpad"
+            "mode": "button",
+            "path": "/user/hand/left/input/trigger"
+          },
+          {
+            "inputs": {
+              "center": {
+                "output": "/actions/ui/in/recenterhmd"
+              }
             },
-            {
-               "inputs" : {
-                  "position" : {
-                     "output" : "/actions/ui/in/navigate"
-                  }
-               },
-               "mode" : "joystick",
-               "path" : "/user/hand/left/input/thumbstick"
+            "mode": "dpad",
+            "parameters": {
+              "sub_mode": "click"
             },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/ui/in/pause"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/left/input/b"
+            "path": "/user/hand/left/input/trackpad"
+          },
+          {
+            "inputs": {
+              "position": {
+                "output": "/actions/ui/in/navigate"
+              }
             },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/ui/in/readyandcontinue"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/left/input/a"
+            "mode": "joystick",
+            "path": "/user/hand/left/input/thumbstick"
+          },
+          {
+            "inputs": {
+              "click": {
+                "output": "/actions/ui/in/pause"
+              }
             },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/ui/in/tabright"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/right/input/trigger"
+            "mode": "button",
+            "path": "/user/hand/left/input/b"
+          },
+          {
+            "inputs": {
+              "click": {
+                "output": "/actions/ui/in/readyandcontinue"
+              }
             },
-            {
-               "inputs" : {
-                  "center" : {
-                     "output" : "/actions/ui/in/recenterhmd"
-                  }
-               },
-               "mode" : "dpad",
-               "parameters" : {
-                  "sub_mode" : "click"
-               },
-               "path" : "/user/hand/right/input/trackpad"
+            "mode": "button",
+            "path": "/user/hand/left/input/a"
+          },
+          {
+            "inputs": {
+              "click": {
+                "output": "/actions/ui/in/tabright"
+              }
             },
-            {
-               "inputs" : {
-                  "east" : {
-                     "output" : "/actions/ui/in/submenuright"
-                  },
-                  "west" : {
-                     "output" : "/actions/ui/in/submenuleft"
-                  }
-               },
-               "mode" : "dpad",
-               "parameters" : {
-                  "sub_mode" : "touch"
-               },
-               "path" : "/user/hand/right/input/thumbstick"
+            "mode": "button",
+            "path": "/user/hand/right/input/trigger"
+          },
+          {
+            "inputs": {
+              "center": {
+                "output": "/actions/ui/in/recenterhmd"
+              }
             },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/ui/in/cancel"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/right/input/b"
+            "mode": "dpad",
+            "parameters": {
+              "sub_mode": "click"
             },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/ui/in/submit"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/right/input/a"
+            "path": "/user/hand/right/input/trackpad"
+          },
+          {
+            "inputs": {
+              "east": {
+                "output": "/actions/ui/in/submenuright"
+              },
+              "west": {
+                "output": "/actions/ui/in/submenuleft"
+              }
             },
-			      {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/ui/in/submenuleft"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/left/input/grip"
+            "mode": "dpad",
+            "parameters": {
+              "sub_mode": "touch"
             },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/ui/in/submenuright"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/right/input/grip"
-            }
-         ]
+            "path": "/user/hand/right/input/thumbstick"
+          },
+          {
+            "inputs": {
+              "click": {
+                "output": "/actions/ui/in/recenterhmd"
+              }
+            },
+            "mode": "joystick",
+            "path": "/user/hand/right/input/thumbstick"
+          },
+          {
+            "inputs": {
+              "click": {
+                "output": "/actions/ui/in/cancel"
+              }
+            },
+            "mode": "button",
+            "path": "/user/hand/right/input/b"
+          },
+          {
+            "inputs": {
+              "click": {
+                "output": "/actions/ui/in/submit"
+              }
+            },
+            "mode": "button",
+            "path": "/user/hand/right/input/a"
+          },
+          {
+            "inputs": {
+              "click": {
+                "output": "/actions/ui/in/submenuleft"
+              }
+            },
+            "mode": "button",
+            "path": "/user/hand/left/input/grip"
+          },
+          {
+            "inputs": {
+              "click": {
+                "output": "/actions/ui/in/submenuright"
+              }
+            },
+            "mode": "button",
+            "path": "/user/hand/right/input/grip"
+          }
+        ]
       }
    },
    "category" : "steamvr_input",
