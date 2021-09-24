@@ -50,14 +50,14 @@ namespace VRMod
         {
             XRSettings.LoadDeviceByName(useOculus ? "Oculus" : "OpenVR");
             yield return null;
-            if (XRSettings.loadedDeviceName == (useOculus ? "Oculus" : "OpenVR"))
-            {
-                XRSettings.enabled = true;
-                XRDevice.SetTrackingSpaceType(ModConfig.Roomscale.Value ? TrackingSpaceType.RoomScale : TrackingSpaceType.Stationary);
-            }
+            if (XRSettings.loadedDeviceName != (useOculus ? "Oculus" : "OpenVR")) yield break;
+            
+            XRSettings.enabled = true;
+            XRDevice.SetTrackingSpaceType(ModConfig.Roomscale.Value ? TrackingSpaceType.RoomScale : TrackingSpaceType.Stationary);
 
             if (!useOculus)
             {
+                Valve.VR.SteamVR_Settings.instance.trackingSpace = ModConfig.Roomscale.Value ? Valve.VR.ETrackingUniverseOrigin.TrackingUniverseStanding : Valve.VR.ETrackingUniverseOrigin.TrackingUniverseSeated;
                 Valve.VR.SteamVR.Initialize();
                 Valve.VR.SteamVR_Actions.gameplay.Activate();
                 Valve.VR.SteamVR_Actions.ui.Activate();
