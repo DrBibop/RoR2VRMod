@@ -20,6 +20,7 @@ namespace VRPatcher
         internal static string VRPatcherPath => Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         internal static string ManagedPath => Paths.ManagedPath;
         internal static string PluginsPath => Path.Combine(VREnabler.ManagedPath, "../Plugins");
+        internal static string SteamVRPath => Path.Combine(VREnabler.ManagedPath, "../StreamingAssets/SteamVR");
 
         private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("VREnabler");
         
@@ -36,64 +37,73 @@ namespace VRPatcher
                 return;
             }
             VREnabler.Logger.LogInfo("Checking for VR plugins...");
-            string path = Path.Combine(VREnabler.PluginsPath, "x86_64");
-            DirectoryInfo directoryInfo;
-            if (!Directory.Exists(path))
+            string pluginsPath = Path.Combine(VREnabler.PluginsPath, "x86_64");
+            if (!Directory.Exists(pluginsPath))
             {
-                directoryInfo = new DirectoryInfo(VREnabler.PluginsPath);
+                pluginsPath = VREnabler.PluginsPath;
             }
-            else
-            {
-                directoryInfo = new DirectoryInfo(path);
-            }
-            string[] array = new string[]
+
+            string[] plugins = new string[]
             {
                 "AudioPluginOculusSpatializer.dll",
                 "openvr_api.dll",
                 "OVRGamepad.dll",
                 "OVRPlugin.dll"
             };
-            FileInfo[] files = directoryInfo.GetFiles();
-            bool flag = false;
-            Assembly executingAssembly = Assembly.GetExecutingAssembly();
-            string name = executingAssembly.GetName().Name;
-            string[] array2 = array;
-            for (int i = 0; i < array2.Length; i++)
+            string[] managedLibraries = new string[]
             {
-                string pluginName = array2[i];
-                if (!Array.Exists<FileInfo>(files, (FileInfo file) => pluginName == file.Name))
-                {
-                    flag = true;
-                    using (Stream manifestResourceStream = executingAssembly.GetManifestResourceStream(name + ".Plugins." + pluginName))
-                    {
-                        using (FileStream fileStream = new FileStream(Path.Combine(directoryInfo.FullName, pluginName), FileMode.Create, FileAccess.Write, FileShare.Delete))
-                        {
-                            VREnabler.Logger.LogInfo("Copying " + pluginName);
-                            manifestResourceStream.CopyTo(fileStream);
-                        }
-                    }
-                }
-            }
-            directoryInfo = new DirectoryInfo(VREnabler.ManagedPath);
-            files = directoryInfo.GetFiles();
-            if (!Array.Exists<FileInfo>(files, (FileInfo file) => file.Name == "SteamVR.dll"))
-            {
-                flag = true;
-                using (Stream manifestResourceStream = executingAssembly.GetManifestResourceStream(name + ".Plugins.SteamVR.dll"))
-                {
-                    using (FileStream fileStream = new FileStream(Path.Combine(directoryInfo.FullName, "SteamVR.dll"), FileMode.Create, FileAccess.Write, FileShare.Delete))
-                    {
-                        VREnabler.Logger.LogInfo("Copying SteamVR.dll");
-                        manifestResourceStream.CopyTo(fileStream);
-                    }
-                }
-            }
+                "SteamVR.dll",
+                "SteamVR_Actions.dll"
+            };
+
+            bool flag = CopyFiles(pluginsPath, plugins, "Plugins.") || CopyFiles(VREnabler.ManagedPath, managedLibraries, "Plugins.");
+
             if (flag)
-            {
                 VREnabler.Logger.LogInfo("Successfully copied VR plugins!");
-                return;
+            else
+                VREnabler.Logger.LogInfo("VR plugins already present");
+
+            VREnabler.Logger.LogInfo("Checking for binding files...");
+
+
+            if (!Directory.Exists(SteamVRPath))
+            {
+                try
+                {
+                    Directory.CreateDirectory(SteamVRPath);
+                }
+                catch (Exception e)
+                {
+                    VREnabler.Logger.LogError("Could not create SteamVR folder in StreamingAssets: " + e.Message);
+                    VREnabler.Logger.LogError(e.StackTrace);
+                    return;
+                }
             }
-            VREnabler.Logger.LogInfo("VR plugins already present");
+
+            string[] bindingFiles = new string[]
+            {
+                "actions.json",
+                "binding_holographic_hmd.json",
+                "binding_index_hmd.json",
+                "binding_rift.json",
+                "binding_vive.json",
+                "binding_vive_cosmos.json",
+                "binding_vive_pro.json",
+                "binding_vive_tracker_camera.json",
+                "bindings_holographic_controller.json",
+                "bindings_knuckles.json",
+                "bindings_logitech_stylus.json",
+                "bindings_oculus_touch.json",
+                "bindings_vive_controller.json",
+                "bindings_vive_cosmos_controller.json"
+            };
+
+            flag = CopyFiles(SteamVRPath, bindingFiles, "Binds.");
+
+            if (flag)
+                VREnabler.Logger.LogInfo("Successfully copied binding files!");
+            else
+                VREnabler.Logger.LogInfo("Binding files already present");
         }
 
         private static bool EnableVROptions(string path)
@@ -161,6 +171,33 @@ namespace VRPatcher
             }
             VREnabler.Logger.LogError("VR enable location not found!");
             return false;
+        }
+
+        private static bool CopyFiles(string destinationPath, string[] fileNames, string embedFolder)
+        {
+            DirectoryInfo directoryInfo = new DirectoryInfo(destinationPath);
+            FileInfo[] files = directoryInfo.GetFiles();
+            bool flag = false;
+            Assembly executingAssembly = Assembly.GetExecutingAssembly();
+            string name = executingAssembly.GetName().Name;
+            string[] array = fileNames;
+            for (int i = 0; i < array.Length; i++)
+            {
+                string fileName = array[i];
+                if (!Array.Exists<FileInfo>(files, (FileInfo file) => fileName == file.Name))
+                {
+                    flag = true;
+                    using (Stream manifestResourceStream = executingAssembly.GetManifestResourceStream(name + "." + embedFolder + fileName))
+                    {
+                        using (FileStream fileStream = new FileStream(Path.Combine(directoryInfo.FullName, fileName), FileMode.Create, FileAccess.Write, FileShare.Delete))
+                        {
+                            VREnabler.Logger.LogInfo("Copying " + fileName);
+                            manifestResourceStream.CopyTo(fileStream);
+                        }
+                    }
+                }
+            }
+            return flag;
         }
 
         /// <summary>

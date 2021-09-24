@@ -5,19 +5,49 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Binds\actions.json" />
+    <None Remove="Binds\bindings_holographic_controller.json" />
+    <None Remove="Binds\bindings_knuckles.json" />
+    <None Remove="Binds\bindings_logitech_stylus.json" />
+    <None Remove="Binds\bindings_oculus_touch.json" />
+    <None Remove="Binds\bindings_vive_controller.json" />
+    <None Remove="Binds\bindings_vive_cosmos_controller.json" />
+    <None Remove="Binds\binding_holographic_hmd.json" />
+    <None Remove="Binds\binding_index_hmd.json" />
+    <None Remove="Binds\binding_rift.json" />
+    <None Remove="Binds\binding_vive.json" />
+    <None Remove="Binds\binding_vive_cosmos.json" />
+    <None Remove="Binds\binding_vive_pro.json" />
+    <None Remove="Binds\binding_vive_tracker_camera.json" />
     <None Remove="Plugins\AudioPluginOculusSpatializer.dll" />
     <None Remove="Plugins\openvr_api.dll" />
     <None Remove="Plugins\OVRGamepad.dll" />
     <None Remove="Plugins\OVRPlugin.dll" />
     <None Remove="Plugins\SteamVR.dll" />
+    <None Remove="Plugins\SteamVR_Actions.dll" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Binds\actions.json" />
+    <EmbeddedResource Include="Binds\bindings_holographic_controller.json" />
+    <EmbeddedResource Include="Binds\bindings_knuckles.json" />
+    <EmbeddedResource Include="Binds\bindings_logitech_stylus.json" />
+    <EmbeddedResource Include="Binds\bindings_oculus_touch.json" />
+    <EmbeddedResource Include="Binds\bindings_vive_controller.json" />
+    <EmbeddedResource Include="Binds\bindings_vive_cosmos_controller.json" />
+    <EmbeddedResource Include="Binds\binding_holographic_hmd.json" />
+    <EmbeddedResource Include="Binds\binding_index_hmd.json" />
+    <EmbeddedResource Include="Binds\binding_rift.json" />
+    <EmbeddedResource Include="Binds\binding_vive.json" />
+    <EmbeddedResource Include="Binds\binding_vive_cosmos.json" />
+    <EmbeddedResource Include="Binds\binding_vive_pro.json" />
+    <EmbeddedResource Include="Binds\binding_vive_tracker_camera.json" />
     <EmbeddedResource Include="Plugins\AudioPluginOculusSpatializer.dll" />
     <EmbeddedResource Include="Plugins\openvr_api.dll" />
     <EmbeddedResource Include="Plugins\OVRGamepad.dll" />
     <EmbeddedResource Include="Plugins\OVRPlugin.dll" />
     <EmbeddedResource Include="Plugins\SteamVR.dll" />
+    <EmbeddedResource Include="Plugins\SteamVR_Actions.dll" />
   </ItemGroup>
 
   <ItemGroup>

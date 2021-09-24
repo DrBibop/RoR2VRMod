@@ -4,7 +4,7 @@ Experience Risk of Rain 2 in virtual reality with full motion controls support! 
 
 ![](https://thumbs.gfycat.com/DeterminedSpryCassowary-size_restricted.gif)
 
-Playing in VR should be possible with any Oculus or SteamVR compatible devices. This includes WMR headsets with SteamVR. Make sure to disable game theatre mode in the game's properties.
+Playing in VR should be possible with any Oculus or SteamVR compatible devices. This includes WMR headsets as well as the Quest/Quest 2 if connected to a PC via a Link cable, AirLink or Virtual Desktop. Make sure to disable game theatre mode in the game's properties.
 
 If you want to support me and gain access to pre-release testing builds, you can head to my [Patreon](https://www.patreon.com/DrBibop)!
 
@@ -13,35 +13,29 @@ It is strongly recommended to use a mod manager such as the [Thunderstore Mod Ma
 
 For manual download, make sure to have [BepInEx](https://thunderstore.io/package/bbepis/BepInExPack/) and [HookGenPatcher](https://thunderstore.io/package/RiskofThunder/HookGenPatcher/) installed. You can then download the VR mod with the "Manual Download" button and copy the `plugins` and `patchers` folder into the `BepInEx` folder.
 
-# Controls
-Shoutout to laila, HutchyBen, Skarl1n, Geb, Popzix and Terrorcotta211 for helping me add support for all these controllers! Some controllers need special SteamVR bindings.
+# Default controls
+Shoutout to laila, HutchyBen, Skarl1n, Geb, Popzix and Terrorcotta211 for helping me add support for all these controllers!
 
-## Oculus Touch controllers
+## Oculus Touch/Reverb G2/Vive Cosmos controllers
 ![](https://i.imgur.com/5ZY5mQc.png)
+
+## Index Knuckles
+![](https://i.imgur.com/fEv3KAH.png)
 
 ## Vive controllers
 ![](https://i.imgur.com/ApqDR5O.png)
 
-## WMR controllers with trackpads
+## WMR controllers
 ![](https://i.imgur.com/lBDaQJ6.png)
 
-## Index Knuckles/Reverb G2 controllers
-The Index Knuckles and the Reverb G2 controllers use the same binds as the Oculus Touch controllers but need special bindings in SteamVR in order to function properly. Their support in this version of Unity isn't well implemented out of the box. There are two ways to correctly bind your controllers:
+## Inputs for mods
+The VR Mod uses the SteamVR binding system to bind controls. Some binds have been added to support certain mods.
 
-### Option 1:
-You can download the corresponding binding file below:
-
-- [Download bindings for the Reverb G2 controllers](https://drive.google.com/uc?export=download&id=1nYZZR_wwwogffWNXotdZohRSigLbWvH4)
-- [Download bindings for the Index Knuckles](https://drive.google.com/uc?export=download&id=1AJxT02TNW3qEndzXdoxu0Z5AiiKYDSbR)
-
-With your file downloaded, open a file explorer and go to `C:/Users/%USERNAME%/Documents/steamvr/input/imports`. Create the `imports` folder if necessary. Drag the binding file you downloaded into that directory.
-
-Now that the file is setup, you can open the game in VR and open the SteamVR overlay. Inside the overlay, you can go activate the custom binding:
-
-![](https://thumbs.gfycat.com/GloriousComfortableFieldmouse-size_restricted.gif)
-
-### Option 2:
-The community managed to publish either these binds or their own version publicly for you to try. You can find them in the same place as the GIF above shows.
+### Currently supported mods:
+[**ExtraSkillSlots**](https://thunderstore.io/package/KingEnderBrine/ExtraSkillSlots/): Skills 1-4\
+[**VoiceChat**](https://thunderstore.io/package/Evaisa/Voicechat/): Push-to-talk\
+[**SkillsPlusPlus**](https://thunderstore.io/package/Volvary/SkillsPlusPlus_UnofficialRelease/): Buy menu\
+[**ProperSave**](https://thunderstore.io/package/KingEnderBrine/ProperSave/): Load
 
 # FAQ
 
@@ -67,10 +61,10 @@ This is likely because the game is not in focus on your PC. Make sure to click o
 If you are using SteamVR and the game launches in game theatre mode, right click the game on Steam and go to `Properties > General`. You can then turn off the "Use Desktop Game Theatre while SteamVR is active" option. If it's still not working, there was likely an error when trying to activate VR. Ask for help on the [Discord server](https://discord.gg/eQ7Fwac).
 
 ### Can I change my controller binds?
-There isn't an official way to change your binds yet. You can do some changes to your controller binds in SteamVR but it won't change the icons shown in-game.
+You can change your binds using SteamVR's binding system. Note that changing your binds won't change the icons shown in-game. There is currently no way to change your binds when using the Oculus Runtime instead of SteamVR.
 
 ### The game is lagging. What can I do to improve performance?
-Disabling SSAO and Bloom in the game's settings should improve the performance. Make sure you also don't have too many other applications running in the background. If necessary, you can lower the resolution of your headset in SteamVR.
+Disabling SSAO and Bloom in the game's settings should improve the performance. Make sure you also don't have too many other applications running in the background. You can also try the [OpenVR FSR mod](https://github.com/fholger/openvr_fsr) which adds AMD's upscaling technology to the game.
 
 ### I have an Oculus headset and I don't want to use SteamVR.
 No worries! You can switch to Oculus mode in the config file.
@@ -91,7 +85,8 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 **dotflare:** 3D artist\
 **Ncognito:** 3D artist\
 **eliotttate:** Original creator, code assist\
-**HutchyBen:** Code assist
+**HutchyBen:** Code assist\
+**Daerst:** Fixed the biggest and oldest bug of this mod. Thank you so much.
 
 # Changelog
 ### 1.0.0
@@ -204,3 +199,13 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - Fixed a bug that caused decals to only render on the left eye.
 - Fixed a bug that caused the camera HUD to freeze in place while paused.
 - Fixed a bug that caused parts of the multiplayer menu to not render properly creating an offset.
+
+### 2.4.0
+- You can now freely bind your controls with SteamVR.
+	- Every single action can be bound to separate inputs.
+	- This new system removes the need to download binds for Index Knuckles and Reverb G2 controllers.
+	- A few extra bindable actions have been added for these mods: ExtraSkillSlots, VoiceChat, SkillsPlusPlus and ProperSave.
+- Added haptic feedback (controller rumble). The intensity can be adjusted with the in-game gamepad setting.
+- In-game "cutscenes" that take control of the camera have been improved to reduce risks of nausea and clipping.
+- Fixed a bug that caused inputs to break after selecting a profile.
+- Fixed a bug that placed and scaled enemy health bars and some indicators incorrectly when using the roomscale tracking setting.

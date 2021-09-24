@@ -5,7 +5,7 @@ using UnityEngine.Events;
 
 namespace VRMod
 {
-    internal static class VRManager
+    internal static class RecenterController
     {
         private static GameObject instance;
         public static void Init()

@@ -5,12 +5,15 @@ using UnityEngine.XR;
 using System.Collections;
 using BepInEx.Logging;
 using UnityEngine;
+using System;
+using System.Reflection;
+using System.IO;
 
 [module: UnverifiableCode]
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
 namespace VRMod
 {
-    [BepInPlugin("com.DrBibop.VRMod", "VRMod", "2.3.0")]
+    [BepInPlugin("com.DrBibop.VRMod", "VRMod", "2.4.0")]
     public class VRMod : BaseUnityPlugin
     {
         internal static ManualLogSource StaticLogger;
@@ -25,7 +28,7 @@ namespace VRMod
 
             ModConfig.Init();
             ActionAddons.Init();
-            VRManager.Init();
+            RecenterController.Init();
             SettingsAddon.Init();
             UIFixes.Init();
             CameraFixes.Init();
@@ -38,21 +41,29 @@ namespace VRMod
 
             RoR2.RoR2Application.onLoad += () =>
             {
-                StartCoroutine(SetVRDevice(ModConfig.OculusMode.Value));
-                VRManager.Init();
-                Controllers.Init();
+                StartCoroutine(InitVR(ModConfig.OculusMode.Value));
+                RecenterController.Init();
             };
         }
 
-        private IEnumerator SetVRDevice(bool useOculus)
+        private IEnumerator InitVR(bool useOculus)
         {
             XRSettings.LoadDeviceByName(useOculus ? "Oculus" : "OpenVR");
             yield return null;
-            if (XRSettings.loadedDeviceName == (useOculus ? "Oculus" : "OpenVR"))
+            if (XRSettings.loadedDeviceName != (useOculus ? "Oculus" : "OpenVR")) yield break;
+            
+            XRSettings.enabled = true;
+            XRDevice.SetTrackingSpaceType(ModConfig.Roomscale.Value ? TrackingSpaceType.RoomScale : TrackingSpaceType.Stationary);
+
+            if (!useOculus)
             {
-                XRSettings.enabled = true;
-                XRDevice.SetTrackingSpaceType(ModConfig.Roomscale.Value ? TrackingSpaceType.RoomScale : TrackingSpaceType.Stationary);
+                Valve.VR.SteamVR_Settings.instance.trackingSpace = ModConfig.Roomscale.Value ? Valve.VR.ETrackingUniverseOrigin.TrackingUniverseStanding : Valve.VR.ETrackingUniverseOrigin.TrackingUniverseSeated;
+                Valve.VR.SteamVR.Initialize();
+                Valve.VR.SteamVR_Actions.gameplay.Activate();
+                Valve.VR.SteamVR_Actions.ui.Activate();
             }
+            Controllers.Init();
+            ControllerGlyphs.Init();
         }
     }
 }

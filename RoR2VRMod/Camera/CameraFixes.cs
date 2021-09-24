@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Playables;
 using UnityEngine.Rendering.PostProcessing;
 
 namespace VRMod
@@ -108,6 +109,26 @@ namespace VRMod
             On.RoR2.CameraRigController.GetCrosshairRaycastRay += GetVRCrosshairRaycastRay;
 
             IL.ThreeEyedGames.DecaliciousRenderer.OnPreRender += OnPreRenderIL;
+
+            On.RoR2.SurvivorPodController.UpdateCameras += (orig, self, gameObject) => { };
+
+            On.RoR2.CameraRigController.SetOverrideCam += RemoveCameraLerp;
+
+            On.RoR2.PositionAlongBasicBezierSpline.Update += ForceEndOfCurve;
+        }
+
+        private static void ForceEndOfCurve(On.RoR2.PositionAlongBasicBezierSpline.orig_Update orig, PositionAlongBasicBezierSpline self)
+        {
+            if (self.GetComponent<PlayableDirector>())
+            {
+                self.normalizedPositionAlongCurve = 1;
+            }
+            orig(self);
+        }
+
+        private static void RemoveCameraLerp(On.RoR2.CameraRigController.orig_SetOverrideCam orig, CameraRigController self, ICameraStateProvider newOverrideCam, float lerpDuration)
+        {
+            orig(self, newOverrideCam, 0);
         }
 
         private static void OnPreRenderIL(ILContext il)
@@ -723,7 +744,7 @@ namespace VRMod
                                 }
                             }
 
-                            VRCameraWrapper.instance.transform.position = cachedCameraTargetTransform.position;
+                            VRCameraWrapper.instance.transform.position = self.hasOverride ? cameraState.position : cachedCameraTargetTransform.position;
                         }
                     }
                 }
