@@ -214,7 +214,7 @@ namespace VRMod
                 "Controls",
                 "Snap turn angle",
                 45,
-                "Rotation in degrees of each snap turn."
+                "Rotation in degrees of each snap turn. If you're trying to change the smooth turn speed, use the gamepad sensitivity setting in-game."
             );
             SnapTurnHoldDelay = configFile.Bind<float>(
                 "Controls",
@@ -258,7 +258,7 @@ namespace VRMod
             InitialRoomscaleValue = Roomscale.Value;
 
             settings.Add("vr_snap_turn", new ConfigSetting(SnapTurn, ConfigSetting.SettingUpdate.Instant));
-            settings.Add("vr_snap_angle", new ConfigSetting(SnapTurnAngle, 0, 180, ConfigSetting.SettingUpdate.Instant));
+            settings.Add("vr_snap_angle", new ConfigSetting(SnapTurnAngle, 30, 180, ConfigSetting.SettingUpdate.Instant));
             settings.Add("vr_snap_delay", new ConfigSetting(SnapTurnHoldDelay, 0.2f, 1, ConfigSetting.SettingUpdate.Instant));
             settings.Add("vr_controller_movement", new ConfigSetting(ControllerMovementDirection, ConfigSetting.SettingUpdate.Instant));
             settings.Add("vr_vignette", new ConfigSetting(UseConfortVignette, ConfigSetting.SettingUpdate.Instant, ChangeVignetteSetting));
@@ -268,7 +268,7 @@ namespace VRMod
             settings.Add("vr_smooth_hud", new ConfigSetting(UseSmoothHUD, ConfigSetting.SettingUpdate.Instant, ChangeSmoothHUD));
             settings.Add("vr_left_handed", new ConfigSetting(LeftDominantHand, ConfigSetting.SettingUpdate.Instant, ChangeHandDominance));
             settings.Add("vr_roomscale", new ConfigSetting(Roomscale, ConfigSetting.SettingUpdate.AfterRestart));
-            settings.Add("vr_height", new ConfigSetting(PlayerHeight, 1, 3, ConfigSetting.SettingUpdate.NextStage));
+            settings.Add("vr_height", new ConfigSetting(PlayerHeight, 1.5f, 2.2f, ConfigSetting.SettingUpdate.NextStage));
             settings.Add("vr_ray_color", new ConfigSetting(RayColorHex, ConfigSetting.SettingUpdate.Instant, ChangeRayColor));
             settings.Add("vr_ray_opacity", new ConfigSetting(RayOpacity, 0, 1, ConfigSetting.SettingUpdate.Instant, ChangeRayColor));
             settings.Add("vr_com_dual", new ConfigSetting(CommandoDualWield, ConfigSetting.SettingUpdate.Instant));
@@ -276,8 +276,8 @@ namespace VRMod
             settings.Add("vr_merc_threshold", new ConfigSetting(MercSwingSpeedThreshold, 5, 50, ConfigSetting.SettingUpdate.Instant, MotionControls.UpdateMercMeleeThreshold));
             settings.Add("vr_loader_threshold", new ConfigSetting(LoaderSwingSpeedThreshold, 5, 50, ConfigSetting.SettingUpdate.Instant, MotionControls.UpdateLoaderMeleeThreshold));
             settings.Add("vr_acrid_threshold", new ConfigSetting(AcridSwingSpeedThreshold, 5, 50, ConfigSetting.SettingUpdate.Instant, MotionControls.UpdateAcridMeleeThreshold));
-            settings.Add("vr_hud_width", new ConfigSetting(HUDWidth, 500, 2500, ConfigSetting.SettingUpdate.Instant, ChangeHUDSize));
-            settings.Add("vr_hud_height", new ConfigSetting(HUDHeight, 500, 2500, ConfigSetting.SettingUpdate.Instant, ChangeHUDSize));
+            settings.Add("vr_hud_width", new ConfigSetting(HUDWidth, 400, 2400, ConfigSetting.SettingUpdate.Instant, ChangeHUDSize));
+            settings.Add("vr_hud_height", new ConfigSetting(HUDHeight, 400, 2400, ConfigSetting.SettingUpdate.Instant, ChangeHUDSize));
             settings.Add("vr_anchor_bottom", new ConfigSetting(BottomAnchor, 0, 1, ConfigSetting.SettingUpdate.Instant, ChangeHUDAnchors));
             settings.Add("vr_anchor_top", new ConfigSetting(TopAnchor, 0, 1, ConfigSetting.SettingUpdate.Instant, ChangeHUDAnchors));
             settings.Add("vr_anchor_left", new ConfigSetting(LeftAnchor, 0, 1, ConfigSetting.SettingUpdate.Instant, ChangeHUDAnchors));
@@ -490,26 +490,6 @@ namespace VRMod
                 else if (entry.SettingType == typeof(string))
                 {
                     (entry as ConfigEntry<string>).SettingChanged += callback;
-                }
-            }
-
-            internal void SetValue(object value)
-            {
-                if (entry.SettingType == typeof(bool))
-                {
-                    (entry as ConfigEntry<bool>).Value = (bool)value;
-                }
-                else if (entry.SettingType == typeof(int))
-                {
-                    (entry as ConfigEntry<int>).Value = (int)value;
-                }
-                else if (entry.SettingType == typeof(float))
-                {
-                    (entry as ConfigEntry<float>).Value = (float)value;
-                }
-                else if (entry.SettingType == typeof(string))
-                {
-                    (entry as ConfigEntry<string>).Value = (string)value;
                 }
             }
 
