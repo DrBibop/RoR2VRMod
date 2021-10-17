@@ -1,21 +1,33 @@
 ﻿using RoR2;
 using RoR2.UI;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace VRMod
 {
     internal class SmoothHUD : MonoBehaviour
     {
+        internal static SmoothHUD instance;
+
         private Quaternion smoothHUDRotation;
 
         private CameraRigController cameraRig;
 
         internal void Init(CameraRigController cameraRig)
         {
+            instance = this;
             this.cameraRig = cameraRig;
 
             smoothHUDRotation = cameraRig.uiCam.transform.rotation;
+        }
+
+        private void OnDisable()
+        {
+            if (cameraRig && cameraRig.uiCam)
+            {
+                smoothHUDRotation = cameraRig.uiCam.transform.rotation;
+
+                TransformMainContainer();
+            }
         }
 
         private void LateUpdate()
@@ -29,13 +41,9 @@ namespace VRMod
                 smoothHUDRotation = Quaternion.Slerp(smoothHUDRotation, cameraRig.uiCam.transform.rotation, t);
             }
 
-            Transform mainContainer = cameraRig.hud.mainContainer.transform;
+            TransformMainContainer();
 
-            mainContainer.rotation = smoothHUDRotation;
-            mainContainer.rotation = Quaternion.LookRotation(mainContainer.forward, cameraRig.uiCam.transform.up);
-            mainContainer.position = cameraRig.uiCam.transform.position + (mainContainer.forward * 12.35f);
-
-            if (!ModConfig.UseMotionControls.Value)
+            if (!ModConfig.InitialMotionControlsValue)
             {
                 CrosshairManager crosshairManager = cameraRig.hud.GetComponent<CrosshairManager>();
 
@@ -47,6 +55,15 @@ namespace VRMod
                     crosshairManager.hitmarker.transform.rotation = cameraRig.uiCam.transform.rotation;
                 }
             }
+        }
+
+        private void TransformMainContainer()
+        {
+            Transform mainContainer = cameraRig.hud.mainContainer.transform;
+
+            mainContainer.rotation = smoothHUDRotation;
+            mainContainer.rotation = Quaternion.LookRotation(mainContainer.forward, cameraRig.uiCam.transform.up);
+            mainContainer.position = cameraRig.uiCam.transform.position + (mainContainer.forward * 12.35f);
         }
     }
 }

@@ -45,15 +45,14 @@ namespace VRMod
 
             On.RoR2.UI.InputBindingControl.Awake += DisableControllerBinds;
 
-            if (ModConfig.UseMotionControls.Value)
+            if (ModConfig.InitialMotionControlsValue)
                 On.RoR2.UI.MainMenu.MainMenuController.Start += ShowRecenterDialog;
 
             PlayerCharacterMasterController.onPlayerAdded += SubscribeToBodyEvents;
 
             On.RoR2.GamepadVibrationManager.Update += VRHaptics;
 
-            if (ModConfig.ControllerMovementDirection.Value)
-                IL.RoR2.PlayerCharacterMasterController.Update += ControllerMovementDirection;
+            IL.RoR2.PlayerCharacterMasterController.Update += ControllerMovementDirection;
 
             On.RoR2.UI.MainMenu.ProfileMainMenuScreen.SetMainProfile += (orig, self, profile) => 
             {
@@ -82,7 +81,7 @@ namespace VRMod
 
             GamepadVibrationManager.MotorValues motorValues = GamepadVibrationManager.CalculateMotorValuesForCameraDisplacement(vibrationScale, rawScreenShakeDisplacement);
 
-            if (ModConfig.OculusMode.Value)
+            if (ModConfig.InitialOculusModeValue)
             {
                 InputDevice leftHand = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
                 InputDevice rightHand = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
@@ -153,6 +152,30 @@ namespace VRMod
             }
         }
 
+        internal static void ChangeDominanceDependantMaps()
+        {
+            Player player = LocalUserManager.GetFirstLocalUser().inputPlayer;
+
+            for (int i = 7; i < 11; i++)
+            {
+                ActionElementMap map = vrGameplayMap.GetElementMapsWithAction(i)[0];
+                int elementIdentifier = map.elementIdentifierId;
+
+                if (elementIdentifier == 8) elementIdentifier = 9;
+                else if (elementIdentifier == 9) elementIdentifier = 8;
+                else if (elementIdentifier == 10) elementIdentifier = 11;
+                else if (elementIdentifier == 11) elementIdentifier = 10;
+
+                bool result = player.controllers.maps.GetMap(vrControllers, vrGameplayMap.id).ReplaceElementMap(map.id, map.actionId, map.axisContribution, elementIdentifier, map.elementType, map.axisRange, map.invert);
+
+                if (!result)
+                {
+                    VRMod.StaticLogger.LogError("Failed to remap");
+                    return;
+                }
+            }
+        }
+
         private static void ControllerMovementDirection(ILContext il)
         {
             ILCursor c = new ILCursor(il);
@@ -163,6 +186,8 @@ namespace VRMod
             c.Emit(OpCodes.Ldloc_S, (byte)6);
             c.EmitDelegate<Func<Vector2, Vector2>>((vector) =>
             {
+                if (!ModConfig.ControllerMovementDirection.Value) return vector;
+
                 float angleDifference;
 
                 if (MotionControls.HandsReady)
@@ -220,7 +245,7 @@ namespace VRMod
         {
             orig(self);
 
-            if (ModConfig.UseMotionControls.Value && self.inputSource == MPEventSystem.InputSource.Gamepad && self.button)
+            if (ModConfig.InitialMotionControlsValue && self.inputSource == MPEventSystem.InputSource.Gamepad && self.button)
             {
                 self.button.interactable = false;
                 self.button = null;
@@ -233,7 +258,7 @@ namespace VRMod
             vrUIMap = RewiredAddons.CreateUIMap(vrControllers.id);
             vrGameplayMap = RewiredAddons.CreateGameplayMap(vrControllers.id);
 
-            if (ModConfig.OculusMode.Value)
+            if (ModConfig.InitialOculusModeValue)
             {
                 inputs = new BaseInput[]
                 {
@@ -349,7 +374,7 @@ namespace VRMod
 
         private static void UpdateVRInputs()
         {
-            if (ModConfig.OculusMode.Value)
+            if (ModConfig.InitialOculusModeValue)
             {
                 string[] joyNames = Input.GetJoystickNames();
 

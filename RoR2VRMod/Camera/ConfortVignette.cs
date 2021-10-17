@@ -8,7 +8,7 @@ namespace VRMod
 {
     public class ConfortVignette : MonoBehaviour
     {
-        private static ConfortVignette instance;
+        internal static ConfortVignette instance { get; private set; }
 
         private static Material vignette;
 

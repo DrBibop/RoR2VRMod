@@ -28,11 +28,10 @@ namespace VRMod
 
             ModConfig.Init();
             ActionAddons.Init();
-            RecenterController.Init();
             SettingsAddon.Init();
             UIFixes.Init();
             CameraFixes.Init();
-            if (ModConfig.UseMotionControls.Value)
+            if (ModConfig.InitialMotionControlsValue)
             {
                 RoR2.RoR2Application.isModded = true;
                 MotionControls.Init();
@@ -41,7 +40,7 @@ namespace VRMod
 
             RoR2.RoR2Application.onLoad += () =>
             {
-                StartCoroutine(InitVR(ModConfig.OculusMode.Value));
+                StartCoroutine(InitVR(ModConfig.InitialOculusModeValue));
                 RecenterController.Init();
             };
         }
@@ -53,11 +52,11 @@ namespace VRMod
             if (XRSettings.loadedDeviceName != (useOculus ? "Oculus" : "OpenVR")) yield break;
             
             XRSettings.enabled = true;
-            XRDevice.SetTrackingSpaceType(ModConfig.Roomscale.Value ? TrackingSpaceType.RoomScale : TrackingSpaceType.Stationary);
+            XRDevice.SetTrackingSpaceType(ModConfig.InitialRoomscaleValue ? TrackingSpaceType.RoomScale : TrackingSpaceType.Stationary);
 
             if (!useOculus)
             {
-                Valve.VR.SteamVR_Settings.instance.trackingSpace = ModConfig.Roomscale.Value ? Valve.VR.ETrackingUniverseOrigin.TrackingUniverseStanding : Valve.VR.ETrackingUniverseOrigin.TrackingUniverseSeated;
+                Valve.VR.SteamVR_Settings.instance.trackingSpace = ModConfig.InitialRoomscaleValue ? Valve.VR.ETrackingUniverseOrigin.TrackingUniverseStanding : Valve.VR.ETrackingUniverseOrigin.TrackingUniverseSeated;
                 Valve.VR.SteamVR.Initialize();
                 Valve.VR.SteamVR_Actions.gameplay.Activate();
                 Valve.VR.SteamVR_Actions.ui.Activate();

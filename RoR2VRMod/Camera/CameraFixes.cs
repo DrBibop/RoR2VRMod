@@ -82,7 +82,7 @@ namespace VRMod
             On.RoR2.CameraRigController.Update += CameraUpdateOverride;
             On.RoR2.CameraRigController.Start += InitCamera;
 
-            if (ModConfig.FirstPerson.Value)
+            if (ModConfig.InitialFirstPersonValue)
             {
                 On.RoR2.Run.Update += SetBodyInvisible;
 
@@ -279,7 +279,7 @@ namespace VRMod
                     ppVolume.profile.GetSetting<DepthOfField>().active = false;
             }
 
-            if (Run.instance && ModConfig.ConfortVignette.Value)
+            if (Run.instance && ModConfig.UseConfortVignette.Value)
             {
                 self.uiCam.gameObject.AddComponent<ConfortVignette>();
             }
@@ -694,7 +694,7 @@ namespace VRMod
             {
                 if (self.cameraMode == CameraRigController.CameraMode.PlayerBasic)
                 {
-                    if (ModConfig.FirstPerson.Value)
+                    if (ModConfig.InitialFirstPersonValue)
                     {
                         if (!VRCameraWrapper.instance)
                         {
@@ -710,7 +710,7 @@ namespace VRMod
                         {
                             if (!cachedCameraTargetTransform)
                             {
-                                if (!ModConfig.Roomscale.Value)
+                                if (!ModConfig.InitialRoomscaleValue)
                                 {
                                     ChildLocator childLocator = self.targetBody.modelLocator.modelTransform.GetComponent<ChildLocator>();
                                     if (childLocator)
@@ -730,7 +730,7 @@ namespace VRMod
 
                                     if (collider)
                                     {
-                                        if (ModConfig.Roomscale.Value)
+                                        if (ModConfig.InitialRoomscaleValue)
                                         {
                                             cachedCameraTargetTransform.Translate(collider.center + new Vector3(0, -collider.height / 2, 0), Space.Self);
                                             VRCameraWrapper.instance.transform.localScale = Vector3.one * (collider.height / ModConfig.PlayerHeight.Value);

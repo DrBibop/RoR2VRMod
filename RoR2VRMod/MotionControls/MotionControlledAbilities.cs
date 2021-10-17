@@ -112,8 +112,7 @@ namespace VRMod
             On.RoR2.EquipmentSlot.GetAimRay += GetLeftAimRay;
             On.EntityStates.BaseState.GetAimRay += EditAimray;
 
-            if (!ModConfig.CommandoDualWield.Value)
-                On.EntityStates.GenericBulletBaseState.FireBullet += ForceShotgunMuzzle;
+            On.EntityStates.GenericBulletBaseState.FireBullet += ForceShotgunMuzzle;
 
             On.EntityStates.GenericBulletBaseState.GenerateBulletAttack += ChangeShotgunMuzzle;
             On.EntityStates.GenericProjectileBaseState.FireProjectile += SetFMJMuzzle;
@@ -215,7 +214,7 @@ namespace VRMod
 
         private static void ForceShotgunMuzzle(On.EntityStates.GenericBulletBaseState.orig_FireBullet orig, EntityStates.GenericBulletBaseState self, Ray aimRay)
         {
-            if (IsLocalPlayer(self.characterBody) && self is EntityStates.Commando.CommandoWeapon.FireShotgunBlast)
+            if (!ModConfig.CommandoDualWield.Value && IsLocalPlayer(self.characterBody) && self is EntityStates.Commando.CommandoWeapon.FireShotgunBlast)
             {
                 self.muzzleName = "MuzzleLeft";
             }

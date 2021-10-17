@@ -260,7 +260,7 @@ namespace VRMod
 
         internal static void AdjustHUD(HUD hud)
         {
-            if (ModConfig.UseMotionControls.Value)
+            if (ModConfig.InitialMotionControlsValue)
             {
                 CrosshairManager crosshairManager = hud.GetComponent<CrosshairManager>();
 
@@ -301,7 +301,7 @@ namespace VRMod
             rectTransform.localScale = menuScale;
             hud.transform.SetParent(cachedUICam.transform);
             hud.transform.localRotation = Quaternion.identity;
-            hud.transform.position = new Vector3(0, 0, 12.35f);
+            hud.transform.localPosition = new Vector3(0, 0, 12.35f);
             rectTransform.pivot = menuPivot;
 
 
@@ -381,7 +381,7 @@ namespace VRMod
                 MotionControls.AddWatchHUD(false, alliesCluster);
             }
 
-            if (ModConfig.SmoothHUD.Value)
+            if (ModConfig.UseSmoothHUD.Value)
                 hud.gameObject.AddComponent<SmoothHUD>().Init(hud.cameraRigController);
         }
 
