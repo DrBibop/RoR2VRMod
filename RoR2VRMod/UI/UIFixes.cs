@@ -381,7 +381,7 @@ namespace VRMod
             }
 
             if (ModConfig.UseSmoothHUD.Value)
-                hud.mainContainer.AddComponent<SmoothHUD>().Init(hud.cameraRigController);
+                hud.mainContainer.AddComponent<SmoothHUD>().Init(hud.cameraRigController.uiCam.transform, hud.cameraRigController);
         }
 
         private static void UpdateAllHealthBarPositionsVR(On.RoR2.UI.CombatHealthBarViewer.orig_UpdateAllHealthbarPositions orig, RoR2.UI.CombatHealthBarViewer self, Camera sceneCam, Camera uiCam)

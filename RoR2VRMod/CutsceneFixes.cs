@@ -12,6 +12,68 @@ namespace VRMod
         internal static void Init()
         {
             On.RoR2.StartEvent.Start += SetupIntro;
+
+            On.RoR2.OutroCutsceneController.OnEnable += SetupOutro;
+        }
+
+        private static void SetupOutro(On.RoR2.OutroCutsceneController.orig_OnEnable orig, OutroCutsceneController self)
+        {
+            GameObject cameraRoot = GameObject.Find("CutsceneEnabledObjects");
+
+            if (cameraRoot)
+            {
+                Transform cameraTransform = cameraRoot.transform.Find("Camera Matcher/Menu Main Camera");
+
+                if (cameraTransform)
+                {
+                    CameraRigController cameraRig = cameraTransform.GetComponent<CameraRigController>();
+
+                    GameObject[] allGameObjects = Resources.FindObjectsOfTypeAll<GameObject>();
+
+                    FixOutroCanvas(allGameObjects, cameraRig);
+                    AdjustOutroElements(allGameObjects, cameraRig);
+                }
+            }
+        }
+
+        private static void AdjustOutroElements(GameObject[] allGameObjects, CameraRigController cameraRig)
+        {
+            GameObject spaceShot = allGameObjects.First(x => x.name == "Set 2 - Space");
+
+            if (spaceShot)
+            {
+                spaceShot.transform.Translate(20, 0, 0);
+
+                Transform dropShipParent = spaceShot.transform.Find("Dropship, Space");
+
+                if (dropShipParent)
+                {
+                    dropShipParent.localScale = Vector3.one;
+                }
+            }
+        }
+
+        private static void FixOutroCanvas(GameObject[] allGameObjects, CameraRigController cameraRig)
+        {
+            GameObject subtitlesCanvas = allGameObjects.First(x => x.name == "Set 5 - Canvas");
+            
+            if (subtitlesCanvas)
+            {
+                Canvas canvas = subtitlesCanvas.GetComponent<Canvas>();
+                canvas.renderMode = RenderMode.WorldSpace;
+                RectTransform rectTransform = subtitlesCanvas.transform as RectTransform;
+                rectTransform.SetParent(cameraRig.sceneCam.transform);
+                rectTransform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
+                
+                rectTransform.sizeDelta = new Vector2(6000, 5000);
+                rectTransform.localRotation = Quaternion.identity;
+                rectTransform.localPosition = new Vector3(0, 0, 15f);
+
+                RectTransform textCanvas = subtitlesCanvas.GetComponentInChildren<RoR2.UI.OutroFlavorTextController>().transform as RectTransform;
+                textCanvas.anchorMin = new Vector2(0.42f, 0.42f);
+                textCanvas.anchorMax = new Vector2(0.58f, 0.58f);
+                textCanvas.gameObject.AddComponent<SmoothHUD>().Init(canvas.worldCamera.transform);
+            }
         }
 
         private static void SetupIntro(On.RoR2.StartEvent.orig_Start orig, StartEvent self)
@@ -103,9 +165,9 @@ namespace VRMod
                 fade.localRotation = Quaternion.identity;
                 fade.localScale = Vector3.one * 3;
 
-                canvasObject.transform.SetParent(cameraRig.uiCam.transform);
-
-                canvasObject.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
+                Canvas canvas = canvasObject.GetComponent<Canvas>();
+                canvas.renderMode = RenderMode.WorldSpace;
+                canvas.worldCamera = cameraRig.uiCam;
                 RectTransform rectTransform = canvasObject.transform as RectTransform;
                 rectTransform.sizeDelta = new Vector2(1200, 1000);
                 rectTransform.localScale = new Vector3(0.01f, 0.01f, 0.01f); ;
@@ -114,7 +176,7 @@ namespace VRMod
                 rectTransform.localPosition = new Vector3(0, 0, 12.35f);
                 rectTransform.pivot = new Vector2(0.5f, 0.5f);
 
-                canvasObject.AddComponent<SmoothHUD>().Init(cameraRig);
+                canvasObject.AddComponent<SmoothHUD>().Init(cameraRig.uiCam.transform);
 
                 canvasObject.transform.Find("MainArea/BlackBarParent").gameObject.SetActive(false);
             }

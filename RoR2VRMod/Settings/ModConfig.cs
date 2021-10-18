@@ -352,7 +352,7 @@ namespace VRMod
 
                 if (localCameraRig && localCameraRig.hud)
                 {
-                    localCameraRig.hud.gameObject.AddComponent<SmoothHUD>().Init(localCameraRig);
+                    localCameraRig.hud.gameObject.AddComponent<SmoothHUD>().Init(localCameraRig.uiCam.transform, localCameraRig);
                 }
             }
         }

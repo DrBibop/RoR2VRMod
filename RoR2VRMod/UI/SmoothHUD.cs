@@ -12,19 +12,22 @@ namespace VRMod
 
         private CameraRigController cameraRig;
 
-        internal void Init(CameraRigController cameraRig)
+        private Transform referenceTransform;
+
+        internal void Init(Transform referenceTransform, CameraRigController cameraRig = null)
         {
             instance = this;
             this.cameraRig = cameraRig;
+            this.referenceTransform = referenceTransform;
 
-            smoothHUDRotation = cameraRig.uiCam.transform.rotation;
+            smoothHUDRotation = referenceTransform.rotation;
         }
 
         private void OnDisable()
         {
-            if (cameraRig && cameraRig.uiCam)
+            if (referenceTransform)
             {
-                smoothHUDRotation = cameraRig.uiCam.transform.rotation;
+                smoothHUDRotation = referenceTransform.rotation;
 
                 TransformRect();
             }
@@ -33,17 +36,17 @@ namespace VRMod
         private void LateUpdate()
         {
             //This slerp code block was taken from idbrii in Unity answers and from an article by Rory
-            float delta = Quaternion.Angle(smoothHUDRotation, cameraRig.uiCam.transform.rotation);
+            float delta = Quaternion.Angle(smoothHUDRotation, referenceTransform.rotation);
             if (delta > 0f)
             {
                 float t = Mathf.Lerp(delta, 0f, 1f - Mathf.Pow(0.03f, Time.unscaledDeltaTime));
                 t = 1.0f - (t / delta);
-                smoothHUDRotation = Quaternion.Slerp(smoothHUDRotation, cameraRig.uiCam.transform.rotation, t);
+                smoothHUDRotation = Quaternion.Slerp(smoothHUDRotation, referenceTransform.rotation, t);
             }
 
             TransformRect();
 
-            if (!ModConfig.InitialMotionControlsValue)
+            if (!ModConfig.InitialMotionControlsValue && cameraRig)
             {
                 CrosshairManager crosshairManager = cameraRig.hud.GetComponent<CrosshairManager>();
 
@@ -60,8 +63,8 @@ namespace VRMod
         private void TransformRect()
         {
             transform.rotation = smoothHUDRotation;
-            transform.rotation = Quaternion.LookRotation(transform.forward, cameraRig.uiCam.transform.up);
-            transform.position = cameraRig.uiCam.transform.position + (transform.forward * 12.35f);
+            transform.rotation = Quaternion.LookRotation(transform.forward, referenceTransform.up);
+            transform.position = referenceTransform.position + (transform.forward * 12.35f);
         }
     }
 }
