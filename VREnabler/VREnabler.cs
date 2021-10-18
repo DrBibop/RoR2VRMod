@@ -6,6 +6,7 @@ using Mono.Cecil;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 
 namespace VRPatcher
@@ -98,7 +99,7 @@ namespace VRPatcher
                 "bindings_vive_cosmos_controller.json"
             };
 
-            flag = CopyFiles(SteamVRPath, bindingFiles, "Binds.");
+            flag = CopyFiles(SteamVRPath, bindingFiles, "Binds.", true);
 
             if (flag)
                 VREnabler.Logger.LogInfo("Successfully copied binding files!");
@@ -173,7 +174,7 @@ namespace VRPatcher
             return false;
         }
 
-        private static bool CopyFiles(string destinationPath, string[] fileNames, string embedFolder)
+        private static bool CopyFiles(string destinationPath, string[] fileNames, string embedFolder, bool replaceIfDifferent = false)
         {
             DirectoryInfo directoryInfo = new DirectoryInfo(destinationPath);
             FileInfo[] files = directoryInfo.GetFiles();
@@ -189,11 +190,32 @@ namespace VRPatcher
                     flag = true;
                     using (Stream manifestResourceStream = executingAssembly.GetManifestResourceStream(name + "." + embedFolder + fileName))
                     {
-                        using (FileStream fileStream = new FileStream(Path.Combine(directoryInfo.FullName, fileName), FileMode.Create, FileAccess.Write, FileShare.Delete))
+                        using (FileStream fileStream = new FileStream(Path.Combine(directoryInfo.FullName, fileName), FileMode.Create, FileAccess.ReadWrite, FileShare.Delete))
                         {
                             VREnabler.Logger.LogInfo("Copying " + fileName);
                             manifestResourceStream.CopyTo(fileStream);
                         }
+                    }
+                }
+                else if (replaceIfDifferent)
+                {
+                    string resourceFileContent;
+                    using (Stream manifestResourceStream = executingAssembly.GetManifestResourceStream(name + "." + embedFolder + fileName))
+                    {
+                        using (StreamReader reader = new StreamReader(manifestResourceStream))
+                        {
+                            resourceFileContent = reader.ReadToEnd();
+                        }
+                    }
+
+                    FileInfo installedFile = files.First(file => file.Name == fileName);
+                    string installedFileContent = File.ReadAllText(@installedFile.FullName);
+
+                    if (resourceFileContent != installedFileContent)
+                    {
+                        flag = true;
+                        VREnabler.Logger.LogInfo("Overwriting " + fileName);
+                        File.WriteAllText(installedFile.FullName, resourceFileContent);
                     }
                 }
             }

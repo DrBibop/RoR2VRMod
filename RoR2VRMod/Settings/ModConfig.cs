@@ -128,7 +128,7 @@ namespace VRMod
             LoaderSwingSpeedThreshold = configFile.Bind<float>(
                 "Survivor Settings",
                 "Loader: Swing speed threshold",
-                18,
+                16,
                 "The mech fist speed required to trigger an attack."
             );
             AcridSwingSpeedThreshold = configFile.Bind<float>(

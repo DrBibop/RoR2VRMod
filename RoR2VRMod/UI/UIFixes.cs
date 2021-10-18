@@ -1,6 +1,5 @@
 ﻿using RoR2;
 using RoR2.UI;
-using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -296,12 +295,12 @@ namespace VRMod
             if (!GetUICamera()) return;
 
             hud.canvas.renderMode = RenderMode.WorldSpace;
-            RectTransform rectTransform = hud.GetComponent<RectTransform>();
+            RectTransform rectTransform = hud.transform as RectTransform;
             rectTransform.sizeDelta = new Vector2(ModConfig.HUDWidth.Value, ModConfig.HUDHeight.Value);
             rectTransform.localScale = menuScale;
-            hud.transform.SetParent(cachedUICam.transform);
-            hud.transform.localRotation = Quaternion.identity;
-            hud.transform.localPosition = new Vector3(0, 0, 12.35f);
+            rectTransform.SetParent(cachedUICam.transform);
+            rectTransform.localRotation = Quaternion.identity;
+            rectTransform.localPosition = new Vector3(0, 0, 12.35f);
             rectTransform.pivot = menuPivot;
 
 
@@ -382,7 +381,7 @@ namespace VRMod
             }
 
             if (ModConfig.UseSmoothHUD.Value)
-                hud.gameObject.AddComponent<SmoothHUD>().Init(hud.cameraRigController);
+                hud.mainContainer.AddComponent<SmoothHUD>().Init(hud.cameraRigController);
         }
 
         private static void UpdateAllHealthBarPositionsVR(On.RoR2.UI.CombatHealthBarViewer.orig_UpdateAllHealthbarPositions orig, RoR2.UI.CombatHealthBarViewer self, Camera sceneCam, Camera uiCam)

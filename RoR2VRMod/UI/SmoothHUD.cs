@@ -26,7 +26,7 @@ namespace VRMod
             {
                 smoothHUDRotation = cameraRig.uiCam.transform.rotation;
 
-                TransformMainContainer();
+                TransformRect();
             }
         }
 
@@ -41,7 +41,7 @@ namespace VRMod
                 smoothHUDRotation = Quaternion.Slerp(smoothHUDRotation, cameraRig.uiCam.transform.rotation, t);
             }
 
-            TransformMainContainer();
+            TransformRect();
 
             if (!ModConfig.InitialMotionControlsValue)
             {
@@ -57,13 +57,11 @@ namespace VRMod
             }
         }
 
-        private void TransformMainContainer()
+        private void TransformRect()
         {
-            Transform mainContainer = cameraRig.hud.mainContainer.transform;
-
-            mainContainer.rotation = smoothHUDRotation;
-            mainContainer.rotation = Quaternion.LookRotation(mainContainer.forward, cameraRig.uiCam.transform.up);
-            mainContainer.position = cameraRig.uiCam.transform.position + (mainContainer.forward * 12.35f);
+            transform.rotation = smoothHUDRotation;
+            transform.rotation = Quaternion.LookRotation(transform.forward, cameraRig.uiCam.transform.up);
+            transform.position = cameraRig.uiCam.transform.position + (transform.forward * 12.35f);
         }
     }
 }

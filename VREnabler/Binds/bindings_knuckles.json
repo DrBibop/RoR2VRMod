@@ -81,12 +81,16 @@
                "path" : "/user/hand/left/input/a"
             },
             {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/gameplay/in/utilityskill"
+               "inputs": {
+                  "click": {
+                     "output": "/actions/gameplay/in/utilityskill"
                   }
                },
                "mode" : "button",
+               "parameters" : {
+                  "click_activate_threshold": "0.55",
+                  "force_input": "force"
+               },
                "path" : "/user/hand/left/input/grip"
             },
             {
@@ -141,13 +145,17 @@
                "path" : "/user/hand/right/input/a"
             },
             {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/gameplay/in/specialskill"
+               "inputs": {
+                  "click": {
+                     "output": "/actions/gameplay/in/specialskill"
                   }
                },
-               "mode" : "button",
-               "path" : "/user/hand/right/input/grip"
+               "parameters": {
+                  "click_activate_threshold": "0.55",
+                  "force_input": "force"
+               },
+               "mode": "button",
+               "path": "/user/hand/right/input/grip"
             }
          ]
       },
@@ -278,6 +286,10 @@
               }
             },
             "mode": "button",
+            "parameters": {
+              "click_activate_threshold": "0.5",
+              "force_input": "force"
+            },
             "path": "/user/hand/left/input/grip"
           },
           {
@@ -287,6 +299,10 @@
               }
             },
             "mode": "button",
+            "parameters": {
+              "click_activate_threshold": "0.5",
+              "force_input": "force"
+            },
             "path": "/user/hand/right/input/grip"
           }
         ]
