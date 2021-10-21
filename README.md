@@ -49,16 +49,16 @@ Your hands will appear once you start a game. The menus don't use any motion con
 Yes! The mod is only required for VR players. You can play with vanilla players just fine too!
 
 ### Where can I configure the mod like turning off snap turning?
-The VR Mod settings can be accessed in the mod manager while the game is closed. On the left, click on `Config Editor > VRMod > Edit Config`. You can then change the settings to your liking. Once you're done, make sure to save your changes with the `Save` button on the top-right.
+The VR Mod settings can be accessed with the in-game settings in the "VR" tab. You can also use the mod manager instead while the game is closed. On the left, click on `Config Editor > VRMod > Edit Config`. You can then change the settings to your liking. Once you're done, make sure to save your changes with the `Save` button on the top-right.
 
 ### Why play a 3rd person game in VR?
-It honestly feels pretty great! This mod makes you play in first person by default but you can always come back to third person using the config editor.
+This mod makes you play in first person by default but you can always come back to third person by going in the settings or the config editor. It's honestly not a bad experience!
 
 ### I can't press any buttons when I launch the game.
 This is likely because the game is not in focus on your PC. Make sure to click on the game window to pull it to the front. If your cursor is stuck in place, you can press the Windows key or Ctrl+Escape to unlock it and click on the game. If that doesn't fix it, relaunching the game should work.
 
 ### The game won't launch in VR!
-If you are using SteamVR and the game launches in game theatre mode, right click the game on Steam and go to `Properties > General`. You can then turn off the "Use Desktop Game Theatre while SteamVR is active" option. If it's still not working, there was likely an error when trying to activate VR. Ask for help on the [Discord server](https://discord.gg/eQ7Fwac).
+If you are using SteamVR and the game launches in game theatre mode, right click the game on Steam and go to `Properties > General`. You can then turn off the "Use Desktop Game Theatre while SteamVR is active" option. If you're using an Oculus headset, try enabling the "Use Oculus mode" setting in the config editor to bypass SteamVR. Finally, make sure your Steam and game folder are correctly set in the mod manager's settings. If it's still not fixed, ask for help on the [Discord server](https://discord.gg/eQ7Fwac).
 
 ### Can I change my controller binds?
 You can change your binds using SteamVR's binding system. Note that changing your binds won't change the icons shown in-game. There is currently no way to change your binds when using the Oculus Runtime instead of SteamVR.
@@ -67,7 +67,8 @@ You can change your binds using SteamVR's binding system. Note that changing you
 Disabling SSAO and Bloom in the game's settings should improve the performance. Make sure you also don't have too many other applications running in the background. You can also try the [OpenVR FSR mod](https://github.com/fholger/openvr_fsr) which adds AMD's upscaling technology to the game.
 
 ### I have an Oculus headset and I don't want to use SteamVR.
-No worries! You can switch to Oculus mode in the config file.
+No worries! You can switch to Oculus mode with the in-game settings.
+If you really don't want to launch the game with SteamVR, you can instead edit the config file.
 1. After launching the game in VR at least once, go to r2modman and click the `Config editor` on the left side.
 2. Click on `VRMod > Edit Config`.
 3. Set "Use Oculus mode" to `true`.
