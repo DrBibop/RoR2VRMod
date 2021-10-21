@@ -209,3 +209,16 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - In-game "cutscenes" that take control of the camera have been improved to reduce risks of nausea and clipping.
 - Fixed a bug that caused inputs to break after selecting a profile.
 - Fixed a bug that placed and scaled enemy health bars and some indicators incorrectly when using the roomscale tracking setting.
+
+### 2.5.0
+- Added the LIV SDK for XR capture support.
+	- Only available with SteamVR and with the "Roomscale tracking space" setting enabled.
+	- A setting has been added to display the classic HUD on the XR camera.
+- All mod configs can now be edited with the in-game settings menu. Some will only be applied on the next stage or after restarting.
+- Elements in the intro cutscene and the escape cutscene have been scaled and placed in a more realistic way.
+- The grip sensitivity has been reduced on the default Index Knuckles bindings.
+- The "Roomscale tracking space" setting is no longer in an experimental stage and is now enabled by default.
+- The default value of Loader's melee swing speed threshold has been slightly reduced.
+- Fixed a bug that prevented cutscene subtitles to display correctly in VR.
+- Fixed a bug that caused the camera to be placed too high in menus when using roomscale tracking.
+- Fixed a bug that caused the Visions on Heresy skill to be activated by swinging your controller when equipped on melee survivors.
