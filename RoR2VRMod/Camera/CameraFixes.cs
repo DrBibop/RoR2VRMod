@@ -63,6 +63,13 @@ namespace VRMod
         }
 
         private static List<ForcedVisibleRenderer> forcedVisibleRenderers;
+
+        internal static LIV.SDK.Unity.LIV liv { get; private set; }
+
+        private static Transform cameraOffset;
+
+        private static GameObject smokeEffect;
+
         internal static void Init()
         {
             spectatorCameraPrefab = VRMod.VRAssetBundle.LoadAsset<GameObject>("SpectatorCamera");
@@ -115,6 +122,39 @@ namespace VRMod
             On.RoR2.CameraRigController.SetOverrideCam += RemoveCameraLerp;
 
             On.RoR2.PositionAlongBasicBezierSpline.Update += ForceEndOfCurve;
+
+            if (ModConfig.InitialRoomscaleValue && !ModConfig.InitialOculusModeValue)
+                LIV.SDK.Unity.SDKShaders.LoadShaders();
+
+            /*
+            RoR2Application.onLoad += () =>
+            {
+                EntityStateConfiguration state = Resources.Load<EntityStateConfiguration>("entitystateconfigurations/EntityStates.Loader.BaseChargeFist");
+
+                if (state)
+                {
+                    VRMod.StaticLogger.LogWarning("State found");
+
+                    HG.GeneralSerializer.SerializedField effectField = state.serializedFieldsCollection.serializedFields.First(x => x.fieldName == "chargeVfxPrefab");
+
+                    GameObject effectPrefab = effectField.fieldValue.objectValue as GameObject;
+
+                    Transform dustObject = effectPrefab.transform.Find("Dust");
+
+                    if (dustObject)
+                    {
+                        smokeEffect = dustObject.gameObject;
+                    }
+                }
+            };
+
+            On.EntityStates.Loader.FireHook.OnEnter += SpawnSmoke;*/
+        }
+
+        private static void SpawnSmoke(On.EntityStates.Loader.FireHook.orig_OnEnter orig, EntityStates.Loader.FireHook self)
+        {
+            orig(self);
+            GameObject.Instantiate(smokeEffect, cameraOffset.transform.position, cameraOffset.transform.rotation);
         }
 
         private static void ForceEndOfCurve(On.RoR2.PositionAlongBasicBezierSpline.orig_Update orig, PositionAlongBasicBezierSpline self)
@@ -270,11 +310,19 @@ namespace VRMod
         {
             orig(self);
 
-            Transform blur = self.transform.Find("GlobalPostProcessVolume, Base");
+            if (self.gameObject.scene.name == "lobby") self.cameraMode = CameraRigController.CameraMode.None;
 
-            if (blur)
+            if (self.sceneCam.cullingMask == (self.sceneCam.cullingMask | (1 << LayerIndex.triggerZone.intVal)))
+                self.sceneCam.cullingMask &= ~(1 << LayerIndex.triggerZone.intVal);
+
+            if (self.sceneCam.cullingMask == (self.sceneCam.cullingMask | (1 << LayerIndex.ui.intVal)))
+                self.sceneCam.cullingMask &= ~(1 << LayerIndex.ui.intVal);
+
+            Transform pp = self.transform.Find("GlobalPostProcessVolume, Base");
+
+            if (pp)
             {
-                PostProcessVolume ppVolume = blur.GetComponent<PostProcessVolume>();
+                PostProcessVolume ppVolume = pp.GetComponent<PostProcessVolume>();
                 if (ppVolume)
                     ppVolume.profile.GetSetting<DepthOfField>().active = false;
             }
@@ -282,6 +330,44 @@ namespace VRMod
             if (Run.instance && ModConfig.UseConfortVignette.Value)
             {
                 self.uiCam.gameObject.AddComponent<ConfortVignette>();
+            }
+
+            GameObject cameraOffsetObject = new GameObject("Camera Offset");
+            cameraOffset = cameraOffsetObject.transform;
+            cameraOffset.transform.SetParent(self.transform);
+            cameraOffset.transform.localPosition = Vector3.zero;
+            cameraOffset.transform.localRotation = Quaternion.identity;
+            cameraOffset.transform.localScale = Vector3.one;
+
+            self.sceneCam.transform.SetParent(cameraOffset.transform);
+
+            if (ModConfig.InitialRoomscaleValue && self.cameraMode == CameraRigController.CameraMode.None)
+            {
+                self.desiredCameraState.position.y -= ModConfig.PlayerHeight.Value;
+                self.currentCameraState = self.desiredCameraState;
+            }
+
+            if (!ModConfig.InitialOculusModeValue && ModConfig.InitialRoomscaleValue)
+            {
+                if (liv) GameObject.Destroy(liv);
+
+                liv = self.gameObject.AddComponent<LIV.SDK.Unity.LIV>();
+                liv.stage = self.transform;
+                liv.stageTransform = cameraOffset.transform;
+                liv.HMDCamera = self.sceneCam;
+                liv.excludeBehaviours = new string[]
+                {
+                "AkAudioListener",
+                "Rigidbody",
+                "AkGameObj",
+                "OutlineHighlight",
+                "SceneCamera",
+                "CameraResolutionScaler"
+                };
+                liv.spectatorLayerMask = self.sceneCam.cullingMask;
+                liv.spectatorLayerMask |= (1 << LayerIndex.triggerZone.intVal);
+
+                liv.enabled = true;
             }
 
             if (self.hud)
@@ -625,6 +711,7 @@ namespace VRMod
             {
                 CharacterMaster targetMaster = self.targetBody ? self.targetBody.master : null;
                 self.hud.targetMaster = targetMaster;
+                if (UIFixes.livHUD) UIFixes.livHUD.targetMaster = targetMaster; 
             }
             self.UpdateCrosshair(vector8);
             CameraState cameraState = self.desiredCameraState;
@@ -698,7 +785,7 @@ namespace VRMod
                     {
                         if (!VRCameraWrapper.instance)
                         {
-                            GameObject wrapperObject = new GameObject("VR Camera Wrapper");
+                            GameObject wrapperObject = new GameObject("VR Camera Rig");
                             VRCameraWrapper.instance = wrapperObject.AddComponent<VRCameraWrapper>();
                             VRCameraWrapper.instance.Init(self);
                         }

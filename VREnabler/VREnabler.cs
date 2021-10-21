@@ -49,7 +49,8 @@ namespace VRPatcher
                 "AudioPluginOculusSpatializer.dll",
                 "openvr_api.dll",
                 "OVRGamepad.dll",
-                "OVRPlugin.dll"
+                "OVRPlugin.dll",
+                "LIV_Bridge.dll"
             };
             string[] managedLibraries = new string[]
             {

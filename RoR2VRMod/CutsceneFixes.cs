@@ -88,14 +88,30 @@ namespace VRMod
 
                     CameraRigController cameraRig = cameraRigObject.GetComponent<CameraRigController>();
 
-                    Vector3 cameraOffset = new Vector3(-0.3387751f, 0.1797891f, -0.5321155f) * 5 / 6;
-                    if (ModConfig.InitialRoomscaleValue) cameraOffset.y -= ModConfig.PlayerHeight.Value / 6;
+                    Vector3 offset = new Vector3(-0.3387751f, 0.1797891f, -0.5321155f) * 5 / 6;
+
+                    if (ModConfig.InitialRoomscaleValue) offset.y -= ModConfig.PlayerHeight.Value / 6;
 
                     cameraRig.desiredCameraState = new CameraState
                     {
-                        position = cameraOffset,
-                        rotation = Quaternion.identity
+                        position = offset,
+                        rotation = Quaternion.Euler(3.899f, -180, 0)
                     };
+
+                    cameraRig.currentCameraState = cameraRig.desiredCameraState;
+
+                    GameObject.Destroy(cameraRig.sceneCam.GetComponent<MatchCamera>());
+
+                    Transform cameraParent = cameraRig.sceneCam.transform.parent;
+                    GameObject newSceneCamObject = GameObject.Instantiate(cameraRig.sceneCam.gameObject, cameraParent.position, cameraParent.rotation, cameraParent);
+                    GameObject.Destroy(cameraRig.sceneCam.gameObject);
+
+                    Camera newCam = newSceneCamObject.GetComponent<Camera>();
+                    newCam.cullingMask = newCam.cullingMask & ~(1 << LayerIndex.ui.intVal);
+                    cameraRig.sceneCam = newCam;
+                    cameraRig.sprintingParticleSystem = newSceneCamObject.GetComponentInChildren<ParticleSystem>();
+
+                    if (CameraFixes.liv) CameraFixes.liv.HMDCamera = newCam;
 
                     FixIntroCanvas(cameraRig);
                     AdjustIntroElements(cameraRig);
@@ -151,7 +167,7 @@ namespace VRMod
 
             if (canvasObject)
             {
-                GameObject fadeObject = new GameObject();
+                GameObject fadeObject = new GameObject("Black Fade");
                 fadeObject.layer = LayerIndex.ui.intVal;
                 Canvas fadeCanvas = fadeObject.AddComponent<Canvas>();
                 fadeCanvas.renderMode = RenderMode.ScreenSpaceCamera;

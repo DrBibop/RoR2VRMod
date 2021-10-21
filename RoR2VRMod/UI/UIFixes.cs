@@ -26,6 +26,8 @@ namespace VRMod
         private static GameObject creditsCanvasPrefab;
         private static GameObject creditsCanvas;
 
+        internal static HUD livHUD;
+
         internal static void Init()
         {
             creditsCanvasPrefab = VRMod.VRAssetBundle.LoadAsset<GameObject>("CreditsCanvas");
@@ -113,6 +115,55 @@ namespace VRMod
             On.RoR2.UI.MainMenu.ProfileMainMenuScreen.OpenCreateProfileMenu += SetAddProfileButtonAsDefaultFallback;
 
             On.RoR2.UI.CreditsPanelController.OnEnable += MoveCreditsToWorldSpace;
+
+            On.RoR2.CameraRigController.OnDestroy += (orig, self) =>
+            {
+                orig(self);
+                if (livHUD) Object.Destroy(livHUD.gameObject);
+            };
+
+            On.RoR2.GameOverController.GenerateReportScreen += (orig, self, hud) =>
+            {
+                if (hud != livHUD)
+                    return orig(self, hud);
+                else
+                    return null;
+            };
+        }
+
+        internal static void CreateLIVHUD(Camera livCamera)
+        {
+            CameraRigController cameraRig = LocalUserManager.GetFirstLocalUser().cameraRigController;
+
+            if (cameraRig && cameraRig.hud)
+            {
+                GameObject gameObject = Object.Instantiate(Resources.Load<GameObject>("Prefabs/HUDSimple"));
+                HUD hud = gameObject.GetComponent<HUD>();
+                hud.cameraRigController = cameraRig;
+                Canvas canvas = hud.GetComponent<Canvas>();
+                canvas.worldCamera = livCamera;
+                canvas.planeDistance = 0.1f;
+                Object.Destroy(hud.GetComponent<CrosshairManager>());
+                hud.localUserViewer = cameraRig.localUserViewer;
+
+                Object.Destroy(gameObject.transform.Find("MainContainer/MainUIArea/CrosshairCanvas").gameObject);
+                Object.Destroy(gameObject.transform.Find("MainContainer/MainUIArea/Hitmarker").gameObject);
+
+                int dummyLayer = LayerIndex.triggerZone.intVal;
+                gameObject.SetLayerRecursive(dummyLayer);
+
+                livHUD = hud;
+            }
+        }
+
+        private static void SetLayerRecursive(this GameObject obj, int layer)
+        {
+            obj.layer = layer;
+
+            foreach (Transform child in obj.transform)
+            {
+                child.gameObject.SetLayerRecursive(layer);
+            }
         }
 
         private static void MoveCreditsToWorldSpace(On.RoR2.UI.CreditsPanelController.orig_OnEnable orig, CreditsPanelController self)
@@ -242,10 +293,13 @@ namespace VRMod
 
                 }
 
-                if (uiObject.transform.parent)
-                    uiObject.transform.parent.position = cachedUICam.transform.position + offset;
+                if (ModConfig.InitialRoomscaleValue)
+                    offset.y += ModConfig.PlayerHeight.Value;
 
-                uiObject.transform.position = cachedUICam.transform.position + offset;
+                if (uiObject.transform.parent)
+                    uiObject.transform.parent.position = offset;
+
+                uiObject.transform.position = offset;
                 uiObject.transform.localScale = scale;
 
                 RectTransform rect = uiObject.GetComponent<RectTransform>();

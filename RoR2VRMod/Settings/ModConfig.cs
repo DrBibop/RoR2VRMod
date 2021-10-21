@@ -41,6 +41,7 @@ namespace VRMod
         internal static ConfigEntry<float> TopAnchor { get; private set; }
         internal static ConfigEntry<float> LeftAnchor { get; private set; }
         internal static ConfigEntry<float> RightAnchor { get; private set; }
+        internal static ConfigEntry<bool> LIVHUD { get; private set; }
         internal static Vector2 AnchorMin { get; private set; }
         internal static Vector2 AnchorMax { get; private set; }
 
@@ -85,14 +86,14 @@ namespace VRMod
             Roomscale = configFile.Bind<bool>(
                 "VR Settings",
                 "Roomscale Tracking Space",
-                false,
-                "EXPERIMENTAL: Changes the tracking space to roomscale. Your real height will be used in-game to scale the view properly. This should also fix a rare gray screen glitch."
+                true,
+                "TRUE: Sets the tracking space to roomscale. Your real height will be used in-game to scale the view properly. Better for standing play and for LIV's XR Capture. FALSE: Sets the tracking space to stationary. Better for seated play."
             );
             PlayerHeight = configFile.Bind<float>(
                 "VR Settings",
                 "Player Height in meters",
                 1.82f,
-                "EXPERIMENTAL: Used for roomscale tracking. Your view scale will be adjusted to make you feel as tall as the survivor you're playing. Most survivors have a height of 1.82 meters which means keeping the default value will keep your view scale multiplier at 1 on most survivors"
+                "Used for roomscale tracking. Your view scale will be adjusted to make you feel as tall as the survivor you're playing. Most survivors have a height of 1.82 meters which means keeping the default value will keep your view scale multiplier at 1 on most survivors"
             );
 
             RayColorHex = configFile.Bind<string>(
@@ -200,6 +201,12 @@ namespace VRMod
                 1f,
                 "Position of the right HUD anchor between 0 and 1 (Middle to right edge of the screen)."
             );
+            LIVHUD = configFile.Bind<bool>(
+                "HUD Settings",
+                "Display HUD on LIV camera",
+                true,
+                "The classic RoR2 HUD will display on the LIV camera when using the LIV XR capture. Since the camera cannot render any UI, this is a good way for viewers to see the HUD."
+            );
 
             AnchorMin = new Vector2((1 - Mathf.Clamp(LeftAnchor.Value, 0, 1)) / 2, (1 - Mathf.Clamp(BottomAnchor.Value, 0, 1)) / 2);
             AnchorMax = new Vector2((1 + Mathf.Clamp(RightAnchor.Value, 0, 1)) / 2, (1 + Mathf.Clamp(TopAnchor.Value, 0, 1)) / 2);
@@ -266,6 +273,7 @@ namespace VRMod
             settings.Add("vr_watch_hud", new ConfigSetting(WatchHUD, ConfigSetting.SettingUpdate.NextStage));
             settings.Add("vr_better_health", new ConfigSetting(BetterHealthBar, ConfigSetting.SettingUpdate.NextStage));
             settings.Add("vr_smooth_hud", new ConfigSetting(UseSmoothHUD, ConfigSetting.SettingUpdate.Instant, ChangeSmoothHUD));
+            settings.Add("vr_liv_hud", new ConfigSetting(LIVHUD, ConfigSetting.SettingUpdate.Instant, ChangeLIVHUD));
             settings.Add("vr_left_handed", new ConfigSetting(LeftDominantHand, ConfigSetting.SettingUpdate.Instant, ChangeHandDominance));
             settings.Add("vr_roomscale", new ConfigSetting(Roomscale, ConfigSetting.SettingUpdate.AfterRestart));
             settings.Add("vr_height", new ConfigSetting(PlayerHeight, 1.5f, 2.2f, ConfigSetting.SettingUpdate.NextStage));
@@ -286,6 +294,18 @@ namespace VRMod
             settings.Add("vr_first_person", new ConfigSetting(FirstPerson, ConfigSetting.SettingUpdate.AfterRestart));
             settings.Add("vr_locked_camera", new ConfigSetting(LockedCameraPitch, ConfigSetting.SettingUpdate.Instant));
             settings.Add("vr_motion_controls", new ConfigSetting(UseMotionControls, ConfigSetting.SettingUpdate.AfterRestart));
+        }
+
+        private static void ChangeLIVHUD(object sender, EventArgs e)
+        {
+            if (UIFixes.livHUD != null)
+            {
+                UIFixes.livHUD.gameObject.SetActive(ModConfig.LIVHUD.Value);
+            }
+            else if (LIVHUD.Value && CameraFixes.liv && CameraFixes.liv.enabled)
+            {
+                UIFixes.CreateLIVHUD(CameraFixes.liv.render.cameraInstance);
+            }
         }
 
         private static void ChangeHandDominance(object sender, EventArgs e)

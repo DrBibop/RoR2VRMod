@@ -5,9 +5,6 @@ using UnityEngine.XR;
 using System.Collections;
 using BepInEx.Logging;
 using UnityEngine;
-using System;
-using System.Reflection;
-using System.IO;
 
 [module: UnverifiableCode]
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
