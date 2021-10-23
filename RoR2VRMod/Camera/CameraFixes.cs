@@ -68,8 +68,6 @@ namespace VRMod
 
         private static Transform cameraOffset;
 
-        private static GameObject smokeEffect;
-
         internal static void Init()
         {
             spectatorCameraPrefab = VRMod.VRAssetBundle.LoadAsset<GameObject>("SpectatorCamera");
@@ -126,35 +124,75 @@ namespace VRMod
             if (ModConfig.InitialRoomscaleValue && !ModConfig.InitialOculusModeValue)
                 LIV.SDK.Unity.SDKShaders.LoadShaders();
 
-            /*
-            RoR2Application.onLoad += () =>
-            {
-                EntityStateConfiguration state = Resources.Load<EntityStateConfiguration>("entitystateconfigurations/EntityStates.Loader.BaseChargeFist");
-
-                if (state)
-                {
-                    VRMod.StaticLogger.LogWarning("State found");
-
-                    HG.GeneralSerializer.SerializedField effectField = state.serializedFieldsCollection.serializedFields.First(x => x.fieldName == "chargeVfxPrefab");
-
-                    GameObject effectPrefab = effectField.fieldValue.objectValue as GameObject;
-
-                    Transform dustObject = effectPrefab.transform.Find("Dust");
-
-                    if (dustObject)
-                    {
-                        smokeEffect = dustObject.gameObject;
-                    }
-                }
-            };
-
-            On.EntityStates.Loader.FireHook.OnEnter += SpawnSmoke;*/
+            RoR2Application.onLoad += ReplaceLoaderSmokeRampTextures;
         }
 
-        private static void SpawnSmoke(On.EntityStates.Loader.FireHook.orig_OnEnter orig, EntityStates.Loader.FireHook self)
+        private static void ReplaceLoaderSmokeRampTextures()
         {
-            orig(self);
-            GameObject.Instantiate(smokeEffect, cameraOffset.transform.position, cameraOffset.transform.rotation);
+            Texture2D smokeRamp = VRMod.VRAssetBundle.LoadAsset<Texture2D>("SmokeRamp"); ;
+
+            EntityStateConfiguration state = Resources.Load<EntityStateConfiguration>("entitystateconfigurations/EntityStates.Loader.BaseChargeFist");
+
+            if (state)
+            {
+                HG.GeneralSerializer.SerializedField effectField = state.serializedFieldsCollection.serializedFields.First(x => x.fieldName == "chargeVfxPrefab");
+
+                GameObject effectPrefab = effectField.fieldValue.objectValue as GameObject;
+
+                Transform dustObject = effectPrefab.transform.Find("Dust");
+
+                if (dustObject)
+                {
+                    ReplaceSmokeRampTexture(dustObject, smokeRamp);
+                }
+            }
+
+            state = Resources.Load<EntityStateConfiguration>("entitystateconfigurations/EntityStates.Loader.BaseSwingChargedFist");
+
+            if (state)
+            {
+                HG.GeneralSerializer.SerializedField effectField = state.serializedFieldsCollection.serializedFields.First(x => x.fieldName == "swingEffectPrefab");
+
+                GameObject effectPrefab = effectField.fieldValue.objectValue as GameObject;
+
+                Transform dustObject = effectPrefab.transform.Find("Dust");
+
+                if (dustObject)
+                {
+                    ReplaceSmokeRampTexture(dustObject, smokeRamp);
+                }
+            }
+
+            GameObject hookPrefab = Resources.Load<GameObject>("prefabs/projectiles/LoaderHook");
+
+            if (hookPrefab)
+            {
+                Transform dustObject = hookPrefab.transform.Find("FistMesh/RopeFront/Dust");
+
+                if (dustObject)
+                {
+                    ReplaceSmokeRampTexture(dustObject, smokeRamp);
+                }
+
+                dustObject = hookPrefab.transform.Find("RopeEnd/Dust");
+
+                if (dustObject)
+                {
+                    ReplaceSmokeRampTexture(dustObject, smokeRamp);
+                }
+            }
+        }
+
+        private static void ReplaceSmokeRampTexture(Transform effect, Texture2D rampTexture)
+        {
+            Material smokeMat = effect.GetComponent<ParticleSystemRenderer>().material;
+
+            if (smokeMat)
+            {
+                smokeMat.SetTexture("_RemapTex", rampTexture);
+                smokeMat.SetFloat("_AlphaBias", 0.005f);
+                smokeMat.SetFloat("_InvFade", 0f);
+            }
         }
 
         private static void ForceEndOfCurve(On.RoR2.PositionAlongBasicBezierSpline.orig_Update orig, PositionAlongBasicBezierSpline self)
@@ -315,7 +353,7 @@ namespace VRMod
             if (self.sceneCam.cullingMask == (self.sceneCam.cullingMask | (1 << LayerIndex.triggerZone.intVal)))
                 self.sceneCam.cullingMask &= ~(1 << LayerIndex.triggerZone.intVal);
 
-            if (self.sceneCam.cullingMask == (self.sceneCam.cullingMask | (1 << LayerIndex.ui.intVal)))
+            if (self.gameObject.scene.name == "intro" && self.sceneCam.cullingMask == (self.sceneCam.cullingMask | (1 << LayerIndex.ui.intVal)))
                 self.sceneCam.cullingMask &= ~(1 << LayerIndex.ui.intVal);
 
             Transform pp = self.transform.Find("GlobalPostProcessVolume, Base");
@@ -360,12 +398,9 @@ namespace VRMod
                 "AkAudioListener",
                 "Rigidbody",
                 "AkGameObj",
-                "OutlineHighlight",
-                "SceneCamera",
                 "CameraResolutionScaler"
                 };
                 liv.spectatorLayerMask = self.sceneCam.cullingMask;
-                liv.spectatorLayerMask |= (1 << LayerIndex.triggerZone.intVal);
 
                 liv.enabled = true;
             }

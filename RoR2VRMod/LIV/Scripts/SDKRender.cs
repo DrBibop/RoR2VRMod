@@ -37,11 +37,15 @@ namespace LIV.SDK.Unity
         private Material _combineAlphaMaterial = null;
         private Material _writeMaterial = null;
         private Material _forceForwardRenderingMaterial = null;
+        private Material _uiTransparentMaterial = null;
         
         private RenderTexture _backgroundRenderTexture = null;
+        private RenderTexture _uiRenderTexture = null;
         private RenderTexture _foregroundRenderTexture = null;
         private RenderTexture _optimizedRenderTexture = null;
         private RenderTexture _complexClipPlaneRenderTexture = null;
+
+        private bool uiRendered = false;
 
         Material GetClipPlaneMaterial(bool debugClipPlane, bool complexClipPlane, ColorWriteMask colorWriteMask)
         {
@@ -124,12 +128,26 @@ namespace LIV.SDK.Unity
             SDKUtils.ApplyUserSpaceTransform(this);
             UpdateTextures();
             InvokePreRender();
+            RenderUI();
             if (canRenderBackground) RenderBackground();
             if (canRenderForeground) RenderForeground();
             if (canRenderOptimized) RenderOptimized();
             IvokePostRender();
             SDKUtils.CreateBridgeOutputFrame(this);
             SDKBridge.IssuePluginEvent();
+        }
+
+        private void RenderUI()
+        {
+            uiRendered = false;
+            if (_uiCameraInstance && _uiRenderTexture)
+            {
+                _uiCameraInstance.targetTexture = _uiRenderTexture;
+                _uiCameraInstance.Render();
+                uiRendered = true;
+                _uiCameraInstance.targetTexture = null;
+                _uiTransparentMaterial.mainTexture = _uiRenderTexture;
+            }
         }
 
         // Default render without any special changes
@@ -156,6 +174,10 @@ namespace LIV.SDK.Unity
             InvokePreRenderBackground();
             SendTextureToBridge(_backgroundRenderTexture, TEXTURE_ID.BACKGROUND_COLOR_BUFFER_ID);
             _cameraInstance.Render();
+
+            if (uiRendered)
+                Graphics.Blit(_uiRenderTexture, _backgroundRenderTexture, _uiTransparentMaterial);
+
             InvokePostRenderBackground();
             _cameraInstance.targetTexture = null;
             SDKShaders.StopBackgroundRendering();
@@ -253,6 +275,10 @@ namespace LIV.SDK.Unity
             InvokePreRenderForeground();
             SendTextureToBridge(_foregroundRenderTexture, TEXTURE_ID.FOREGROUND_COLOR_BUFFER_ID);
             _cameraInstance.Render();
+
+            if (uiRendered)
+                Graphics.Blit(_uiRenderTexture, _foregroundRenderTexture, _uiTransparentMaterial);
+
             InvokePostRenderForeground();
             _cameraInstance.targetTexture = null;
             SDKShaders.StopForegroundRendering();
@@ -331,6 +357,10 @@ namespace LIV.SDK.Unity
             InvokePreRenderBackground();
             SendTextureToBridge(_optimizedRenderTexture, TEXTURE_ID.OPTIMIZED_COLOR_BUFFER_ID);
             _cameraInstance.Render();
+
+            if (uiRendered)
+                Graphics.Blit(_uiRenderTexture, _backgroundRenderTexture, _uiTransparentMaterial);
+
             InvokePostRenderBackground();
             _cameraInstance.targetTexture = null;
             SDKShaders.StopBackgroundRendering();
@@ -380,6 +410,7 @@ namespace LIV.SDK.Unity
             _cameraInstance.allowMSAA = false;
             _cameraInstance.enabled = false;
             _cameraInstance.gameObject.SetActive(true);
+            _cameraInstance.GetComponent<RoR2.SceneCamera>().cameraRigController = cameraReference.GetComponent<RoR2.SceneCamera>().cameraRigController;
 
             _cameraPostProcess = _cameraInstance.GetComponent<PostProcessLayer>();
 
@@ -393,11 +424,30 @@ namespace LIV.SDK.Unity
             _combineAlphaMaterial = new Material(SDKShaders.combineAlphaMaterial);
             _writeMaterial = new Material(SDKShaders.writeMaterial);
             _forceForwardRenderingMaterial = new Material(SDKShaders.forceForwardRenderingMaterial);
+            _uiTransparentMaterial = VRMod.VRMod.VRAssetBundle.LoadAsset<Material>("UnlitTransparentMat");
             _clipPlaneCommandBuffer = new CommandBuffer();
             _combineAlphaCommandBuffer = new CommandBuffer();
             _captureTextureCommandBuffer = new CommandBuffer();
             _applyTextureCommandBuffer = new CommandBuffer();
             _optimizedRenderingCommandBuffer = new CommandBuffer();
+
+            GameObject uiCamObject = new GameObject("LIV UI Camera");
+            uiCamObject.transform.SetParent(_cameraInstance.transform);
+            uiCamObject.transform.localPosition = Vector3.zero;
+            uiCamObject.transform.localRotation = Quaternion.identity;
+            uiCamObject.transform.localScale = Vector3.one;
+
+            _uiCameraInstance = uiCamObject.AddComponent<Camera>();
+            _uiCameraInstance.cullingMask = (1 << RoR2.LayerIndex.triggerZone.intVal);
+            _uiCameraInstance.clearFlags = CameraClearFlags.SolidColor;
+            _uiCameraInstance.backgroundColor = new Color(0, 0, 0, 0);
+            _uiCameraInstance.rect = new Rect(0, 0, 1, 1);
+            _uiCameraInstance.depth = 1;
+            _uiCameraInstance.stereoTargetEye = StereoTargetEyeMask.None;
+            _uiCameraInstance.allowHDR = false;
+            _uiCameraInstance.allowMSAA = false;
+            _uiCameraInstance.enabled = false;
+            _uiCameraInstance.gameObject.SetActive(true);
         }
 
         private void DestroyAssets()
@@ -430,6 +480,7 @@ namespace LIV.SDK.Unity
             ReleaseBridgePoseControl();
             DestroyAssets();
             SDKUtils.DestroyTexture(ref _backgroundRenderTexture);
+            SDKUtils.DestroyTexture(ref _uiRenderTexture);
             SDKUtils.DestroyTexture(ref _foregroundRenderTexture);
             SDKUtils.DestroyTexture(ref _optimizedRenderTexture);
             SDKUtils.DestroyTexture(ref _complexClipPlaneRenderTexture);

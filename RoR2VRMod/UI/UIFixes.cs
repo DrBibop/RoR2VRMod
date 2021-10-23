@@ -142,7 +142,7 @@ namespace VRMod
                 hud.cameraRigController = cameraRig;
                 Canvas canvas = hud.GetComponent<Canvas>();
                 canvas.worldCamera = livCamera;
-                canvas.planeDistance = 0.1f;
+                canvas.planeDistance = 1f;
                 Object.Destroy(hud.GetComponent<CrosshairManager>());
                 hud.localUserViewer = cameraRig.localUserViewer;
 

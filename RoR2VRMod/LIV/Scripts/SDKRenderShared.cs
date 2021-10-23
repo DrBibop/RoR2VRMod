@@ -42,6 +42,15 @@ namespace LIV.SDK.Unity
             }
         }
 
+        private Camera _uiCameraInstance = null;
+        public Camera uiCameraInstance
+        {
+            get
+            {
+                return _uiCameraInstance;
+            }
+        }
+
         private PostProcessLayer _cameraPostProcess = null;
         public PostProcessLayer cameraPostProcess
         {
@@ -335,6 +344,17 @@ namespace LIV.SDK.Unity
             }
         }
 
+        private void CreateUITexture()
+        {
+            if (SDKUtils.CreateTexture(ref _uiRenderTexture, _resolution.width, _resolution.height, 24, RenderTextureFormat.ARGB32))
+            {
+            }
+            else
+            {
+                Debug.LogError("LIV: Unable to create UI texture!");
+            }
+        }
+
         private void CreateForegroundTexture()
         {
             if (SDKUtils.CreateTexture(ref _foregroundRenderTexture, _resolution.width, _resolution.height, 24, RenderTextureFormat.ARGB32))
@@ -393,6 +413,15 @@ namespace LIV.SDK.Unity
             else
             {
                 SDKUtils.DestroyTexture(ref _backgroundRenderTexture);
+            }
+
+            if (
+                    _uiRenderTexture == null ||
+                    _uiRenderTexture.width != _resolution.width ||
+                    _uiRenderTexture.height != _resolution.height
+                )
+            {
+                CreateUITexture();
             }
 
             if (SDKUtils.FeatureEnabled(inputFrame.features, FEATURES.FOREGROUND_RENDER))
