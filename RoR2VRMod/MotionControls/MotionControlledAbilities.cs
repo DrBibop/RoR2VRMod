@@ -159,6 +159,7 @@ namespace VRMod
             On.EntityStates.Mage.Weapon.Flamethrower.OnEnter += ShrinkFireEffect;
             On.EntityStates.Mage.Weapon.Flamethrower.FireGauntlet += DestroyOffHandEffect;
             On.EntityStates.Mage.Weapon.Flamethrower.OnExit += StopCastAnimation;
+            On.EntityStates.Mage.Weapon.BaseChargeBombState.OnEnter += ShrinkNovaBomb;
             On.EntityStates.Mage.Weapon.BaseThrowBombState.OnEnter += AnimateBombCast;
             On.EntityStates.Mage.Weapon.PrepWall.OnExit += AnimateWallCast;
 
@@ -186,6 +187,22 @@ namespace VRMod
             On.EntityStates.Captain.Weapon.FireTazer.Fire += ChangeTazerMuzzleShoot;
 
             IL.EntityStates.GlobalSkills.LunarNeedle.FireLunarNeedle.OnEnter += ChangeNeedleMuzzle;
+        }
+
+        private static void ShrinkNovaBomb(On.EntityStates.Mage.Weapon.BaseChargeBombState.orig_OnEnter orig, EntityStates.Mage.Weapon.BaseChargeBombState self)
+        {
+            orig(self);
+            if (IsLocalPlayer(self.characterBody) && self is EntityStates.Mage.Weapon.ChargeNovabomb && self.chargeEffectInstance)
+            {
+                ObjectScaleCurve scaleCurve = self.chargeEffectInstance.GetComponent<ObjectScaleCurve>();
+
+                if (scaleCurve)
+                {
+                    Keyframe key = scaleCurve.overallCurve.keys[1];
+                    key.value = 0.5f;
+                    scaleCurve.overallCurve.MoveKey(1, key);
+                }
+            }
         }
 
         private static void AnimateDashExtend(On.EntityStates.Toolbot.ToolbotDash.orig_OnEnter orig, EntityStates.Toolbot.ToolbotDash self)

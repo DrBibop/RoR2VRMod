@@ -220,6 +220,7 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - The grip sensitivity has been reduced on the default Index Knuckles bindings.
 - The "Roomscale tracking space" setting is no longer in an experimental stage and is now enabled by default.
 - The default value of Loader's melee swing speed threshold has been slightly reduced.
+- Reduced the size of the charging Nano-Bomb effect on Artificer's hand for better visibility.
 - Fixed a bug that prevented cutscene subtitles to display correctly in VR.
 - Fixed a bug that caused the camera to be placed too high in menus when using roomscale tracking.
 - Fixed a bug that caused the Visions on Heresy skill to be activated by swinging your controller when equipped on melee survivors.

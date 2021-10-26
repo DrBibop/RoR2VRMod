@@ -433,7 +433,8 @@ namespace LIV.SDK.Unity
         {
             DestroyAssets();
             _render = new SDKRender(this);
-            VRMod.UIFixes.CreateLIVHUD(_render.uiCameraInstance);
+            if (VRMod.ModConfig.LIVHUD.Value)
+                VRMod.UIFixes.CreateLIVHUD(_render.uiCameraInstance);
         }
 
         void DestroyAssets()
