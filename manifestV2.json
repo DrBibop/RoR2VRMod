@@ -3,10 +3,10 @@
     "AuthorName": "DrBibop",
     "Name": "DrBibop-VRMod",
     "DisplayName": "VR Mod",
-    "Version": "2.4.0",
+    "Version": "2.5.1",
     "Licence": "MIT",
     "WebsiteURL": "https://github.com/DrBibop/RoR2VRMod",
-    "Description": "Play Risk of Rain 2 in virtual reality! Now with motion controls!",
+    "Description": "Play Risk of Rain 2 in virtual reality! Now with LIV support!",
     "GameVersion": "N/A",
     "Dependencies": [
 		"bbepis-BepInExPack-5.4.9",

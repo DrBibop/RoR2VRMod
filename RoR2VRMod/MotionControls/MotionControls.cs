@@ -1,6 +1,4 @@
-﻿using Mono.Cecil.Cil;
-using MonoMod.Cil;
-using RoR2;
+﻿using RoR2;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,6 +35,11 @@ namespace VRMod
         private static List<HUDQueueEntry> wristHudQueue = new List<HUDQueueEntry>();
 
         private static List<HUDQueueEntry> watchHudQueue = new List<HUDQueueEntry>();
+
+        private static TwoHandedMainHand banditMainHand;
+        private static MeleeSkill mercMelee;
+        private static MeleeSkill loaderMelee;
+        private static MeleeSkill acridMelee;
 
         internal struct HUDQueueEntry
         {
@@ -118,33 +121,144 @@ namespace VRMod
 
                 if (prefabName == "BanditRifle")
                 {
-                    TwoHandedMainHand origin = prefab.GetComponent<TwoHandedMainHand>();
+                    banditMainHand = prefab.GetComponent<TwoHandedMainHand>();
 
-                    origin.snapAngle = ModConfig.BanditWeaponGripSnapAngle.Value;
+                    banditMainHand.snapAngle = ModConfig.BanditWeaponGripSnapAngle.Value;
                 }
                 if (prefabName == "MercSword")
                 {
-                    MeleeSkill melee = prefab.GetComponent<MeleeSkill>();
+                    mercMelee = prefab.GetComponent<MeleeSkill>();
 
-                    melee.speedThreshold = ModConfig.MercSwingSpeedThreshold.Value;
+                    mercMelee.speedThreshold = ModConfig.MercSwingSpeedThreshold.Value;
                 }
                 if (prefabName == "LoaderHand" || prefabName == "LoaderHand2")
                 {
-                    MeleeSkill melee = prefab.GetComponent<MeleeSkill>();
+                    loaderMelee = prefab.GetComponent<MeleeSkill>();
 
-                    melee.speedThreshold = ModConfig.LoaderSwingSpeedThreshold.Value;
+                    loaderMelee.speedThreshold = ModConfig.LoaderSwingSpeedThreshold.Value;
                 }
                 if (prefabName == "AcridHand" || prefabName == "AcridHand2")
                 {
-                    MeleeSkill melee = prefab.GetComponent<MeleeSkill>();
+                    acridMelee = prefab.GetComponent<MeleeSkill>();
 
-                    melee.speedThreshold = ModConfig.AcridSwingSpeedThreshold.Value;
+                    acridMelee.speedThreshold = ModConfig.AcridSwingSpeedThreshold.Value;
                 }
 
                 if (prefab)
                 {
                     AddHandPrefab(prefab);
                 }
+            }
+        }
+
+        internal static void UpdateDominance()
+        {
+            if (!HandsReady) return;
+
+            HandHUD dominantWristHUD = dominantHand.smallHud;
+            Vector3 dominantWristHUDpos = dominantWristHUD.transform.localPosition;
+            Quaternion dominantWristHUDrot = dominantWristHUD.transform.localRotation;
+
+            HandHUD nonDominantWristHUD = nonDominantHand.smallHud;
+            Vector3 nonDominantWristHUDpos = nonDominantWristHUD.transform.localPosition;
+            Quaternion nonDominantWristHUDrot = nonDominantWristHUD.transform.localRotation;
+
+            HandHUD dominantWatchHUD = dominantHand.watchHud;
+            Vector3 dominantWatchHUDpos = dominantWatchHUD.transform.localPosition;
+            Quaternion dominantWatchHUDrot = dominantWatchHUD.transform.localRotation;
+
+            HandHUD nonDominantWatchHUD = nonDominantHand.watchHud;
+            Vector3 nonDominantWatchHUDpos = nonDominantWatchHUD.transform.localPosition;
+            Quaternion nonDominantWatchHUDrot = nonDominantWatchHUD.transform.localRotation;
+
+            dominantWristHUD.transform.SetParent(null);
+            nonDominantWristHUD.transform.SetParent(null); 
+            dominantWatchHUD.transform.SetParent(null);
+            nonDominantWatchHUD.transform.SetParent(null);
+
+            Vector3 mirroredScale = dominantHand.transform.localScale;
+            nonDominantHand.transform.localScale = mirroredScale;
+            mirroredScale.x *= -1;
+            dominantHand.transform.localScale = mirroredScale;
+
+            dominantHand.xrNode = ModConfig.LeftDominantHand.Value ? XRNode.LeftHand : XRNode.RightHand;
+            nonDominantHand.xrNode = ModConfig.LeftDominantHand.Value ? XRNode.RightHand : XRNode.LeftHand;
+
+            nonDominantWristHUD.transform.SetParent(dominantHand.transform);
+            nonDominantWristHUD.transform.localPosition = dominantWristHUDpos;
+            nonDominantWristHUD.transform.localRotation = dominantWristHUDrot;
+            dominantHand.smallHud = nonDominantWristHUD;
+
+            dominantWristHUD.transform.SetParent(nonDominantHand.transform);
+            dominantWristHUD.transform.localPosition = nonDominantWristHUDpos;
+            dominantWristHUD.transform.localRotation = nonDominantWristHUDrot;
+            nonDominantHand.smallHud = dominantWristHUD;
+
+            nonDominantWatchHUD.transform.SetParent(dominantHand.transform);
+            nonDominantWatchHUD.transform.localPosition = dominantWatchHUDpos;
+            nonDominantWatchHUD.transform.localRotation = dominantWatchHUDrot;
+            dominantHand.watchHud = nonDominantWatchHUD;
+
+            dominantWatchHUD.transform.SetParent(nonDominantHand.transform);
+            dominantWatchHUD.transform.localPosition = nonDominantWatchHUDpos;
+            dominantWatchHUD.transform.localRotation = nonDominantWatchHUDrot;
+            nonDominantHand.watchHud = dominantWatchHUD;
+        }
+
+        internal static void UpdateRayColor()
+        {
+            dominantHand.UpdateRayColor();
+            nonDominantHand.UpdateRayColor();
+        }
+
+        internal static void UpdateBanditSnapAngle(object sender, EventArgs e)
+        {
+            if (!ModConfig.MotionControlsEnabled) return;
+
+            banditMainHand.snapAngle = ModConfig.BanditWeaponGripSnapAngle.Value;
+
+            if (HandsReady && dominantHand.currentHand.gameObject.name.Contains("BanditRifle"))
+            {
+                TwoHandedMainHand hand = dominantHand.currentHand.GetComponent<TwoHandedMainHand>();
+                hand.snapAngle = ModConfig.BanditWeaponGripSnapAngle.Value;
+            }
+        }
+
+        internal static void UpdateMercMeleeThreshold(object sender, EventArgs e)
+        {
+            if (!ModConfig.MotionControlsEnabled) return;
+
+            mercMelee.speedThreshold = ModConfig.MercSwingSpeedThreshold.Value;
+
+            UpdateMeleeThresholdOnCurrentHand(true, "MercSword", ModConfig.MercSwingSpeedThreshold.Value);
+        }
+
+        internal static void UpdateLoaderMeleeThreshold(object sender, EventArgs e)
+        {
+            if (!ModConfig.MotionControlsEnabled) return;
+
+            loaderMelee.speedThreshold = ModConfig.LoaderSwingSpeedThreshold.Value;
+
+            UpdateMeleeThresholdOnCurrentHand(true, "LoaderHand", ModConfig.LoaderSwingSpeedThreshold.Value);
+            UpdateMeleeThresholdOnCurrentHand(false, "LoaderHand", ModConfig.LoaderSwingSpeedThreshold.Value);
+        }
+
+        internal static void UpdateAcridMeleeThreshold(object sender, EventArgs e)
+        {
+            if (!ModConfig.MotionControlsEnabled) return;
+
+            acridMelee.speedThreshold = ModConfig.AcridSwingSpeedThreshold.Value;
+
+            UpdateMeleeThresholdOnCurrentHand(true, "AcridHand", ModConfig.AcridSwingSpeedThreshold.Value);
+            UpdateMeleeThresholdOnCurrentHand(false, "AcridHand", ModConfig.AcridSwingSpeedThreshold.Value);
+        }
+
+        private static void UpdateMeleeThresholdOnCurrentHand(bool dominant, string expectedName, float threshold)
+        {
+            if (HandsReady && (dominant ? dominantHand : nonDominantHand).currentHand.gameObject.name.Contains(expectedName))
+            {
+                MeleeSkill melee = (dominant ? dominantHand : nonDominantHand).currentHand.GetComponent<MeleeSkill>();
+                melee.speedThreshold = threshold;
             }
         }
 

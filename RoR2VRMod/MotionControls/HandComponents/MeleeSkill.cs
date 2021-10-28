@@ -94,6 +94,8 @@ namespace VRMod
 
             foreach (GenericSkill skill in skillsToActivate)
             {
+                if (skill.skillDef.skillName.Contains("Lunar") && skill.skillDef.skillName.Contains("Replacement")) continue;
+
                 SkillSlot slot = body.skillLocator.FindSkillSlot(skill);
 
                 if (slot != SkillSlot.None && swinging)

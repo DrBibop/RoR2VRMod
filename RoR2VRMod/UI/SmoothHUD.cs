@@ -1,41 +1,52 @@
 ﻿using RoR2;
 using RoR2.UI;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace VRMod
 {
     internal class SmoothHUD : MonoBehaviour
     {
+        internal static SmoothHUD instance;
+
         private Quaternion smoothHUDRotation;
 
         private CameraRigController cameraRig;
 
-        internal void Init(CameraRigController cameraRig)
-        {
-            this.cameraRig = cameraRig;
+        private Transform referenceTransform;
 
-            smoothHUDRotation = cameraRig.uiCam.transform.rotation;
+        internal void Init(Transform referenceTransform, CameraRigController cameraRig = null)
+        {
+            instance = this;
+            this.cameraRig = cameraRig;
+            this.referenceTransform = referenceTransform;
+
+            smoothHUDRotation = referenceTransform.rotation;
+        }
+
+        private void OnDisable()
+        {
+            if (referenceTransform)
+            {
+                smoothHUDRotation = referenceTransform.rotation;
+
+                TransformRect();
+            }
         }
 
         private void LateUpdate()
         {
             //This slerp code block was taken from idbrii in Unity answers and from an article by Rory
-            float delta = Quaternion.Angle(smoothHUDRotation, cameraRig.uiCam.transform.rotation);
+            float delta = Quaternion.Angle(smoothHUDRotation, referenceTransform.rotation);
             if (delta > 0f)
             {
                 float t = Mathf.Lerp(delta, 0f, 1f - Mathf.Pow(0.03f, Time.unscaledDeltaTime));
                 t = 1.0f - (t / delta);
-                smoothHUDRotation = Quaternion.Slerp(smoothHUDRotation, cameraRig.uiCam.transform.rotation, t);
+                smoothHUDRotation = Quaternion.Slerp(smoothHUDRotation, referenceTransform.rotation, t);
             }
 
-            Transform mainContainer = cameraRig.hud.mainContainer.transform;
+            TransformRect();
 
-            mainContainer.rotation = smoothHUDRotation;
-            mainContainer.rotation = Quaternion.LookRotation(mainContainer.forward, cameraRig.uiCam.transform.up);
-            mainContainer.position = cameraRig.uiCam.transform.position + (mainContainer.forward * 12.35f);
-
-            if (!ModConfig.UseMotionControls.Value)
+            if (!ModConfig.InitialMotionControlsValue && cameraRig)
             {
                 CrosshairManager crosshairManager = cameraRig.hud.GetComponent<CrosshairManager>();
 
@@ -47,6 +58,13 @@ namespace VRMod
                     crosshairManager.hitmarker.transform.rotation = cameraRig.uiCam.transform.rotation;
                 }
             }
+        }
+
+        private void TransformRect()
+        {
+            transform.rotation = smoothHUDRotation;
+            transform.rotation = Quaternion.LookRotation(transform.forward, referenceTransform.up);
+            transform.position = referenceTransform.position + (transform.forward * 12.35f);
         }
     }
 }

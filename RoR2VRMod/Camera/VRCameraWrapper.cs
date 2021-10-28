@@ -1,5 +1,4 @@
-﻿using Rewired;
-using RoR2;
+﻿using RoR2;
 using UnityEngine;
 
 namespace VRMod
@@ -8,18 +7,22 @@ namespace VRMod
     {
         public static VRCameraWrapper instance;
 
-
         public void Init(CameraRigController cameraRigController)
         {
             instance = this;
             this.cameraRigController = cameraRigController;
-            Vector3 localCamPos = cameraRigController.sceneCam.transform.localPosition;
             while(cameraRigController.transform.childCount > 0)
             {
-                cameraRigController.transform.GetChild(cameraRigController.transform.childCount - 1).SetParent(transform);
+                Transform child = cameraRigController.transform.GetChild(cameraRigController.transform.childCount - 1);
+                child.SetParent(transform);
+                child.localPosition = Vector3.zero;
+                child.localRotation = Quaternion.identity;
             }
 
-            cameraRigController.sceneCam.transform.localPosition = localCamPos;
+            if (CameraFixes.liv)
+            {
+                CameraFixes.liv.stage = transform;
+            }
         }
 
         internal void UpdateRotation(CameraState cameraState)

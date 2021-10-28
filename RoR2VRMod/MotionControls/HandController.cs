@@ -101,7 +101,7 @@ namespace VRMod
             transform.localPosition = InputTracking.GetLocalPosition(xrNode);
             transform.localRotation = InputTracking.GetLocalRotation(xrNode);
 
-            if (!ModConfig.OculusMode.Value)
+            if (!ModConfig.InitialOculusModeValue)
             {
                 transform.Rotate(new Vector3(40, 0, 0), Space.Self);
                 transform.Translate(new Vector3(0, -0.03f, -0.05f), Space.Self);
@@ -200,6 +200,11 @@ namespace VRMod
 
             Transform muzzle = currentHand.currentMuzzle.transform;
             return muzzle.position + (muzzle.forward * 300);
+        }
+
+        internal void UpdateRayColor()
+        {
+            ray.material.color = ModConfig.RayColor;
         }
     }
 }

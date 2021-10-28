@@ -26,10 +26,10 @@ namespace VRMod
         {
             if (!Run.instance || PauseManager.isPaused)
             {
-                if (ModConfig.OculusMode.Value)
+                if (ModConfig.InitialOculusModeValue)
                     UnityEngine.XR.InputTracking.Recenter();
                 else
-                    Valve.VR.OpenVR.Chaperone.ResetZeroPose(ModConfig.Roomscale.Value ? Valve.VR.ETrackingUniverseOrigin.TrackingUniverseStanding : Valve.VR.ETrackingUniverseOrigin.TrackingUniverseSeated);
+                    Valve.VR.OpenVR.Chaperone.ResetZeroPose(ModConfig.InitialRoomscaleValue ? Valve.VR.ETrackingUniverseOrigin.TrackingUniverseStanding : Valve.VR.ETrackingUniverseOrigin.TrackingUniverseSeated);
             }
         }
     }
