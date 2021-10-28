@@ -90,7 +90,7 @@ namespace VRMod
                     }
                     else if (entry.SettingType == typeof(float))
                     {
-                        float parsedValue = float.Parse(newValue);
+                        float parsedValue = float.Parse(newValue, System.Globalization.CultureInfo.InvariantCulture);
                         (entry as ConfigEntry<float>).Value = parsedValue;
                     }
                     else if (entry.SettingType == typeof(string))

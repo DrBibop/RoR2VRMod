@@ -10,7 +10,7 @@ using UnityEngine;
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
 namespace VRMod
 {
-    [BepInPlugin("com.DrBibop.VRMod", "VRMod", "2.5.0")]
+    [BepInPlugin("com.DrBibop.VRMod", "VRMod", "2.5.1")]
     public class VRMod : BaseUnityPlugin
     {
         internal static ManualLogSource StaticLogger;

@@ -369,6 +369,16 @@ namespace VRMod
                     healthCluster.localRotation = Quaternion.identity;
                     healthCluster.offsetMin = new Vector2(300, healthCluster.offsetMin.y);
                     healthCluster.offsetMax = new Vector2(-300, healthCluster.offsetMax.y);
+
+                    Vector3 notificationPosition = notificationArea.localPosition;
+                    notificationPosition.y += 60;
+                    notificationArea.localPosition = notificationPosition;
+
+                    RectTransform spectatorLabel = springCanvas.Find("BottomCenterCluster/SpectatorLabel") as RectTransform;
+
+                    Vector3 labelPosition = spectatorLabel.localPosition;
+                    labelPosition.y += 68;
+                    spectatorLabel.localPosition = labelPosition;
                 }
                 else
                 {

@@ -224,3 +224,7 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - Fixed a bug that prevented cutscene subtitles to display correctly in VR.
 - Fixed a bug that caused the camera to be placed too high in menus when using roomscale tracking.
 - Fixed a bug that caused the Visions on Heresy skill to be activated by swinging your controller when equipped on melee survivors.
+
+### 2.5.1
+- The pickup notification and the spectator label have been moved up above the central health bar to prevent them from being hidden behind status icons.
+- Fixed a bug that caused some setting sliders to parse decimals incorrectly when using certain languages.
