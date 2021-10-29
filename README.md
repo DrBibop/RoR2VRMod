@@ -228,3 +228,7 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 ### 2.5.1
 - The pickup notification and the spectator label have been moved up above the central health bar to prevent them from being hidden behind status icons.
 - Fixed a bug that caused some setting sliders to parse decimals incorrectly when using certain languages.
+
+### 2.5.2
+- Fixed a bug that caused the credits to appear during the escape cutscene.
+- Fixed a bug that prevented the LIV plugin from being correctly copied into the game directory during the patching process.

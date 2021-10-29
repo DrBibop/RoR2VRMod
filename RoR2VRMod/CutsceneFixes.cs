@@ -34,6 +34,8 @@ namespace VRMod
                     AdjustOutroElements(allGameObjects, cameraRig);
                 }
             }
+
+            orig(self);
         }
 
         private static void AdjustOutroElements(GameObject[] allGameObjects, CameraRigController cameraRig)
