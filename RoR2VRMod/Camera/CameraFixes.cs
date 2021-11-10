@@ -36,32 +36,6 @@ namespace VRMod
 
         private static Transform cachedCameraTargetTransform;
 
-        private static CharacterBody _cachedBody;
-        private static CharacterBody cachedBody
-        {
-            get
-            {
-                if (!_cachedBody)
-                {
-                    _cachedBody = LocalUserManager.GetFirstLocalUser().cachedBody;
-                }
-                return _cachedBody;
-            }
-        }
-
-        private static CharacterMaster _cachedMaster;
-        private static CharacterMaster cachedMaster
-        {
-            get
-            {
-                if (!_cachedMaster)
-                {
-                    _cachedMaster = LocalUserManager.GetFirstLocalUser().cachedMaster;
-                }
-                return _cachedMaster;
-            }
-        }
-
         private static List<ForcedVisibleRenderer> forcedVisibleRenderers;
 
         internal static LIV.SDK.Unity.LIV liv { get; private set; }
@@ -245,8 +219,7 @@ namespace VRMod
             CharacterModel componentInParent = self.GetComponentInParent<CharacterModel>();
             if (componentInParent)
             {
-                CharacterBody body = componentInParent.body;
-                if (body && body == cachedBody)
+                if (componentInParent.body.IsLocalBody())
                 {
                     self.enabled = false;
                     return;
@@ -259,7 +232,7 @@ namespace VRMod
         private static void HideDisc(On.EntityStates.LaserTurbine.LaserTurbineBaseState.orig_OnEnter orig, EntityStates.LaserTurbine.LaserTurbineBaseState self)
         {
             orig(self);
-            if (self.ownerBody == cachedBody)
+            if (self.ownerBody.IsLocalBody())
             {
                 self.laserTurbineController.showTurbineDisplay = false;
             }
@@ -268,7 +241,7 @@ namespace VRMod
         private static void HideSparks(On.EntityStates.VagrantNovaItem.BaseVagrantNovaItemState.orig_OnEnter orig, EntityStates.VagrantNovaItem.BaseVagrantNovaItemState self)
         {
             orig(self);
-            if (self.attachedBody == cachedBody)
+            if (self.attachedBody.IsLocalBody())
             {
                 if (self.chargeSparks)
                 {
@@ -290,7 +263,7 @@ namespace VRMod
             c.Emit(OpCodes.Ldind_Ref);
             c.EmitDelegate<Action<CharacterBody, TemporaryVisualEffect>>((body, effect) =>
             {
-                if (body == cachedBody)
+                if (body.IsLocalBody())
                 {
                     Renderer[] renderers = effect.GetComponentsInChildren<Renderer>();
                     foreach (Renderer renderer in renderers)
@@ -338,7 +311,7 @@ namespace VRMod
                 RoR2Content.Equipment.Meteor.equipmentIndex
             };
             
-            if (!self.body.master || self.body.master != cachedMaster || !equipmentsToHide.Contains(newEquipmentIndex))
+            if (!self.body.master.IsLocalMaster() || !equipmentsToHide.Contains(newEquipmentIndex))
             {
                 orig(self, newEquipmentIndex);
             }
@@ -398,7 +371,8 @@ namespace VRMod
                 "AkAudioListener",
                 "Rigidbody",
                 "AkGameObj",
-                "CameraResolutionScaler"
+                "CameraResolutionScaler",
+                "TranslucentImageSource"
                 };
                 liv.spectatorLayerMask = self.sceneCam.cullingMask;
 
@@ -779,20 +753,19 @@ namespace VRMod
 
         private static void SetBodyInvisible(On.RoR2.Run.orig_Update orig, Run self)
         {
+            CharacterBody cachedBody = Utils.localBody;
+
             if (cachedBody)
             {
-                Renderer[] renderers;
+                Renderer[] renderers = cachedBody.modelLocator?.modelTransform?.gameObject.GetComponentsInChildren<Renderer>();
 
                 if (forcedVisibleRenderers != null)
                 {
-                    ForcedVisibleRenderer[] visibleBodyRenderers = forcedVisibleRenderers.Where(x => x.bodyName == cachedBody.name.Substring(0, cachedBody.name.IndexOf("(Clone)"))).ToArray();
+                    string currentBodyName = cachedBody.name.Substring(0, cachedBody.name.IndexOf("(Clone)"));
 
-                    renderers = cachedBody.modelLocator?.modelTransform?.gameObject.GetComponentsInChildren<Renderer>().Where(x => !Array.Exists(visibleBodyRenderers, vren => vren.rendererObjectName == x.gameObject.name)).ToArray();
-                }
-                else
-                {
-                    renderers = cachedBody.modelLocator?.modelTransform?.gameObject.GetComponentsInChildren<Renderer>();
+                    ForcedVisibleRenderer[] visibleBodyRenderers = forcedVisibleRenderers.Where(x => x.bodyName == currentBodyName).ToArray();
 
+                    renderers = renderers.Where(x => !Array.Exists(visibleBodyRenderers, vren => vren.rendererObjectName == x.gameObject.name)).ToArray();
                 }
                 
                 if (renderers != null)
@@ -861,7 +834,6 @@ namespace VRMod
                                         {
                                             cachedCameraTargetTransform.Translate(collider.center + new Vector3(0, collider.height / 2, 0), Space.Self);
                                         }
-
                                     }
                                 }
                             }

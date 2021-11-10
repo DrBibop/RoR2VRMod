@@ -1,40 +1,26 @@
-﻿using RoR2;
+﻿using MonoMod.RuntimeDetour;
+using Rewired.Integration.UnityUI;
+using Rewired.UI;
+using RoR2;
 using RoR2.UI;
 using System;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace VRMod
 {
-    //WIP
     internal class MenuInteraction
     {
-        internal static readonly int uiLayer = LayerMask.NameToLayer("UI");
-
         private static Camera _cachedUICam;
 
-        private static MPButton _selectedButton;
+        private static float clickTime;
 
-        private static Vector3 pointerHitPosition = Vector3.zero;
+        private static Vector3 clickPosition;
 
-        private static MPButton selectedButton
-        {
-            get { return _selectedButton; }
-            set
-            {
-                if (_selectedButton)
-                {
-                    _selectedButton.OnPointerExit(new PointerEventData(_selectedButton.eventSystem));
-                }
+        private static Vector3 pointerHitPosition;
 
-                _selectedButton = value;
+        private static GameObject cursorPrefab;
 
-                if (_selectedButton)
-                {
-                    _selectedButton.OnPointerEnter(new PointerEventData(_selectedButton.eventSystem));
-                }
-            }
-        }
+        private static GameObject cursorInstance;
 
         private static Camera cachedUICam
         {
@@ -57,88 +43,120 @@ namespace VRMod
 
         internal static void Init()
         {
-            On.RoR2.UI.MPButton.Awake += AddCollider;
-            //RoR2Application.onFixedUpdate += FixedUpdate;
-            On.RoR2.UI.MainMenu.BaseMainMenuScreen.OnEnter += AddMenuCollider;
             On.RoR2.UI.MPInput.Update += EditPointerPosition;
+
+            On.RoR2.UI.MainMenu.BaseMainMenuScreen.OnEnter += (orig, self, menuController) =>
+            {
+                orig(self, menuController);
+                AddMenuCollider(self.gameObject);
+            };
+            On.RoR2.UI.CharacterSelectController.Awake += (orig, self) =>
+            {
+                orig(self);
+                AddMenuCollider(self.gameObject);
+            };
+            On.RoR2.UI.LogBook.LogBookController.Start += (orig, self) =>
+            {
+                orig(self);
+                AddMenuCollider(self.gameObject);
+            };
+            On.RoR2.UI.EclipseRunScreenController.Start += (orig, self) =>
+            {
+                orig(self);
+                AddMenuCollider(self.gameObject);
+            };
+            On.RoR2.UI.PauseScreenController.OnEnable += (orig, self) =>
+            {
+                orig(self);
+                AddMenuCollider(self.gameObject);
+            };
+            On.RoR2.UI.SimpleDialogBox.Start += (orig, self) =>
+            {
+                orig(self);
+                AddMenuCollider(self.transform.root.gameObject);
+            };
+            On.RoR2.UI.GameEndReportPanelController.Awake += (orig, self) =>
+            {
+                orig(self);
+                AddMenuCollider(self.gameObject);
+            };
+
+            cursorPrefab = VRMod.VRAssetBundle.LoadAsset<GameObject>("UICursor");
         }
 
-        private static void AddMenuCollider(On.RoR2.UI.MainMenu.BaseMainMenuScreen.orig_OnEnter orig, RoR2.UI.MainMenu.BaseMainMenuScreen self, RoR2.UI.MainMenu.MainMenuController mainMenuController)
+        private static void AddMenuCollider(GameObject canvasObject)
         {
-            orig(self, mainMenuController);
-            BoxCollider collider = self.GetComponent<BoxCollider>();
+            BoxCollider collider = canvasObject.GetComponent<BoxCollider>();
             if (!collider)
             {
-                RectTransform rect = self.transform as RectTransform;
-                collider = self.gameObject.AddComponent<BoxCollider>();
+                RectTransform rect = canvasObject.transform as RectTransform;
+                collider = canvasObject.gameObject.AddComponent<BoxCollider>();
                 collider.size = new Vector3(rect.sizeDelta.x, rect.sizeDelta.y, 1);
             }
         }
 
         private static void EditPointerPosition(On.RoR2.UI.MPInput.orig_Update orig, MPInput self)
         {
-            if (!self.eventSystem.isCursorVisible)
+            if (!cachedUICam || (Run.instance && !PauseManager.isPaused))
             {
+                if (cursorInstance.activeSelf)
+                    cursorInstance.SetActive(false);
+
+                orig(self);
                 return;
             }
+
+            if (!cursorInstance && cursorPrefab)
+            {
+                cursorInstance = GameObject.Instantiate(cursorPrefab);
+            }
+
+            if (!cursorInstance.activeSelf)
+                cursorInstance.SetActive(true);
+
             self.internalScreenPositionDelta = Vector2.zero;
             self._scrollDelta = new Vector2(0f, self.player.GetAxis(26));
-            if (cachedUICam)
-                self.internalMousePosition = cachedUICam.WorldToScreenPoint(pointerHitPosition);
 
-        }
-
-        private static void FixedUpdate()
-        {
-            if (Run.instance && !PauseManager.isPaused) return;
+            if (self.GetMouseButtonDown(0))
+            {
+                clickTime = Time.realtimeSinceStartup;
+                clickPosition = pointerHitPosition;
+            }
+            else if (self.GetMouseButtonUp(0))
+            {
+                clickTime = 0;
+            }
 
             Camera uiCam = cachedUICam;
-
-            if (!uiCam) return;
 
             Ray ray;
             if (MotionControls.HandsReady)
             {
                 HandController dominantHand = MotionControls.GetHandByDominance(true);
 
-                ray = dominantHand.aimRay;
+                ray = dominantHand.uiRay;
             }
             else
             {
                 ray = new Ray(uiCam.transform.position, uiCam.transform.forward);
             }
 
-            int layerMask = 1 << uiLayer;
             RaycastHit hit;
-            if (Physics.Raycast(ray, out hit, 100, layerMask))
+            if (Physics.Raycast(ray, out hit, 100, LayerIndex.ui.mask))
             {
-                /*
-                MPButton button = hit.collider.GetComponent<MPButton>();
-                if(button)
-                {
-                    if (button != selectedButton)
-                    {
-                        selectedButton = button;
-                    }
-                }*/
                 pointerHitPosition = hit.point;
-            }
-            /*else
-            {
-                selectedButton = null;
-            }*/
-        }
 
-        private static void AddCollider(On.RoR2.UI.MPButton.orig_Awake orig, RoR2.UI.MPButton self)
-        {
-            orig(self);
-            Vector2 rectSize = (self.transform as RectTransform).sizeDelta;
-            BoxCollider newCollider = self.gameObject.AddComponent<BoxCollider>();
-            newCollider.size = new Vector3(rectSize.x, rectSize.y, 1);
-            if (self.gameObject.name.Contains("GenericHeaderButton"))
-            {
-                newCollider.center = Vector3.back;
+                if (cursorInstance)
+                {
+                    cursorInstance.transform.position = pointerHitPosition;
+                    cursorInstance.transform.rotation = Quaternion.LookRotation(hit.normal, Vector3.up);
+                }
             }
+
+            Vector3 mousePosition = uiCam.WorldToScreenPoint(pointerHitPosition);
+
+            if (Time.realtimeSinceStartup - clickTime > 0.25f || (pointerHitPosition - clickPosition).magnitude > 1f)
+                self.internalMousePosition = mousePosition;
         }
     }
 }

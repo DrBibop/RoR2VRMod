@@ -30,6 +30,14 @@ namespace VRMod
             }
         }
 
+        internal Ray uiRay
+        {
+            get
+            {
+                return new Ray(uiHand.currentMuzzle.transform.position, uiHand.currentMuzzle.transform.forward);
+            }
+        }
+
         public Transform muzzle => currentHand.currentMuzzle.transform;
 
         internal Hand currentHand { get; private set; }
@@ -40,7 +48,11 @@ namespace VRMod
 
         internal bool forceRay;
 
+        private Hand uiHand;
+
         private bool _uiMode;
+
+        private bool rayActive => currentHand.useRay || forceRay || uiMode;
 
         internal bool uiMode
         {
@@ -53,25 +65,17 @@ namespace VRMod
 
                 if (_uiMode)
                 {
-                    int uiLayer = LayerMask.NameToLayer("UI");
-
-                    ray.gameObject.layer = uiLayer;
-                    ray.sortingOrder = 1;
-                    pointerHand.gameObject.layer = uiLayer;
-                    foreach (Renderer renderer in pointerRenderers)
-                    {
-                        renderer.gameObject.layer = uiLayer;
-                    }
+                    ray.gameObject.layer = LayerIndex.ui.intVal;
+                    ray.sortingOrder = 999;
+                    currentHand.gameObject.SetActive(false);
+                    uiHand.gameObject.SetActive(true);
                 }
                 else
                 {
                     ray.gameObject.layer = 0;
-                    ray.sortingOrder = 999;
-                    pointerHand.gameObject.layer = 0;
-                    foreach (Renderer renderer in pointerRenderers)
-                    {
-                        renderer.gameObject.layer = 0;
-                    }
+                    ray.sortingOrder = 0;
+                    currentHand.gameObject.SetActive(true);
+                    uiHand.gameObject.SetActive(false);
                 }
             }
         }
@@ -80,53 +84,63 @@ namespace VRMod
 
         private List<Hand> instantiatedHands = new List<Hand>();
 
-        private Renderer[] pointerRenderers;
-
         private void Awake()
         {
             SetCurrentHand(pointerHand);
+
+            uiHand = Object.Instantiate(pointerHand.gameObject).GetComponent<Hand>();
+            uiHand.gameObject.name = string.Format("UI Hand ({0})", xrNode == XRNode.LeftHand ? "Left" : "Right");
+            uiHand.gameObject.SetLayerRecursive(LayerIndex.ui.intVal);
+            uiHand.gameObject.SetActive(false);
+
             ray.material.color = ModConfig.RayColor;
-            pointerRenderers = pointerHand.GetComponentsInChildren<Renderer>();
         }
 
         private void Update()
         {
-            uiMode = false;/*!RoR2.Run.instance || RoR2.PauseManager.isPaused;*/
+            uiMode = !RoR2.Run.instance || RoR2.PauseManager.isPaused;
 
             if (!uiMode && transform.parent != Camera.main.transform.parent)
                 transform.SetParent(Camera.main.transform.parent);
             else if (uiMode && transform.parent)
                 transform.SetParent(null);
 
-            transform.localPosition = InputTracking.GetLocalPosition(xrNode);
-            transform.localRotation = InputTracking.GetLocalRotation(xrNode);
+            Vector3 handPosition = InputTracking.GetLocalPosition(xrNode);
+            Quaternion handRotation = InputTracking.GetLocalRotation(xrNode);
 
             if (!ModConfig.InitialOculusModeValue)
             {
-                transform.Rotate(new Vector3(40, 0, 0), Space.Self);
-                transform.Translate(new Vector3(0, -0.03f, -0.05f), Space.Self);
+                handRotation *= Quaternion.Euler(Vector3.right * 40);
+                handPosition += handRotation * Vector3.down * 0.03f;
+                handPosition += handRotation * Vector3.back * 0.05f;
             }
+
+            transform.localPosition = handPosition;
+            transform.localRotation = handRotation;
+
+            uiHand.transform.position = handPosition;
+            uiHand.transform.rotation = handRotation;
         }
 
         private void LateUpdate()
         {
             if (!currentHand) return;
 
-            if (ray.gameObject.activeSelf != (currentHand.useRay || forceRay))
-                ray.gameObject.SetActive(currentHand.useRay || forceRay);
+            if (ray.gameObject.activeSelf != rayActive)
+                ray.gameObject.SetActive(rayActive);
 
             if (ray.gameObject.activeSelf)
             {
-                ray.SetPosition(0, currentHand.currentMuzzle.transform.position);
+                ray.SetPosition(0, (uiMode ? uiHand.currentMuzzle.transform : muzzle).position);
                 ray.SetPosition(1, GetRayHitPosition());
             }
         }
 
         /// <summary>
-        /// 
+        /// Returns the muzzle transform at the specified index.
         /// </summary>
-        /// <param name="index"></param>
-        /// <returns></returns>
+        /// <param name="index">The index of the muzzle.</param>
+        /// <returns>The chosen muzzle's transform.</returns>
         public Transform GetMuzzleByIndex(uint index)
         {
             return currentHand.muzzles[index].transform;
@@ -139,11 +153,11 @@ namespace VRMod
 
         internal void SetCurrentHand(string bodyName)
         {
-            List<Hand> matchingInstantiatedHands = instantiatedHands.Where((hand) => hand.bodyName == bodyName).ToList();
+            Hand matchingInstantiatedHands = instantiatedHands.FirstOrDefault((hand) => hand.bodyName == bodyName);
 
-            if (matchingInstantiatedHands.Count > 0)
+            if (matchingInstantiatedHands)
             {
-                SetCurrentHand(matchingInstantiatedHands.First());
+                SetCurrentHand(matchingInstantiatedHands);
                 return;
             }
 
@@ -184,7 +198,7 @@ namespace VRMod
             currentHand = hand;
             currentHand.gameObject.SetActive(true);
 
-            ray.gameObject.SetActive(currentHand.useRay);
+            ray.gameObject.SetActive(rayActive);
         }
 
         private Vector3 GetRayHitPosition()
@@ -192,14 +206,17 @@ namespace VRMod
             if (!currentHand)
                 return Vector3.zero;
 
+            Ray ray = uiMode ? uiRay : aimRay;
+
+            LayerMask mask = uiMode ? LayerIndex.ui.mask : LayerIndex.ragdoll.mask;
+
             RaycastHit hitInfo;
-            if (Physics.Raycast(aimRay, out hitInfo, 300, LayerMask.GetMask("Ragdoll")))
+            if (Physics.Raycast(ray, out hitInfo, 300, mask))
             {
                 return hitInfo.point;
             }
 
-            Transform muzzle = currentHand.currentMuzzle.transform;
-            return muzzle.position + (muzzle.forward * 300);
+            return ray.origin + (ray.direction * 300);
         }
 
         internal void UpdateRayColor()

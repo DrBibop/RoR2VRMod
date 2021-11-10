@@ -66,7 +66,7 @@ namespace VRMod
             {
                 pcmc.master.onBodyStart += (body) =>
                 {
-                    if (body.master != LocalUserManager.GetFirstLocalUser().cachedMaster) return;
+                    if (!body.master.IsLocalMaster()) return;
 
                     currentBody = body;
                     string bodyName = body.name.Substring(0, body.name.IndexOf("(Clone)"));
@@ -300,7 +300,7 @@ namespace VRMod
 
         private static void OnSprintStop(On.RoR2.CharacterBody.orig_OnSprintStop orig, CharacterBody self)
         {
-            if (self == LocalUserManager.GetFirstLocalUser().cachedBody)
+            if (self.IsLocalBody())
             {
                 if (cachedSprintIcon)
                     cachedSprintIcon.color = originalSprintIconColor;
@@ -316,11 +316,11 @@ namespace VRMod
 
         private static void OnSprintStart(On.RoR2.CharacterBody.orig_OnSprintStart orig, CharacterBody self)
         {
-            if (self == LocalUserManager.GetFirstLocalUser().cachedBody)
+            if (self.IsLocalBody())
             {
                 if (!cachedSprintIcon)
                 {
-                    Transform iconTransform = LocalUserManager.GetFirstLocalUser().cameraRigController.hud.mainUIPanel.transform.Find("SpringCanvas/BottomRightCluster/Scaler/SprintCluster/SprintIcon");
+                    Transform iconTransform = Utils.localCameraRig.hud.mainUIPanel.transform.Find("SpringCanvas/BottomRightCluster/Scaler/SprintCluster/SprintIcon");
                     if (iconTransform)
                     {
                         Image sprintIcon = iconTransform.GetComponent<Image>();
@@ -352,9 +352,7 @@ namespace VRMod
 
             if (!HandsReady) return;
 
-            LocalUser localUser = LocalUserManager.GetFirstLocalUser();
-
-            if (localUser != null && self.body == localUser.cachedBody && self.visibility != VisibilityLevel.Invisible)
+            if (self.body.IsLocalBody() && self.visibility != VisibilityLevel.Invisible)
             {
                 foreach (CharacterModel.RendererInfo rendererInfo in dominantHand.currentHand.rendererInfos)
                 {
@@ -448,8 +446,6 @@ namespace VRMod
         private static void InitWristHUD(On.RoR2.CameraRigController.orig_Start orig, RoR2.CameraRigController self)
         {
             orig(self);
-
-            if (!Run.instance) return;
 
             if (!HandsReady) SetupHands();
 

@@ -118,7 +118,7 @@ namespace VRMod
                 "Survivor Settings",
                 "Bandit: Weapon grip snap angle",
                 40,
-                "Angle in which the non-dominant hand can grip the weapon."
+                "Angle in which the non-dominant hand can grip the weapon. Set to 0 to completely disable two-handed gripping. Set to 180 for constant grip."
             );
             MercSwingSpeedThreshold = configFile.Bind<float>(
                 "Survivor Settings",

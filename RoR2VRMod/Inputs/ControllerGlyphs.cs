@@ -172,7 +172,7 @@ namespace VRMod
             {
                 return "UNKNOWN";
             }
-            if (currentInputSource == MPEventSystem.InputSource.Gamepad && isUsingMotionControls)
+            if (isUsingMotionControls)
             {
                 Glyphs.resultsList.Clear();
                 eventSystem.player.controllers.maps.GetElementMapsWithAction(ControllerType.Custom, Controllers.ControllerID, actionName, false, Glyphs.resultsList);
@@ -195,7 +195,7 @@ namespace VRMod
             if (controller != null && controller.type == ControllerType.Custom)
             {
                 isUsingMotionControls = true;
-                self.currentInputSource = MPEventSystem.InputSource.Gamepad;
+                self.currentInputSource = MPEventSystem.InputSource.MouseAndKeyboard;
                 return;
             }
             isUsingMotionControls = false;

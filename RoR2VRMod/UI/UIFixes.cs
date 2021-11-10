@@ -51,7 +51,7 @@ namespace VRMod
             On.RoR2.UI.MainMenu.MultiplayerMenuController.Awake += (orig, self) =>
             {
                 orig(self);
-                self.gameObject.layer = LayerMask.NameToLayer("UI");
+                self.gameObject.layer = LayerIndex.ui.intVal;
             };
             On.RoR2.UI.LogBook.LogBookController.Start += (orig, self) =>
             {
@@ -133,7 +133,7 @@ namespace VRMod
 
         internal static void CreateLIVHUD(Camera livCamera)
         {
-            CameraRigController cameraRig = LocalUserManager.GetFirstLocalUser().cameraRigController;
+            CameraRigController cameraRig = Utils.localCameraRig;
 
             if (cameraRig && cameraRig.hud)
             {
@@ -153,16 +153,6 @@ namespace VRMod
                 gameObject.SetLayerRecursive(dummyLayer);
 
                 livHUD = hud;
-            }
-        }
-
-        private static void SetLayerRecursive(this GameObject obj, int layer)
-        {
-            obj.layer = layer;
-
-            foreach (Transform child in obj.transform)
-            {
-                child.gameObject.SetLayerRecursive(layer);
             }
         }
 

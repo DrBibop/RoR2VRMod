@@ -1,4 +1,5 @@
 ﻿using RoR2;
+using System;
 using System.Linq;
 using UnityEngine;
 
@@ -36,15 +37,15 @@ namespace VRMod
                     name = name.Remove(name.IndexOf(" (Instance)"));
                 }
 
-                var bodyRendererInfos = model.baseRendererInfos.Where(x => x.defaultMaterial && (x.defaultMaterial.name == name || x.defaultMaterial.name == (name + "Alt")));
+                CharacterModel.RendererInfo? matchingRendererInfo = model.baseRendererInfos.FirstOrDefault(x => x.defaultMaterial && (x.defaultMaterial.name == name || x.defaultMaterial.name == (name + "Alt")));
 
-                if (bodyRendererInfos == null || bodyRendererInfos.Count() <= 0)
+                if (matchingRendererInfo == null)
                 {
                     if (rendererInfo.renderer is SkinnedMeshRenderer)
                     {
-                        bodyRendererInfos = model.baseRendererInfos.Where(x => x.renderer is SkinnedMeshRenderer && x.renderer.name == rendererInfo.renderer.name);
+                        matchingRendererInfo = model.baseRendererInfos.FirstOrDefault(x => x.renderer is SkinnedMeshRenderer && x.renderer.name == rendererInfo.renderer.name);
 
-                        if (bodyRendererInfos == null || bodyRendererInfos.Count() <= 0) continue;
+                        if (matchingRendererInfo == null) continue;
                     }
                     else
                     {
@@ -52,7 +53,7 @@ namespace VRMod
                     }
                 }
 
-                var bodyRendererInfo = bodyRendererInfos.First();
+                CharacterModel.RendererInfo bodyRendererInfo = matchingRendererInfo.Value;
 
                 if (bodyRendererInfo.defaultMaterial)
                 {

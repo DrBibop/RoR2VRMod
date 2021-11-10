@@ -40,6 +40,7 @@ namespace VRMod
             {
                 StartCoroutine(InitVR(ModConfig.InitialOculusModeValue));
                 RecenterController.Init();
+                MenuInteraction.Init();
             };
         }
 
@@ -55,6 +56,7 @@ namespace VRMod
             if (!useOculus)
             {
                 Valve.VR.SteamVR_Settings.instance.trackingSpace = ModConfig.InitialRoomscaleValue ? Valve.VR.ETrackingUniverseOrigin.TrackingUniverseStanding : Valve.VR.ETrackingUniverseOrigin.TrackingUniverseSeated;
+                Valve.VR.SteamVR_Settings.instance.pauseGameWhenDashboardVisible = false;
                 Valve.VR.SteamVR.Initialize();
                 Valve.VR.SteamVR_Actions.gameplay.Activate();
                 Valve.VR.SteamVR_Actions.ui.Activate();
