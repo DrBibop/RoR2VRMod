@@ -801,7 +801,7 @@ namespace VRMod
 
                         cameraState.rotation = self.sceneCam.transform.rotation;
 
-                        if (self.targetBody)
+                        if (self.targetBody.IsLocalBody())
                         {
                             if (!cachedCameraTargetTransform)
                             {
@@ -828,12 +828,12 @@ namespace VRMod
                                         if (ModConfig.InitialRoomscaleValue)
                                         {
                                             cachedCameraTargetTransform.Translate(collider.center + new Vector3(0, -collider.height / 2, 0), Space.Self);
-                                            VRCameraWrapper.instance.transform.localScale = Vector3.one * (collider.height / ModConfig.PlayerHeight.Value);
                                         }
                                         else
                                         {
                                             cachedCameraTargetTransform.Translate(collider.center + new Vector3(0, collider.height / 2, 0), Space.Self);
                                         }
+                                        VRCameraWrapper.instance.transform.localScale = Vector3.one * (collider.height / ModConfig.PlayerHeight.Value);
                                     }
                                 }
                             }
@@ -843,14 +843,18 @@ namespace VRMod
                     }
                 }
 
-                if (self.target != null && self.target != self.localUserViewer.cachedBodyObject)
+                if (!self.targetBody.IsLocalBody())
                 {
                     if (!spectatorCamera)
                     {
                         spectatorCamera = GameObject.Instantiate(spectatorCameraPrefab, null);
+                    }
+
+                    if (!spectatorScreen)
+                    { 
                         spectatorScreen = GameObject.Instantiate(spectatorScreenPrefab, null);
-                        spectatorScreen.transform.rotation = Quaternion.Euler(new Vector3(0, self.sceneCam.transform.eulerAngles.y, 0));
-                        spectatorScreen.transform.position = self.sceneCam.transform.position + spectatorScreen.transform.forward * 2;
+                        spectatorScreen.transform.rotation = Quaternion.Euler(new Vector3(0, self.uiCam.transform.eulerAngles.y, 0));
+                        spectatorScreen.transform.position = self.uiCam.transform.position + spectatorScreen.transform.forward * 2;
                     }
 
                     spectatorCamera.transform.position = cameraState.position;
@@ -859,10 +863,10 @@ namespace VRMod
                 else
                 {
                     if (spectatorCamera)
-                    {
                         GameObject.Destroy(spectatorCamera);
+
+                    if (spectatorScreen)
                         GameObject.Destroy(spectatorScreen);
-                    }
                 }
             }
 

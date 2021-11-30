@@ -87,18 +87,18 @@ namespace VRMod
                 "VR Settings",
                 "Roomscale Tracking Space",
                 true,
-                "TRUE: Sets the tracking space to roomscale. Your real height will be used in-game to scale the view properly. Better for standing play and for LIV's XR Capture. FALSE: Sets the tracking space to stationary. Better for seated play."
+                "TRUE: Sets the tracking space to roomscale. Your ground will match the in-game ground. Better for standing play and required for LIV's XR Capture. FALSE: Sets the tracking space to stationary. The camera's center position will be placed at head level of the survivor. Better for seated play."
             );
             PlayerHeight = configFile.Bind<float>(
                 "VR Settings",
                 "Player Height in meters",
                 1.82f,
-                "Used for roomscale tracking. Your view scale will be adjusted to make you feel as tall as the survivor you're playing. Most survivors have a height of 1.82 meters which means keeping the default value will keep your view scale multiplier at 1 on most survivors"
+                "Used for scaling the view. Your view scale will be adjusted to make you feel as tall as the survivor you're playing. In order to adjust to the survivor's height, raising your height will make you feel smaller while lowering your height will make you feel taller."
             );
 
             RayColorHex = configFile.Bind<string>(
                 "Survivor Settings",
-                "General: Aim ray hex color",
+                "General: Aim ray color",
                 "FFFFFF",
                 "Changes the color of aim rays. You can use Google's color picker to find your desired color's hex value."
             );

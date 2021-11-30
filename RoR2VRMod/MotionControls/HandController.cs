@@ -98,7 +98,7 @@ namespace VRMod
 
         private void Update()
         {
-            uiMode = !RoR2.Run.instance || RoR2.PauseManager.isPaused;
+            uiMode = Utils.isUIOpen;
 
             if (!uiMode && transform.parent != Camera.main.transform.parent)
                 transform.SetParent(Camera.main.transform.parent);

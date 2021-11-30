@@ -129,6 +129,41 @@ namespace VRMod
                 else
                     return null;
             };
+
+            On.RoR2.PickupPickerController.OnDisplayBegin += MovePickerPanelToWorld;
+
+            On.RoR2.PickupPickerController.OnDisplayEnd += DestroyPickerPanelCanvas;
+        }
+
+        private static void DestroyPickerPanelCanvas(On.RoR2.PickupPickerController.orig_OnDisplayEnd orig, PickupPickerController self, NetworkUIPromptController networkUIPromptController, LocalUser localUser, CameraRigController cameraRigController)
+        {
+            Transform parentCanvas = self.panelInstance.transform.parent;
+            orig(self, networkUIPromptController, localUser, cameraRigController);
+            if (parentCanvas) GameObject.Destroy(parentCanvas.gameObject);
+
+            Utils.isPickerPanelOpen = false;
+        }
+
+        private static void MovePickerPanelToWorld(On.RoR2.PickupPickerController.orig_OnDisplayBegin orig, PickupPickerController self, NetworkUIPromptController networkUIPromptController, LocalUser localUser, CameraRigController cameraRigController)
+        {
+            orig(self, networkUIPromptController, localUser, cameraRigController);
+
+            if (self.panelInstance)
+            {
+                Canvas pickerCanvas = new GameObject("PickerCanvas").AddComponent<Canvas>();
+                camRotation = new Vector3(0, cameraRigController.uiCam.transform.eulerAngles.y, 0);
+                SetRenderMode(pickerCanvas.gameObject, menuResolution, characterSelectPosition, characterSelectScale, true);
+
+                RectTransform canvasTransform = pickerCanvas.transform as RectTransform;
+                pickerCanvas.gameObject.AddComponent<BoxCollider>().size = new Vector3(canvasTransform.sizeDelta.x, canvasTransform.sizeDelta.y, 1);
+
+                self.panelInstance.transform.SetParent(pickerCanvas.transform);
+                self.panelInstance.transform.localPosition = Vector3.zero;
+                self.panelInstance.transform.localRotation = Quaternion.identity;
+                self.panelInstance.transform.localScale = Vector3.one;
+
+                Utils.isPickerPanelOpen = true;
+            }
         }
 
         internal static void CreateLIVHUD(Camera livCamera)

@@ -5,6 +5,10 @@ namespace VRMod
 {
     internal static class Utils
     {
+        internal static bool isPickerPanelOpen;
+
+        internal static bool isUIOpen => !Run.instance || PauseManager.isPaused || isPickerPanelOpen;
+
         private static CharacterMaster _localMaster;
 
         internal static CharacterMaster localMaster

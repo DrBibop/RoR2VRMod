@@ -97,9 +97,9 @@ namespace VRMod
 
         private static void EditPointerPosition(On.RoR2.UI.MPInput.orig_Update orig, MPInput self)
         {
-            if (!cachedUICam || (Run.instance && !PauseManager.isPaused))
+            if (!cachedUICam || !Utils.isUIOpen)
             {
-                if (cursorInstance.activeSelf)
+                if (cursorInstance && cursorInstance.activeSelf)
                     cursorInstance.SetActive(false);
 
                 orig(self);
