@@ -375,7 +375,7 @@ namespace VRMod
             {
                 string[] joyNames = Input.GetJoystickNames();
 
-                if (!joyNames[leftJoystickID].ToLower().Contains("left") || !joyNames[rightJoystickID].ToLower().Contains("right"))
+                if (leftJoystickID >= joyNames.Length || rightJoystickID >= joyNames.Length || !joyNames[leftJoystickID].ToLower().Contains("left") || !joyNames[rightJoystickID].ToLower().Contains("right"))
                 {
                     leftJoystickID = -1;
                     rightJoystickID = -1;
