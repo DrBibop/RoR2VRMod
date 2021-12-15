@@ -40,7 +40,7 @@ namespace VRMod
             {
                 StartCoroutine(InitVR(ModConfig.InitialOculusModeValue));
                 RecenterController.Init();
-                MenuInteraction.Init();
+                UIPointer.Init();
             };
         }
 

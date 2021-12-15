@@ -1,14 +1,11 @@
-﻿using MonoMod.RuntimeDetour;
-using Rewired.Integration.UnityUI;
-using Rewired.UI;
-using RoR2;
+﻿using RoR2;
 using RoR2.UI;
 using System;
 using UnityEngine;
 
 namespace VRMod
 {
-    internal class MenuInteraction
+    internal class UIPointer
     {
         private static Camera _cachedUICam;
 
@@ -21,6 +18,8 @@ namespace VRMod
         private static GameObject cursorPrefab;
 
         private static GameObject cursorInstance;
+
+        private static Canvas lastHitCanvas;
 
         private static Camera cachedUICam
         {
@@ -80,8 +79,49 @@ namespace VRMod
                 orig(self);
                 AddMenuCollider(self.gameObject);
             };
+            On.RoR2.UI.TooltipController.SetTooltip += MatchTooltipToCanvas;
+            On.RoR2.UI.TooltipController.LateUpdate += PlaceTooltipOnCursor;
 
             cursorPrefab = VRMod.VRAssetBundle.LoadAsset<GameObject>("UICursor");
+        }
+
+        private static void PlaceTooltipOnCursor(On.RoR2.UI.TooltipController.orig_LateUpdate orig, TooltipController self)
+        {
+            if (cursorInstance)
+            {
+                self.tooltipCenterTransform.position = cursorInstance.transform.position;
+            }
+        }
+
+        private static void MatchTooltipToCanvas(On.RoR2.UI.TooltipController.orig_SetTooltip orig, MPEventSystem eventSystem, TooltipProvider newTooltipProvider, Vector2 tooltipPosition)
+        {
+            orig(eventSystem, newTooltipProvider, tooltipPosition);
+
+            if (!eventSystem.currentTooltip || !lastHitCanvas) return;
+
+            if (cursorInstance)
+            {
+                Vector3 relativeCursorPosition = lastHitCanvas.transform.InverseTransformPoint(cursorInstance.transform.position);
+
+                Vector2 vector2 = new Vector2(0f, 0f);
+                vector2.x = ((relativeCursorPosition.x > 0f) ? 1f : 0f);
+                vector2.y = ((relativeCursorPosition.y > 0f) ? 1f : 0f);
+                eventSystem.currentTooltip.tooltipFlipTransform.anchorMin = vector2;
+                eventSystem.currentTooltip.tooltipFlipTransform.anchorMax = vector2;
+                eventSystem.currentTooltip.tooltipFlipTransform.pivot = vector2;
+            }
+
+            Canvas canvas = eventSystem.currentTooltip.GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.WorldSpace;
+
+            RectTransform canvasTransform = canvas.transform as RectTransform;
+            RectTransform lastHitTransform = lastHitCanvas.transform as RectTransform;
+
+            canvasTransform.sizeDelta = lastHitTransform.sizeDelta;
+            canvasTransform.pivot = lastHitTransform.pivot;
+            canvasTransform.position = lastHitTransform.position;
+            canvasTransform.rotation = lastHitTransform.rotation;
+            canvasTransform.localScale = lastHitTransform.localScale;
         }
 
         private static void AddMenuCollider(GameObject canvasObject)
@@ -151,6 +191,8 @@ namespace VRMod
                     cursorInstance.transform.position = pointerHitPosition;
                     cursorInstance.transform.rotation = Quaternion.LookRotation(hit.normal, Vector3.up);
                 }
+
+                lastHitCanvas = hit.collider.GetComponent<Canvas>();
             }
 
             Vector3 mousePosition = uiCam.WorldToScreenPoint(pointerHitPosition);
