@@ -52,7 +52,7 @@ namespace VRMod
 
         private bool _uiMode;
 
-        private bool rayActive => currentHand.useRay || forceRay || uiMode;
+        private bool rayActive => currentHand.useRay || forceRay || (uiMode && this == MotionControls.GetHandByDominance(true));
 
         internal bool uiMode
         {
@@ -98,12 +98,10 @@ namespace VRMod
 
         private void Update()
         {
-            uiMode = Utils.isUIOpen;
+            uiMode = Utils.isUsingUI;
 
-            if (!uiMode && transform.parent != Camera.main.transform.parent)
+            if (transform.parent != Camera.main.transform.parent)
                 transform.SetParent(Camera.main.transform.parent);
-            else if (uiMode && transform.parent)
-                transform.SetParent(null);
 
             Vector3 handPosition = InputTracking.GetLocalPosition(xrNode);
             Quaternion handRotation = InputTracking.GetLocalRotation(xrNode);

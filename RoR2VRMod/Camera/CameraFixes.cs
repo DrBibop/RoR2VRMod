@@ -537,16 +537,28 @@ namespace VRMod
                             vector2.y = 0;
                         }
                     }
-                    num14 = vector.x * mouseLookSensitivity * userProfile.mouseLookScaleX + vector2.x * num2 * userProfile.stickLookScaleX * Time.deltaTime;
-                    num15 = vector.y * mouseLookSensitivity * userProfile.mouseLookScaleY + vector2.y * num2 * userProfile.stickLookScaleY * Time.deltaTime;
+                    num14 = vector2.x * num2 * userProfile.stickLookScaleX * Time.deltaTime;
+                    num15 = vector2.y * num2 * userProfile.stickLookScaleY * Time.deltaTime;
+
+                    if (!ModConfig.InitialMotionControlsValue)
+                    {
+                        num14 += vector.x * mouseLookSensitivity * userProfile.mouseLookScaleX;
+                        num15 += vector.y * mouseLookSensitivity * userProfile.mouseLookScaleY;
+                    }
                 }
                 else
                 {
                     wasTurningLeft = isTurningLeft;
                     wasTurningRight = isTurningRight;
 
-                    isTurningLeft = vector.x < -0.8f || vector2.x < -0.8f;
-                    isTurningRight = vector.x > 0.8f || vector2.x > 0.8f;
+                    isTurningLeft = vector2.x < -0.8f;
+                    isTurningRight = vector2.x > 0.8f;
+
+                    if (!ModConfig.MotionControlsEnabled)
+                    {
+                        isTurningLeft = isTurningLeft || vector.x < -0.8f;
+                        isTurningRight = isTurningRight || vector.x > 0.8f;
+                    }
 
                     num14 = 0f;
 

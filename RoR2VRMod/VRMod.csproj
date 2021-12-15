@@ -55,7 +55,7 @@
       <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\stubs\Rewired_Core.refstub.dll</HintPath>
     </Reference>
     <Reference Include="Rewired_CSharp">
-      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\stubs\Rewired_CSharp-nstrip.dll</HintPath>
+      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\Rewired_CSharp.dll</HintPath>
     </Reference>
     <Reference Include="SteamVR">
       <HintPath>..\..\..\Unity\risk of rain 2\build\risk of rain 2_Data\Managed\SteamVR.dll</HintPath>

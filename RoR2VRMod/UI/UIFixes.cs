@@ -26,11 +26,14 @@ namespace VRMod
         private static GameObject creditsCanvasPrefab;
         private static GameObject creditsCanvas;
 
+        private static GameObject pickerCanvasPrefab;
+
         internal static HUD livHUD;
 
         internal static void Init()
         {
             creditsCanvasPrefab = VRMod.VRAssetBundle.LoadAsset<GameObject>("CreditsCanvas");
+            pickerCanvasPrefab = VRMod.VRAssetBundle.LoadAsset<GameObject>("PickerCanvas");
 
             On.RoR2.UI.CombatHealthBarViewer.UpdateAllHealthbarPositions += UpdateAllHealthBarPositionsVR;
 
@@ -148,19 +151,26 @@ namespace VRMod
         {
             orig(self, networkUIPromptController, localUser, cameraRigController);
 
-            if (self.panelInstance)
+            if (self.panelInstance && GetUICamera())
             {
-                Canvas pickerCanvas = new GameObject("PickerCanvas").AddComponent<Canvas>();
-                camRotation = new Vector3(0, cameraRigController.uiCam.transform.eulerAngles.y, 0);
-                SetRenderMode(pickerCanvas.gameObject, menuResolution, characterSelectPosition, characterSelectScale, true);
+                GameObject pickerCanvas = GameObject.Instantiate(pickerCanvasPrefab);
+                pickerCanvas.GetComponent<Canvas>().worldCamera = cachedUICam;
+                pickerCanvas.transform.rotation = Quaternion.Euler(0, cachedUICam.transform.eulerAngles.y, 0);
+                pickerCanvas.transform.position = pickerCanvas.transform.forward * 4;
+                if (ModConfig.InitialRoomscaleValue)
+                    pickerCanvas.transform.Translate(0, ModConfig.PlayerHeight.Value, 0);
 
-                RectTransform canvasTransform = pickerCanvas.transform as RectTransform;
-                pickerCanvas.gameObject.AddComponent<BoxCollider>().size = new Vector3(canvasTransform.sizeDelta.x, canvasTransform.sizeDelta.y, 1);
+                RectTransform panelTransform = self.panelInstance.transform as RectTransform;
+                panelTransform.SetParent(pickerCanvas.transform);
+                panelTransform.localPosition = Vector3.zero;
+                panelTransform.localRotation = Quaternion.identity;
+                panelTransform.localScale = Vector3.one;
+                panelTransform.offsetMin = Vector2.zero;
+                panelTransform.offsetMax = Vector2.zero;
 
-                self.panelInstance.transform.SetParent(pickerCanvas.transform);
-                self.panelInstance.transform.localPosition = Vector3.zero;
-                self.panelInstance.transform.localRotation = Quaternion.identity;
-                self.panelInstance.transform.localScale = Vector3.one;
+                LeTai.Asset.TranslucentImage.TranslucentImage translucentImage = self.panelInstance.gameObject.GetComponent<LeTai.Asset.TranslucentImage.TranslucentImage>();
+
+                if (translucentImage) translucentImage.enabled = false;
 
                 Utils.isPickerPanelOpen = true;
             }

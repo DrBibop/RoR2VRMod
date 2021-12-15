@@ -7,7 +7,7 @@ namespace VRMod
     {
         internal static bool isPickerPanelOpen;
 
-        internal static bool isUIOpen => !Run.instance || PauseManager.isPaused || isPickerPanelOpen;
+        internal static bool isUsingUI => !Run.instance || PauseManager.isPaused || isPickerPanelOpen;
 
         private static CharacterMaster _localMaster;
 
