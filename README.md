@@ -42,9 +42,6 @@ The VR Mod uses the SteamVR binding system to bind controls. Some binds have bee
 ### Wouldn't it be nauseating to play in VR?
 Each person has a different level of tolerance regarding motion sickness and VR. Despite that, Risk of Rain 2 was not intended to be played in VR. This means that getting motion sick is more likely, especially with high mobility characters such as Loader or Mercenary. We plan to make the VR experience better for players in the future and feedback regarding this issue would be very appreciated.
 
-### Where are my VR hands?
-Your hands will appear once you start a game. The menus don't use any motion controls at the moment. You can simply use the joysticks to navigate.
-
 ### Can I play using the VR Mod in multiplayer with my non-VR friends?
 Yes! The mod is only required for VR players. You can play with vanilla players just fine too!
 
@@ -81,7 +78,7 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 
 # Credits
 
-**DrBibop:** Mod/patcher programmer, animator, 3D artist\
+**DrBibop:** Mod/patcher programmer, animator\
 **MrPurple6411:** Patcher programmer\
 **dotflare:** 3D artist\
 **Ncognito:** 3D artist\
@@ -232,3 +229,14 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 ### 2.5.2
 - Fixed a bug that caused the credits to appear during the escape cutscene.
 - Fixed a bug that prevented the LIV plugin from being correctly copied into the game directory during the patching process.
+
+### 2.6.0
+- The UI navigation system has been revamped to use your dominant hand as a pointer instead of using gamepad controls.
+- The player and character height can now also scale the camera view with the roomscale tracking space setting disabled.
+- The mouse can no longer move the camera when using motion controls.
+- Fixed a bug that prevented the default Vive Cosmos controller binds from loading correctly which made the Vive Cosmos controllers unusable.
+- Fixed a bug that would sometimes break inputs with the Oculus Mode setting enabled.
+- Fixed a bug that caused the SteamVR overlay to pause the game which created sync issues in multiplayer.
+- Fixed a bug that caused corruption of some menu backgrounds when using LIV XR capture.
+- Fixed a bug that caused the hand tracking to be slightly inaccurate when using SteamVR.
+- Possibly fixed a bug that prevented the spectator screen from appearing in some occasions.
