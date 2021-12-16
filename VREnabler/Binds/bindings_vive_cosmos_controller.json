@@ -135,131 +135,62 @@
          "sources" : []
       },
       "/actions/ui" : {
-         "sources" : [
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/ui/in/pause"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/left/input/y"
+        "sources": [
+          {
+            "inputs": {
+              "click": {
+                "output": "/actions/ui/in/pause"
+              }
             },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/ui/in/pause"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/right/input/y"
+            "mode": "button",
+            "path": "/user/hand/left/input/y"
+          },
+          {
+            "inputs": {
+              "click": {
+                "output": "/actions/ui/in/submit"
+              }
             },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/ui/in/tableft"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/left/input/trigger"
+            "mode": "button",
+            "path": "/user/hand/left/input/trigger"
+          },
+          {
+            "inputs": {
+              "click": {
+                "output": "/actions/ui/in/submit"
+              }
             },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/ui/in/tabright"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/right/input/trigger"
+            "mode": "button",
+            "path": "/user/hand/right/input/trigger"
+          },
+          {
+            "inputs": {
+              "click": {
+                "output": "/actions/ui/in/submit"
+              }
             },
-            {
-               "inputs" : {
-                  "position" : {
-                     "output" : "/actions/ui/in/navigate"
-                  }
-               },
-               "mode" : "joystick",
-               "path" : "/user/hand/left/input/joystick"
+            "mode": "button",
+            "path": "/user/hand/left/input/x"
+          },
+          {
+            "inputs": {
+              "click": {
+                "output": "/actions/ui/in/submit"
+              }
             },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/ui/in/submenuleft"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/left/input/grip"
+            "mode": "button",
+            "path": "/user/hand/right/input/a"
+          },
+          {
+            "inputs": {
+              "click": {
+                "output": "/actions/ui/in/recenterhmd"
+              }
             },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/ui/in/submenuright"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/right/input/grip"
-            },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/ui/in/readyandcontinue"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/left/input/x"
-            },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/ui/in/readyandcontinue"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/right/input/x"
-            },
-            {
-               "inputs" : {
-                  "east" : {
-                     "output" : "/actions/ui/in/submenuright"
-                  },
-                  "west" : {
-                     "output" : "/actions/ui/in/submenuleft"
-                  }
-               },
-               "mode" : "dpad",
-               "parameters" : {
-                  "sub_mode" : "touch"
-               },
-               "path" : "/user/hand/right/input/joystick"
-            },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/ui/in/submit"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/right/input/a"
-            },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/ui/in/cancel"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/right/input/b"
-            },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/ui/in/recenterhmd"
-                  }
-               },
-               "mode" : "joystick",
-               "path" : "/user/hand/right/input/joystick"
-            }
-         ]
+            "mode": "joystick",
+            "path": "/user/hand/right/input/joystick"
+          }
+        ]
       }
    },
    "category" : "steamvr_input",
