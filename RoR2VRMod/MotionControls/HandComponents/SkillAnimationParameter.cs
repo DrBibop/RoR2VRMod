@@ -31,7 +31,7 @@ namespace VRMod
 
         private void Start()
         {
-            body = LocalUserManager.GetFirstLocalUser().cachedBody;
+            body = Utils.localBody;
             animator = GetComponent<Animator>();
 
             if (!body || !animator)

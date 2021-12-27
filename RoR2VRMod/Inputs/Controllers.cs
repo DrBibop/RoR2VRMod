@@ -70,14 +70,11 @@ namespace VRMod
         private static void VRHaptics(On.RoR2.GamepadVibrationManager.orig_Update orig)
         {
             orig();
+            if (Utils.localUserProfile == null || Utils.localCameraRig == null) return;
 
-            LocalUser localUser = LocalUserManager.GetFirstLocalUser();
+            float vibrationScale = Utils.localUserProfile.gamepadVibrationScale;
 
-            if (localUser == null || localUser.userProfile == null || localUser.cameraRigController == null) return;
-
-            float vibrationScale = localUser.userProfile.gamepadVibrationScale;
-
-            Vector3 rawScreenShakeDisplacement = localUser.cameraRigController.rawScreenShakeDisplacement;
+            Vector3 rawScreenShakeDisplacement = Utils.localCameraRig.rawScreenShakeDisplacement;
 
             GamepadVibrationManager.MotorValues motorValues = GamepadVibrationManager.CalculateMotorValuesForCameraDisplacement(vibrationScale, rawScreenShakeDisplacement);
 
@@ -378,7 +375,7 @@ namespace VRMod
             {
                 string[] joyNames = Input.GetJoystickNames();
 
-                if (!joyNames[leftJoystickID].ToLower().Contains("left") || !joyNames[rightJoystickID].ToLower().Contains("right"))
+                if (leftJoystickID >= joyNames.Length || rightJoystickID >= joyNames.Length || !joyNames[leftJoystickID].ToLower().Contains("left") || !joyNames[rightJoystickID].ToLower().Contains("right"))
                 {
                     leftJoystickID = -1;
                     rightJoystickID = -1;

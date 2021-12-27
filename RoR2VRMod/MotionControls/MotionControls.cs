@@ -10,9 +10,9 @@ namespace VRMod
 {
     public static class MotionControls
     {
-        public static bool HandsReady => dominantHand != null && nonDominantHand != null && dominantHand.currentHand != null && nonDominantHand.currentHand != null;
+        public static bool HandsReady => dominantHand != null && nonDominantHand != null && dominantHand.currentHand != null && nonDominantHand.currentHand != null && dominantHand.isActiveAndEnabled && nonDominantHand.isActiveAndEnabled;
 
-        private static GameObject handSelectorPrefab;
+        private static GameObject handControllerPrefab;
 
         private static HandController dominantHand;
         private static HandController nonDominantHand;
@@ -55,7 +55,7 @@ namespace VRMod
 
         internal static void Init()
         {
-            On.RoR2.CameraRigController.Start += InitWristHUD;
+            On.RoR2.CameraRigController.Start += InitHandsAndHUDs;
 
             On.RoR2.CharacterBody.OnSprintStart += OnSprintStart;
             On.RoR2.CharacterBody.OnSprintStop += OnSprintStop;
@@ -66,7 +66,7 @@ namespace VRMod
             {
                 pcmc.master.onBodyStart += (body) =>
                 {
-                    if (body.master != LocalUserManager.GetFirstLocalUser().cachedMaster) return;
+                    if (!body.master.IsLocalMaster()) return;
 
                     currentBody = body;
                     string bodyName = body.name.Substring(0, body.name.IndexOf("(Clone)"));
@@ -87,7 +87,7 @@ namespace VRMod
 
             On.RoR2.CharacterBody.OnInventoryChanged += OnInventoryChanged;
 
-            handSelectorPrefab = VRMod.VRAssetBundle.LoadAsset<GameObject>("VRHand");
+            handControllerPrefab = VRMod.VRAssetBundle.LoadAsset<GameObject>("VRHand");
 
             string[] prefabNames = new string[]
             {
@@ -300,7 +300,7 @@ namespace VRMod
 
         private static void OnSprintStop(On.RoR2.CharacterBody.orig_OnSprintStop orig, CharacterBody self)
         {
-            if (self == LocalUserManager.GetFirstLocalUser().cachedBody)
+            if (self.IsLocalBody())
             {
                 if (cachedSprintIcon)
                     cachedSprintIcon.color = originalSprintIconColor;
@@ -316,11 +316,11 @@ namespace VRMod
 
         private static void OnSprintStart(On.RoR2.CharacterBody.orig_OnSprintStart orig, CharacterBody self)
         {
-            if (self == LocalUserManager.GetFirstLocalUser().cachedBody)
+            if (self.IsLocalBody())
             {
                 if (!cachedSprintIcon)
                 {
-                    Transform iconTransform = LocalUserManager.GetFirstLocalUser().cameraRigController.hud.mainUIPanel.transform.Find("SpringCanvas/BottomRightCluster/Scaler/SprintCluster/SprintIcon");
+                    Transform iconTransform = Utils.localCameraRig.hud.mainUIPanel.transform.Find("SpringCanvas/BottomRightCluster/Scaler/SprintCluster/SprintIcon");
                     if (iconTransform)
                     {
                         Image sprintIcon = iconTransform.GetComponent<Image>();
@@ -352,9 +352,7 @@ namespace VRMod
 
             if (!HandsReady) return;
 
-            LocalUser localUser = LocalUserManager.GetFirstLocalUser();
-
-            if (localUser != null && self.body == localUser.cachedBody && self.visibility != VisibilityLevel.Invisible)
+            if (self.body.IsLocalBody() && self.visibility != VisibilityLevel.Invisible)
             {
                 foreach (CharacterModel.RendererInfo rendererInfo in dominantHand.currentHand.rendererInfos)
                 {
@@ -445,11 +443,9 @@ namespace VRMod
             return hand.bodyName == prefabHand.bodyName && (prefabHand.handType == HandType.Both || hand.handType == HandType.Both || prefabHand.handType == hand.handType);
         }
 
-        private static void InitWristHUD(On.RoR2.CameraRigController.orig_Start orig, RoR2.CameraRigController self)
+        private static void InitHandsAndHUDs(On.RoR2.CameraRigController.orig_Start orig, RoR2.CameraRigController self)
         {
             orig(self);
-
-            if (!Run.instance) return;
 
             if (!HandsReady) SetupHands();
 
@@ -476,13 +472,13 @@ namespace VRMod
 
         private static void SetupHands()
         {
-            HandController leftHand = GameObject.Instantiate(handSelectorPrefab).GetComponent<HandController>();
+            HandController leftHand = GameObject.Instantiate(handControllerPrefab).GetComponent<HandController>();
             leftHand.xrNode = XRNode.LeftHand;
             Vector3 mirroredScale = leftHand.transform.localScale;
             mirroredScale.x = -mirroredScale.x;
             leftHand.transform.localScale = mirroredScale;
 
-            HandController rightHand = GameObject.Instantiate(handSelectorPrefab).GetComponent<HandController>();
+            HandController rightHand = GameObject.Instantiate(handControllerPrefab).GetComponent<HandController>();
             rightHand.xrNode = XRNode.RightHand;
 
             dominantHand = ModConfig.LeftDominantHand.Value ? leftHand : rightHand;

@@ -26,11 +26,14 @@ namespace VRMod
         private static GameObject creditsCanvasPrefab;
         private static GameObject creditsCanvas;
 
+        private static GameObject pickerCanvasPrefab;
+
         internal static HUD livHUD;
 
         internal static void Init()
         {
             creditsCanvasPrefab = VRMod.VRAssetBundle.LoadAsset<GameObject>("CreditsCanvas");
+            pickerCanvasPrefab = VRMod.VRAssetBundle.LoadAsset<GameObject>("PickerCanvas");
 
             On.RoR2.UI.CombatHealthBarViewer.UpdateAllHealthbarPositions += UpdateAllHealthBarPositionsVR;
 
@@ -51,7 +54,7 @@ namespace VRMod
             On.RoR2.UI.MainMenu.MultiplayerMenuController.Awake += (orig, self) =>
             {
                 orig(self);
-                self.gameObject.layer = LayerMask.NameToLayer("UI");
+                self.gameObject.layer = LayerIndex.ui.intVal;
             };
             On.RoR2.UI.LogBook.LogBookController.Start += (orig, self) =>
             {
@@ -129,11 +132,53 @@ namespace VRMod
                 else
                     return null;
             };
+
+            On.RoR2.PickupPickerController.OnDisplayBegin += MovePickerPanelToWorld;
+
+            On.RoR2.PickupPickerController.OnDisplayEnd += DestroyPickerPanelCanvas;
+        }
+
+        private static void DestroyPickerPanelCanvas(On.RoR2.PickupPickerController.orig_OnDisplayEnd orig, PickupPickerController self, NetworkUIPromptController networkUIPromptController, LocalUser localUser, CameraRigController cameraRigController)
+        {
+            Transform parentCanvas = self.panelInstance.transform.parent;
+            orig(self, networkUIPromptController, localUser, cameraRigController);
+            if (parentCanvas) GameObject.Destroy(parentCanvas.gameObject);
+
+            Utils.isPickerPanelOpen = false;
+        }
+
+        private static void MovePickerPanelToWorld(On.RoR2.PickupPickerController.orig_OnDisplayBegin orig, PickupPickerController self, NetworkUIPromptController networkUIPromptController, LocalUser localUser, CameraRigController cameraRigController)
+        {
+            orig(self, networkUIPromptController, localUser, cameraRigController);
+
+            if (self.panelInstance && GetUICamera())
+            {
+                GameObject pickerCanvas = GameObject.Instantiate(pickerCanvasPrefab);
+                pickerCanvas.GetComponent<Canvas>().worldCamera = cachedUICam;
+                pickerCanvas.transform.rotation = Quaternion.Euler(0, cachedUICam.transform.eulerAngles.y, 0);
+                pickerCanvas.transform.position = pickerCanvas.transform.forward * 4;
+                if (ModConfig.InitialRoomscaleValue)
+                    pickerCanvas.transform.Translate(0, ModConfig.PlayerHeight.Value, 0);
+
+                RectTransform panelTransform = self.panelInstance.transform as RectTransform;
+                panelTransform.SetParent(pickerCanvas.transform);
+                panelTransform.localPosition = Vector3.zero;
+                panelTransform.localRotation = Quaternion.identity;
+                panelTransform.localScale = Vector3.one;
+                panelTransform.offsetMin = Vector2.zero;
+                panelTransform.offsetMax = Vector2.zero;
+
+                LeTai.Asset.TranslucentImage.TranslucentImage translucentImage = self.panelInstance.gameObject.GetComponent<LeTai.Asset.TranslucentImage.TranslucentImage>();
+
+                if (translucentImage) translucentImage.enabled = false;
+
+                Utils.isPickerPanelOpen = true;
+            }
         }
 
         internal static void CreateLIVHUD(Camera livCamera)
         {
-            CameraRigController cameraRig = LocalUserManager.GetFirstLocalUser().cameraRigController;
+            CameraRigController cameraRig = Utils.localCameraRig;
 
             if (cameraRig && cameraRig.hud)
             {
@@ -153,16 +198,6 @@ namespace VRMod
                 gameObject.SetLayerRecursive(dummyLayer);
 
                 livHUD = hud;
-            }
-        }
-
-        private static void SetLayerRecursive(this GameObject obj, int layer)
-        {
-            obj.layer = layer;
-
-            foreach (Transform child in obj.transform)
-            {
-                child.gameObject.SetLayerRecursive(layer);
             }
         }
 

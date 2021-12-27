@@ -64,11 +64,13 @@
     },
     {
       "name": "/actions/gameplay/in/LookLeft",
-      "type": "boolean"
+      "type": "boolean",
+      "requirement": "optional"
     },
     {
       "name": "/actions/gameplay/in/LookRight",
-      "type": "boolean"
+      "type": "boolean",
+      "requirement": "optional"
     },
     {
       "name": "/actions/gameplay/in/ExtraSkill1",
@@ -107,7 +109,7 @@
     {
       "name": "/actions/ui/in/Navigate",
       "type": "vector2",
-      "requirement": "mandatory"
+      "requirement": "optional"
     },
     {
       "name": "/actions/ui/in/Submit",
@@ -117,32 +119,32 @@
     {
       "name": "/actions/ui/in/Cancel",
       "type": "boolean",
-      "requirement": "mandatory"
+      "requirement": "optional"
     },
     {
       "name": "/actions/ui/in/TabLeft",
       "type": "boolean",
-      "requirement": "mandatory"
+      "requirement": "optional"
     },
     {
       "name": "/actions/ui/in/TabRight",
       "type": "boolean",
-      "requirement": "mandatory"
+      "requirement": "optional"
     },
     {
       "name": "/actions/ui/in/SubmenuLeft",
       "type": "boolean",
-      "requirement": "mandatory"
+      "requirement": "optional"
     },
     {
       "name": "/actions/ui/in/SubmenuRight",
       "type": "boolean",
-      "requirement": "mandatory"
+      "requirement": "optional"
     },
     {
       "name": "/actions/ui/in/ReadyAndContinue",
       "type": "boolean",
-      "requirement": "mandatory"
+      "requirement": "optional"
     },
     {
       "name": "/actions/ui/in/RecenterHMD",

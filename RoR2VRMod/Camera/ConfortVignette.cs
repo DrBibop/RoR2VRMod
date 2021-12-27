@@ -73,13 +73,13 @@ namespace VRMod
         {
             if (!stateType.IsSubclassOf(typeof(EntityStates.EntityState)))
             {
-                VRMod.StaticLogger.LogWarning("The type " + stateType.ToString() + " doesn't inherit from EntityState and cannot be added as a vignette state.");
+                VRMod.StaticLogger.LogError("The type " + stateType.ToString() + " doesn't inherit from EntityState and cannot be added as a vignette state.");
                 return;
             }
 
             if (vignetteAbilities.Contains(stateType))
             {
-                VRMod.StaticLogger.LogWarning("The state type " + stateType.ToString() + " is already set as a vignette state and cannot be added twice.");
+                VRMod.StaticLogger.LogError("The state type " + stateType.ToString() + " is already set as a vignette state and cannot be added twice.");
                 return;
             }
 

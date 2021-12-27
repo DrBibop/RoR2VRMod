@@ -135,101 +135,62 @@
          "sources" : []
       },
       "/actions/ui" : {
-         "sources" : [
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/ui/in/submenuleft"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/left/input/grip"
+        "sources": [
+          {
+            "inputs": {
+              "click": {
+                "output": "/actions/ui/in/pause"
+              }
             },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/ui/in/pause"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/left/input/application_menu"
+            "mode": "button",
+            "path": "/user/hand/left/input/application_menu"
+          },
+          {
+            "inputs": {
+              "click": {
+                "output": "/actions/ui/in/submit"
+              }
             },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/ui/in/tableft"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/left/input/trigger"
+            "mode": "button",
+            "path": "/user/hand/left/input/trigger"
+          },
+          {
+            "inputs": {
+              "click": {
+                "output": "/actions/ui/in/submit"
+              }
             },
-            {
-               "inputs" : {
-                  "position" : {
-                     "output" : "/actions/ui/in/navigate"
-                  }
-               },
-               "mode" : "trackpad",
-               "path" : "/user/hand/left/input/trackpad"
+            "mode": "trackpad",
+            "path": "/user/hand/left/input/trackpad"
+          },
+          {
+            "inputs": {
+              "click": {
+                "output": "/actions/ui/in/submit"
+              }
             },
-            {
-               "inputs" : {
-                  "double" : {
-                     "output" : "/actions/ui/in/readyandcontinue"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/left/input/trackpad"
+            "mode": "button",
+            "path": "/user/hand/right/input/trigger"
+          },
+          {
+            "inputs": {
+              "click": {
+                "output": "/actions/ui/in/submit"
+              }
             },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/ui/in/submenuright"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/right/input/grip"
+            "mode": "trackpad",
+            "path": "/user/hand/right/input/trackpad"
+          },
+          {
+            "inputs": {
+              "click": {
+                "output": "/actions/ui/in/recenterhmd"
+              }
             },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/ui/in/recenterhmd"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/right/input/application_menu"
-            },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/ui/in/tabright"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/right/input/trigger"
-            },
-            {
-               "inputs" : {
-                  "east" : {
-                     "output" : "/actions/ui/in/submenuright"
-                  },
-                  "north" : {
-                     "output" : "/actions/ui/in/cancel"
-                  },
-                  "south" : {
-                     "output" : "/actions/ui/in/submit"
-                  },
-                  "west" : {
-                     "output" : "/actions/ui/in/submenuleft"
-                  }
-               },
-               "mode" : "dpad",
-               "parameters" : {
-                  "sub_mode" : "click"
-               },
-               "path" : "/user/hand/right/input/trackpad"
-            }
-         ]
+            "mode": "button",
+            "path": "/user/hand/right/input/application_menu"
+          }
+        ]
       }
    },
    "category" : "steamvr_input",

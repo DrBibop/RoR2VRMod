@@ -127,7 +127,7 @@ namespace VRMod
                 new ActionElementMap(11, ControllerElementType.Button, 24, Pole.Positive, AxisRange.Positive, false), //Start
                 new ActionElementMap(12, ControllerElementType.Axis  , 4 , Pole.Positive, AxisRange.Full, false), //UIHor
                 new ActionElementMap(13, ControllerElementType.Axis  , 5 , Pole.Positive, AxisRange.Full, false), //UIVer
-                new ActionElementMap(14, ControllerElementType.Button, 17 , Pole.Positive, AxisRange.Positive, false), //Submit
+                new ActionElementMap(20, ControllerElementType.Button, 17 , Pole.Positive, AxisRange.Positive, false), //Submit
                 new ActionElementMap(15, ControllerElementType.Button, 18, Pole.Positive, AxisRange.Positive, false), //Cancel
                 new ActionElementMap(25, ControllerElementType.Button, 24, Pole.Positive, AxisRange.Positive, false), //Pause
                 new ActionElementMap(29, ControllerElementType.Button, 20, Pole.Positive, AxisRange.Positive, false), //TabLeft
