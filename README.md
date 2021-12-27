@@ -2,7 +2,7 @@
 # Play Risk of Rain 2 in VR!
 Experience Risk of Rain 2 in virtual reality with full motion controls support! Join the [Flatscreen to VR Discord server](https://discord.gg/eQ7Fwac) to stay up to date with the development.
 
-![](https://thumbs.gfycat.com/DeterminedSpryCassowary-size_restricted.gif)
+![](https://i.imgur.com/Z6R7Rli.gif)
 
 Playing in VR should be possible with any Oculus or SteamVR compatible devices. This includes WMR headsets as well as the Quest/Quest 2 if connected to a PC via a Link cable, AirLink or Virtual Desktop. Make sure to disable game theatre mode in the game's properties.
 
@@ -17,16 +17,16 @@ For manual download, make sure to have [BepInEx](https://thunderstore.io/package
 Shoutout to laila, HutchyBen, Skarl1n, Geb, Popzix and Terrorcotta211 for helping me add support for all these controllers!
 
 ## Oculus Touch/Reverb G2/Vive Cosmos controllers
-![](https://i.imgur.com/5ZY5mQc.png)
+![](https://i.imgur.com/EdPkhQD.png)
 
 ## Index Knuckles
-![](https://i.imgur.com/fEv3KAH.png)
+![](https://i.imgur.com/9eLpOgc.png)
 
 ## Vive controllers
-![](https://i.imgur.com/ApqDR5O.png)
+![](https://i.imgur.com/SFrR5pP.png)
 
 ## WMR controllers
-![](https://i.imgur.com/lBDaQJ6.png)
+![](https://i.imgur.com/h75xsb3.png)
 
 ## Inputs for mods
 The VR Mod uses the SteamVR binding system to bind controls. Some binds have been added to support certain mods.

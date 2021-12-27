@@ -25,7 +25,7 @@ namespace VRMod
         {
             get
             {
-                if (_cachedUICam == null)
+                if (_cachedUICam == null || !_cachedUICam.isActiveAndEnabled)
                 {
                     if (Camera.main)
                     {
@@ -151,9 +151,6 @@ namespace VRMod
                 cursorInstance = GameObject.Instantiate(cursorPrefab);
             }
 
-            if (!cursorInstance.activeSelf)
-                cursorInstance.SetActive(true);
-
             self.internalScreenPositionDelta = Vector2.zero;
             self._scrollDelta = new Vector2(0f, self.player.GetAxis(26));
 
@@ -188,11 +185,18 @@ namespace VRMod
 
                 if (cursorInstance)
                 {
+                    if (!cursorInstance.activeSelf)
+                        cursorInstance.SetActive(true);
+
                     cursorInstance.transform.position = pointerHitPosition;
                     cursorInstance.transform.rotation = Quaternion.LookRotation(hit.normal, Vector3.up);
                 }
 
                 lastHitCanvas = hit.collider.GetComponent<Canvas>();
+            }
+            else if (cursorInstance.activeSelf)
+            {
+                cursorInstance.SetActive(false);
             }
 
             Vector3 mousePosition = uiCam.WorldToScreenPoint(pointerHitPosition);

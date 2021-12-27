@@ -7,7 +7,7 @@ namespace VRMod
     {
         internal static bool isPickerPanelOpen;
 
-        internal static bool isUsingUI => !Run.instance || MPEventSystemManager.primaryEventSystem.isCursorVisible;
+        internal static bool isUsingUI => !Run.instance || MPEventSystemManager.primaryEventSystem.isCursorVisible || !MotionControls.currentBody;
 
         private static CharacterMaster _localMaster;
 

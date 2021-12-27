@@ -10,9 +10,9 @@ namespace VRMod
 {
     public static class MotionControls
     {
-        public static bool HandsReady => dominantHand != null && nonDominantHand != null && dominantHand.currentHand != null && nonDominantHand.currentHand != null;
+        public static bool HandsReady => dominantHand != null && nonDominantHand != null && dominantHand.currentHand != null && nonDominantHand.currentHand != null && dominantHand.isActiveAndEnabled && nonDominantHand.isActiveAndEnabled;
 
-        private static GameObject handSelectorPrefab;
+        private static GameObject handControllerPrefab;
 
         private static HandController dominantHand;
         private static HandController nonDominantHand;
@@ -55,7 +55,7 @@ namespace VRMod
 
         internal static void Init()
         {
-            On.RoR2.CameraRigController.Start += InitWristHUD;
+            On.RoR2.CameraRigController.Start += InitHandsAndHUDs;
 
             On.RoR2.CharacterBody.OnSprintStart += OnSprintStart;
             On.RoR2.CharacterBody.OnSprintStop += OnSprintStop;
@@ -87,7 +87,7 @@ namespace VRMod
 
             On.RoR2.CharacterBody.OnInventoryChanged += OnInventoryChanged;
 
-            handSelectorPrefab = VRMod.VRAssetBundle.LoadAsset<GameObject>("VRHand");
+            handControllerPrefab = VRMod.VRAssetBundle.LoadAsset<GameObject>("VRHand");
 
             string[] prefabNames = new string[]
             {
@@ -443,7 +443,7 @@ namespace VRMod
             return hand.bodyName == prefabHand.bodyName && (prefabHand.handType == HandType.Both || hand.handType == HandType.Both || prefabHand.handType == hand.handType);
         }
 
-        private static void InitWristHUD(On.RoR2.CameraRigController.orig_Start orig, RoR2.CameraRigController self)
+        private static void InitHandsAndHUDs(On.RoR2.CameraRigController.orig_Start orig, RoR2.CameraRigController self)
         {
             orig(self);
 
@@ -472,13 +472,13 @@ namespace VRMod
 
         private static void SetupHands()
         {
-            HandController leftHand = GameObject.Instantiate(handSelectorPrefab).GetComponent<HandController>();
+            HandController leftHand = GameObject.Instantiate(handControllerPrefab).GetComponent<HandController>();
             leftHand.xrNode = XRNode.LeftHand;
             Vector3 mirroredScale = leftHand.transform.localScale;
             mirroredScale.x = -mirroredScale.x;
             leftHand.transform.localScale = mirroredScale;
 
-            HandController rightHand = GameObject.Instantiate(handSelectorPrefab).GetComponent<HandController>();
+            HandController rightHand = GameObject.Instantiate(handControllerPrefab).GetComponent<HandController>();
             rightHand.xrNode = XRNode.RightHand;
 
             dominantHand = ModConfig.LeftDominantHand.Value ? leftHand : rightHand;

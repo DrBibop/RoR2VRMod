@@ -68,7 +68,7 @@ namespace VRMod
                     ray.gameObject.layer = LayerIndex.ui.intVal;
                     ray.sortingOrder = 999;
                     currentHand.gameObject.SetActive(false);
-                    uiHand.gameObject.SetActive(true);
+                    uiHand.gameObject.SetActive(isActiveAndEnabled);
                 }
                 else
                 {
@@ -89,11 +89,34 @@ namespace VRMod
             SetCurrentHand(pointerHand);
 
             uiHand = Object.Instantiate(pointerHand.gameObject).GetComponent<Hand>();
-            uiHand.gameObject.name = string.Format("UI Hand ({0})", xrNode == XRNode.LeftHand ? "Left" : "Right");
             uiHand.gameObject.SetLayerRecursive(LayerIndex.ui.intVal);
             uiHand.gameObject.SetActive(false);
 
             ray.material.color = ModConfig.RayColor;
+        }
+
+        private void OnEnable()
+        {
+            if (uiMode && uiHand && !uiHand.isActiveAndEnabled)
+                uiHand.gameObject.SetActive(true);
+        }
+
+        private void OnDisable()
+        {
+            if (uiHand && uiHand.isActiveAndEnabled)
+                uiHand.gameObject.SetActive(false);
+        }
+
+        private void Start()
+        {
+            if (uiHand)
+                uiHand.gameObject.name = string.Format("UI Hand ({0})", xrNode == XRNode.LeftHand ? "Left" : "Right");
+        }
+
+        private void OnDestroy()
+        {
+            if(uiHand)
+                GameObject.Destroy(uiHand.gameObject);
         }
 
         private void Update()

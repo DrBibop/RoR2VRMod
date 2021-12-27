@@ -39,7 +39,7 @@ namespace VRMod
 
                 CharacterModel.RendererInfo? matchingRendererInfo = model.baseRendererInfos.FirstOrDefault(x => x.defaultMaterial && (x.defaultMaterial.name == name || x.defaultMaterial.name == (name + "Alt")));
 
-                if (matchingRendererInfo == null)
+                if (!matchingRendererInfo.HasValue || matchingRendererInfo.Value.defaultMaterial == null)
                 {
                     if (rendererInfo.renderer is SkinnedMeshRenderer)
                     {
