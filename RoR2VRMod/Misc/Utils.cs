@@ -15,9 +15,12 @@ namespace VRMod
         {
             get
             {
+
                 if (!_localMaster)
                 {
-                    _localMaster = LocalUserManager.GetFirstLocalUser().cachedMaster;
+                    LocalUser user = LocalUserManager.GetFirstLocalUser();
+                    if (user != null)
+                        _localMaster = user.cachedMaster;
                 }
 
                 return _localMaster;
@@ -32,7 +35,9 @@ namespace VRMod
             {
                 if (!_localBody)
                 {
-                    _localBody = LocalUserManager.GetFirstLocalUser().cachedBody;
+                    LocalUser user = LocalUserManager.GetFirstLocalUser();
+                    if (user != null)
+                        _localBody = user.cachedBody;
                 }
 
                 return _localBody;
@@ -47,7 +52,9 @@ namespace VRMod
             {
                 if (!_localCameraRig)
                 {
-                    _localCameraRig = LocalUserManager.GetFirstLocalUser().cameraRigController;
+                    LocalUser user = LocalUserManager.GetFirstLocalUser();
+                    if (user != null)
+                        _localCameraRig = user.cameraRigController;
                 }
 
                 return _localCameraRig;
@@ -62,7 +69,9 @@ namespace VRMod
             {
                 if (_localInputPlayer == null)
                 {
-                    _localInputPlayer = LocalUserManager.GetFirstLocalUser().inputPlayer;
+                    LocalUser user = LocalUserManager.GetFirstLocalUser();
+                    if (user != null)
+                        _localInputPlayer = user.inputPlayer;
                 }
 
                 return _localInputPlayer;
@@ -77,7 +86,9 @@ namespace VRMod
             {
                 if (_localUserProfile == null)
                 {
-                    _localUserProfile = LocalUserManager.GetFirstLocalUser().userProfile;
+                    LocalUser user = LocalUserManager.GetFirstLocalUser();
+                    if (user != null)
+                        _localUserProfile = user.userProfile;
                 }
 
                 return _localUserProfile;

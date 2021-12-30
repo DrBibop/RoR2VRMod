@@ -52,7 +52,7 @@ namespace VRMod
 
         private bool _uiMode;
 
-        private bool rayActive => currentHand.useRay || forceRay || (uiMode && this == MotionControls.GetHandByDominance(true));
+        private bool rayActive => (!uiMode && (currentHand.useRay || forceRay)) || (uiMode && this == MotionControls.GetHandByDominance(true));
 
         internal bool uiMode
         {
@@ -67,15 +67,17 @@ namespace VRMod
                 {
                     ray.gameObject.layer = LayerIndex.ui.intVal;
                     ray.sortingOrder = 999;
-                    currentHand.gameObject.SetActive(false);
+                    Utils.SetLayerRecursive(currentHand.gameObject, LayerIndex.noDraw.intVal);
                     uiHand.gameObject.SetActive(isActiveAndEnabled);
+                    ray.material.color = Color.white;
                 }
                 else
                 {
                     ray.gameObject.layer = 0;
                     ray.sortingOrder = 0;
-                    currentHand.gameObject.SetActive(true);
+                    Utils.SetLayerRecursive(currentHand.gameObject, 0);
                     uiHand.gameObject.SetActive(false);
+                    UpdateRayColor();
                 }
             }
         }
@@ -90,6 +92,7 @@ namespace VRMod
 
             uiHand = Object.Instantiate(pointerHand.gameObject).GetComponent<Hand>();
             uiHand.gameObject.SetLayerRecursive(LayerIndex.ui.intVal);
+            uiHand.useRay = false;
             uiHand.gameObject.SetActive(false);
 
             ray.material.color = ModConfig.RayColor;
@@ -165,11 +168,6 @@ namespace VRMod
         public Transform GetMuzzleByIndex(uint index)
         {
             return currentHand.muzzles[index].transform;
-        }
-
-        internal void ResetToPointer()
-        {
-            SetCurrentHand(pointerHand);
         }
 
         internal void SetCurrentHand(string bodyName)

@@ -1,6 +1,9 @@
-﻿using RoR2;
+﻿using On.RoR2.Networking;
+using RoR2;
 using RoR2.UI;
 using UnityEngine;
+using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace VRMod
@@ -18,6 +21,8 @@ namespace VRMod
         private static readonly Vector2 menuResolution = new Vector2(1500, 1000);
         private static readonly Vector2 hdResolution = new Vector2(1920, 1080);
 
+        private static readonly Vector2 gameDetailsResolution = new Vector2(450, 300);
+
         private static Camera cachedUICam;
         private static Vector3 camRotation;
 
@@ -27,6 +32,8 @@ namespace VRMod
         private static GameObject creditsCanvas;
 
         private static GameObject pickerCanvasPrefab;
+
+        private static GameObject queuedKickDialog;
 
         internal static HUD livHUD;
 
@@ -49,7 +56,7 @@ namespace VRMod
             On.RoR2.UI.MainMenu.BaseMainMenuScreen.OnEnter += (orig, self, controller) =>
             {
                 orig(self, controller);
-                SetRenderMode(self.gameObject, menuResolution, menuPosition, menuScale);
+                CanvasToWorldSpace(self.gameObject, menuResolution, menuPosition, menuScale);
             };
             On.RoR2.UI.MainMenu.MultiplayerMenuController.Awake += (orig, self) =>
             {
@@ -59,36 +66,36 @@ namespace VRMod
             On.RoR2.UI.LogBook.LogBookController.Start += (orig, self) =>
             {
                 orig(self);
-                SetRenderMode(self.gameObject, hdResolution, menuPosition, menuScale);
+                CanvasToWorldSpace(self.gameObject, hdResolution, menuPosition, menuScale);
             };
             On.RoR2.UI.EclipseRunScreenController.Start += (orig, self) =>
             {
                 orig(self);
-                SetRenderMode(self.gameObject, hdResolution, menuPosition, menuScale);
+                CanvasToWorldSpace(self.gameObject, hdResolution, menuPosition, menuScale);
             };
             On.RoR2.UI.CharacterSelectController.Start += (orig, self) =>
             {
                 orig(self);
-                SetRenderMode(self.gameObject, hdResolution, characterSelectPosition, characterSelectScale);
+                CanvasToWorldSpace(self.gameObject, hdResolution, characterSelectPosition, characterSelectScale);
             };
             On.RoR2.UI.PauseScreenController.OnEnable += (orig, self) =>
             {
                 orig(self);
                 if (!GetUICamera()) return;
                 camRotation = new Vector3(0, cachedUICam.transform.eulerAngles.y, 0);
-                SetRenderMode(self.gameObject, hdResolution, menuPosition, menuScale, true);
+                CanvasToWorldSpace(self.gameObject, hdResolution, menuPosition, menuScale, true);
             };
             On.RoR2.UI.SimpleDialogBox.Start += (orig, self) =>
             {
                 orig(self);
-                SetRenderMode(self.transform.root.gameObject, hdResolution, menuPosition, menuScale, PauseManager.isPaused);
+                CanvasToWorldSpace(self.rootObject, hdResolution, menuPosition, menuScale, PauseManager.isPaused);
             };
             On.RoR2.UI.GameEndReportPanelController.Awake += (orig, self) =>
             {
                 orig(self);
                 if (!GetUICamera()) return;
                 camRotation = new Vector3(0, cachedUICam.transform.eulerAngles.y, 0);
-                SetRenderMode(self.gameObject, hdResolution, menuPosition, menuScale, true);
+                CanvasToWorldSpace(self.gameObject, hdResolution, menuPosition, menuScale, true);
             };
             On.RoR2.SplashScreenController.Start += (orig, self) =>
             {
@@ -97,7 +104,7 @@ namespace VRMod
                 Camera.main.backgroundColor = Color.black;
                 GameObject splash = GameObject.Find("SpashScreenCanvas");
                 if (splash)
-                    SetRenderMode(splash, hdResolution, menuPosition, menuScale);
+                    CanvasToWorldSpace(splash, hdResolution, menuPosition, menuScale);
             };
 
             On.RoR2.GameOverController.Awake += (orig, self) =>
@@ -136,6 +143,33 @@ namespace VRMod
             On.RoR2.PickupPickerController.OnDisplayBegin += MovePickerPanelToWorld;
 
             On.RoR2.PickupPickerController.OnDisplayEnd += DestroyPickerPanelCanvas;
+
+            On.RoR2.Networking.GameNetworkManager.HandleKick += UnparentDialogBox;
+
+            On.RoR2.SceneCatalog.OnActiveSceneChanged += ChangeDialogScene;
+        }
+
+        private static void ChangeDialogScene(On.RoR2.SceneCatalog.orig_OnActiveSceneChanged orig, Scene oldScene, Scene newScene)
+        {
+            orig(oldScene, newScene);
+
+            if (newScene.name == "title" && queuedKickDialog)
+            {
+                SceneManager.MoveGameObjectToScene(queuedKickDialog, newScene);
+            }
+        }
+
+        private static void UnparentDialogBox(GameNetworkManager.orig_HandleKick orig, NetworkMessage netMsg)
+        {
+            orig(netMsg);
+            SimpleDialogBox dialogBox = RoR2Application.instance.mainCanvas.GetComponentInChildren<SimpleDialogBox>();
+
+            if (dialogBox)
+            {
+                dialogBox.rootObject.transform.SetParent(null);
+                GameObject.DontDestroyOnLoad(dialogBox.rootObject);
+                queuedKickDialog = dialogBox.rootObject;
+            }
         }
 
         private static void DestroyPickerPanelCanvas(On.RoR2.PickupPickerController.orig_OnDisplayEnd orig, PickupPickerController self, NetworkUIPromptController networkUIPromptController, LocalUser localUser, CameraRigController cameraRigController)
@@ -239,7 +273,7 @@ namespace VRMod
             rect.localPosition = Vector3.zero;
             rect.rotation = Quaternion.identity;
             rect.localScale = Vector3.one;
-            rect.sizeDelta = menuResolution / 2;
+            rect.sizeDelta = gameDetailsResolution;
         }
 
         private static GameEndReportPanelController UnparentHUD(On.RoR2.GameOverController.orig_GenerateReportScreen orig, GameOverController self, HUD hud)
@@ -301,11 +335,29 @@ namespace VRMod
             }
         }
 
-        private static void SetRenderMode(GameObject uiObject, Vector2 resolution, Vector3 positionOffset, Vector3 scale, bool followRotation = false)
+        private static void CanvasToWorldSpace(GameObject uiObject, Vector2 resolution, Vector3 positionOffset, Vector3 scale, bool followRotation = false)
         {
             if (!GetUICamera()) return;
 
             Canvas canvas = uiObject.GetComponent<Canvas>();
+
+            if (!canvas)
+            {
+                canvas = uiObject.GetComponentInParent<Canvas>();
+                if (!canvas)
+                {
+                    VRMod.StaticLogger.LogError("Could not set the render mode of " + uiObject.name + " to world space. Make sure a canvas is present on the object or one of its parents.");
+                    VRMod.StaticLogger.LogError(System.Environment.StackTrace);
+                    return;
+                }
+            }
+
+            if (canvas == RoR2Application.instance.mainCanvas)
+            {
+                VRMod.StaticLogger.LogError("Attempted to set the global main canvas to world space. DO NOT DO THAT!");
+                VRMod.StaticLogger.LogError(System.Environment.StackTrace);
+                return;
+            }
 
             if (canvas.renderMode != RenderMode.WorldSpace)
             {
