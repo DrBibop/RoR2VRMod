@@ -240,3 +240,11 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - Fixed a bug that caused corruption of some menu backgrounds when using LIV XR capture.
 - Fixed a bug that caused the hand tracking to be slightly inaccurate when using SteamVR.
 - Possibly fixed a bug that prevented the spectator screen from appearing in some occasions.
+
+### 2.6.1
+- Fixed a bug that prevented the spectator screen from appearing.
+- The spectator screen will now always render on the foreground.
+- Fixed a bug that broke some hand animations after using the command or scrapper panel.
+- Fixed a bug that prevented the kick message from disaplying correctly.
+- Fixed a bug that made the buttons in the lobby details panel unclickable.
+- Fixed a bug that broke all inputs when no profile has been created.
