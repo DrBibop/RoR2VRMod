@@ -581,11 +581,5 @@ namespace VRMod
             if (onHandPairSet != null)
                 onHandPairSet(body);
         }
-
-        internal static void ResetToPointer()
-        {
-            dominantHand.ResetToPointer();
-            nonDominantHand.ResetToPointer();
-        }
     }
 }

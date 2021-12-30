@@ -326,6 +326,9 @@ namespace VRMod
             if (self.sceneCam.cullingMask == (self.sceneCam.cullingMask | (1 << LayerIndex.triggerZone.intVal)))
                 self.sceneCam.cullingMask &= ~(1 << LayerIndex.triggerZone.intVal);
 
+            if (self.sceneCam.cullingMask == (self.sceneCam.cullingMask | (1 << LayerIndex.noDraw.intVal)))
+                self.sceneCam.cullingMask &= ~(1 << LayerIndex.noDraw.intVal);
+
             if (self.gameObject.scene.name == "intro" && self.sceneCam.cullingMask == (self.sceneCam.cullingMask | (1 << LayerIndex.ui.intVal)))
                 self.sceneCam.cullingMask &= ~(1 << LayerIndex.ui.intVal);
 
@@ -855,16 +858,55 @@ namespace VRMod
                     }
                 }
 
-                if (!self.targetBody.IsLocalBody())
+                if (!self.targetBody.IsLocalBody() && (SceneCatalog.mostRecentSceneDef.sceneType == SceneType.Stage || SceneCatalog.mostRecentSceneDef.sceneType == SceneType.Intermission) && Run.instance.livingPlayerCount > 0)
                 {
                     if (!spectatorCamera)
                     {
-                        spectatorCamera = GameObject.Instantiate(spectatorCameraPrefab, null);
+                        Camera cameraReference = Camera.main;
+
+                        bool cameraReferenceEnabled = cameraReference.enabled;
+                        if (cameraReferenceEnabled)
+                        {
+                            cameraReference.enabled = false;
+                        }
+                        bool cameraReferenceActive = cameraReference.gameObject.activeSelf;
+                        if (cameraReferenceActive)
+                        {
+                            cameraReference.gameObject.SetActive(false);
+                        }
+
+                        spectatorCamera = GameObject.Instantiate(cameraReference.gameObject, null);
+                        Component[] components = spectatorCamera.GetComponents<Component>();
+
+                        foreach (Component component in components)
+                        {
+                            if (!(component is Transform) && !(component is Camera) && !(component is PostProcessLayer) && !(component is RoR2.PostProcess.SobelCommandBuffer && !(component is ThreeEyedGames.DecaliciousRenderer)))
+                            {
+                                Component.Destroy(component);
+                            }
+                        }
+
+                        Camera camera = spectatorCamera.GetComponent<Camera>();
+                        camera.stereoTargetEye = StereoTargetEyeMask.None;
+                        camera.targetTexture = spectatorCameraPrefab.GetComponent<Camera>().targetTexture;
+
+                        if (cameraReferenceActive != cameraReference.gameObject.activeSelf)
+                        {
+                            cameraReference.gameObject.SetActive(cameraReferenceActive);
+                        }
+                        if (cameraReferenceEnabled != cameraReference.enabled)
+                        {
+                            cameraReference.enabled = cameraReferenceEnabled;
+                        }
+
+                        spectatorCamera.SetActive(true);
+                        camera.enabled = true;
                     }
 
                     if (!spectatorScreen)
                     { 
                         spectatorScreen = GameObject.Instantiate(spectatorScreenPrefab, null);
+                        Utils.SetLayerRecursive(spectatorScreen, LayerIndex.ui.intVal);
                         spectatorScreen.transform.rotation = Quaternion.Euler(new Vector3(0, self.uiCam.transform.eulerAngles.y, 0));
                         spectatorScreen.transform.position = self.uiCam.transform.position + spectatorScreen.transform.forward * 2;
                     }

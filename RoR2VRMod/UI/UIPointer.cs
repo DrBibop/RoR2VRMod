@@ -72,7 +72,7 @@ namespace VRMod
             On.RoR2.UI.SimpleDialogBox.Start += (orig, self) =>
             {
                 orig(self);
-                AddMenuCollider(self.transform.root.gameObject);
+                AddMenuCollider(self.rootObject);
             };
             On.RoR2.UI.GameEndReportPanelController.Awake += (orig, self) =>
             {
