@@ -23,7 +23,7 @@ namespace VRMod
 
         private Vector3 origScale;
 
-        private Vector3 targetScale;
+        private float scaleLerp = 1f;
 
         private void Awake()
         {
@@ -57,32 +57,6 @@ namespace VRMod
             }
         }
 
-        private void FixedUpdate()
-        {
-            if (hideWhenFacingAway && cameraRig && canvas)
-            {
-                bool show = Vector3.Angle(transform.forward, transform.position - cameraRig.sceneCam.transform.position) <= 45;
-
-                targetScale = show ? origScale : Vector3.zero;
-
-                if (canvas.transform.localScale != targetScale)
-                {
-                    canvas.transform.localScale = Vector3.Lerp(canvas.transform.localScale, targetScale, 0.3f);
-
-                    if (Mathf.Abs(canvas.transform.localScale.x - targetScale.x) < 0.00001)
-                        canvas.transform.localScale = targetScale;
-                }
-
-                foreach (GameObject hud in hudsToHideWhenVisible)
-                {
-                    if (hud.activeSelf == show)
-                    {
-                        hud.SetActive(!show);
-                    }
-                }
-            }
-        }
-
         private void LateUpdate()
         {
             if (!cameraRig || !VRCameraWrapper.instance) return;
@@ -90,6 +64,26 @@ namespace VRMod
             Vector3 position = VRCameraWrapper.instance.transform.InverseTransformPoint(transform.position);
             canvas.transform.position = position;
             canvas.transform.rotation = faceCamera ? Quaternion.LookRotation(position - cameraRig.uiCam.transform.position, cameraRig.uiCam.transform.up) : Quaternion.LookRotation(VRCameraWrapper.instance.transform.InverseTransformVector(transform.forward), VRCameraWrapper.instance.transform.InverseTransformVector(transform.up));
+
+            if (hideWhenFacingAway && cameraRig && canvas)
+            {
+                bool show = Vector3.Angle(transform.forward, transform.position - cameraRig.sceneCam.transform.position) <= 45;
+
+                if (scaleLerp != (show ? 1f : 0f))
+                {
+                    scaleLerp = Mathf.Clamp(scaleLerp + (show ? Time.unscaledDeltaTime : -Time.unscaledDeltaTime) * 6, 0f, 1f);
+
+                    canvas.transform.localScale = Vector3.Lerp(Vector3.zero, origScale, scaleLerp);
+
+                    foreach (GameObject hud in hudsToHideWhenVisible)
+                    {
+                        if (hud.activeSelf == show)
+                        {
+                            hud.SetActive(!show);
+                        }
+                    }
+                }
+            }
         }
     }
 }

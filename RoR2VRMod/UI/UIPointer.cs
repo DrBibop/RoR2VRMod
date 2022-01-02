@@ -43,42 +43,6 @@ namespace VRMod
         internal static void Init()
         {
             On.RoR2.UI.MPInput.Update += EditPointerPosition;
-
-            On.RoR2.UI.MainMenu.BaseMainMenuScreen.OnEnter += (orig, self, menuController) =>
-            {
-                orig(self, menuController);
-                AddMenuCollider(self.gameObject);
-            };
-            On.RoR2.UI.CharacterSelectController.Awake += (orig, self) =>
-            {
-                orig(self);
-                AddMenuCollider(self.gameObject);
-            };
-            On.RoR2.UI.LogBook.LogBookController.Start += (orig, self) =>
-            {
-                orig(self);
-                AddMenuCollider(self.gameObject);
-            };
-            On.RoR2.UI.EclipseRunScreenController.Start += (orig, self) =>
-            {
-                orig(self);
-                AddMenuCollider(self.gameObject);
-            };
-            On.RoR2.UI.PauseScreenController.OnEnable += (orig, self) =>
-            {
-                orig(self);
-                AddMenuCollider(self.gameObject);
-            };
-            On.RoR2.UI.SimpleDialogBox.Start += (orig, self) =>
-            {
-                orig(self);
-                AddMenuCollider(self.rootObject);
-            };
-            On.RoR2.UI.GameEndReportPanelController.Awake += (orig, self) =>
-            {
-                orig(self);
-                AddMenuCollider(self.gameObject);
-            };
             On.RoR2.UI.TooltipController.SetTooltip += MatchTooltipToCanvas;
             On.RoR2.UI.TooltipController.LateUpdate += PlaceTooltipOnCursor;
 
@@ -122,17 +86,6 @@ namespace VRMod
             canvasTransform.position = lastHitTransform.position;
             canvasTransform.rotation = lastHitTransform.rotation;
             canvasTransform.localScale = lastHitTransform.localScale;
-        }
-
-        private static void AddMenuCollider(GameObject canvasObject)
-        {
-            BoxCollider collider = canvasObject.GetComponent<BoxCollider>();
-            if (!collider)
-            {
-                RectTransform rect = canvasObject.transform as RectTransform;
-                collider = canvasObject.gameObject.AddComponent<BoxCollider>();
-                collider.size = new Vector3(rect.sizeDelta.x, rect.sizeDelta.y, 1);
-            }
         }
 
         private static void EditPointerPosition(On.RoR2.UI.MPInput.orig_Update orig, MPInput self)

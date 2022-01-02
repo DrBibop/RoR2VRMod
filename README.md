@@ -248,3 +248,9 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - Fixed a bug that prevented the kick message from disaplying correctly.
 - Fixed a bug that made the buttons in the lobby details panel unclickable.
 - Fixed a bug that broke all inputs when no profile has been created.
+
+### 2.6.2
+- Fixed a bug that caused some menus to have unreachable buttons near the edges when playing with a lower resolution per eye.
+- Fixed a bug that prevented the watch HUD from appearing or disappearing while paused.
+- Fixed a bug that caused the spectator camera to have the wrong field of view.
+- Fixed a bug that caused Bandit's revolver animation to cancel by mistake when other Bandit players in the lobby would start sprinting.
