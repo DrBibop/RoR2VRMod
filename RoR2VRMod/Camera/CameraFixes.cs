@@ -31,6 +31,8 @@ namespace VRMod
         private static GameObject spectatorCamera;
         private static GameObject spectatorScreen;
 
+        private static Camera spectatorCameraComponent;
+
         private static GameObject spectatorCameraPrefab;
         private static GameObject spectatorScreenPrefab;
 
@@ -886,9 +888,9 @@ namespace VRMod
                             }
                         }
 
-                        Camera camera = spectatorCamera.GetComponent<Camera>();
-                        camera.stereoTargetEye = StereoTargetEyeMask.None;
-                        camera.targetTexture = spectatorCameraPrefab.GetComponent<Camera>().targetTexture;
+                        spectatorCameraComponent = spectatorCamera.GetComponent<Camera>();
+                        spectatorCameraComponent.stereoTargetEye = StereoTargetEyeMask.None;
+                        spectatorCameraComponent.targetTexture = spectatorCameraPrefab.GetComponent<Camera>().targetTexture;
 
                         if (cameraReferenceActive != cameraReference.gameObject.activeSelf)
                         {
@@ -900,7 +902,7 @@ namespace VRMod
                         }
 
                         spectatorCamera.SetActive(true);
-                        camera.enabled = true;
+                        spectatorCameraComponent.enabled = true;
                     }
 
                     if (!spectatorScreen)
@@ -913,6 +915,7 @@ namespace VRMod
 
                     spectatorCamera.transform.position = cameraState.position;
                     spectatorCamera.transform.rotation = cameraState.rotation;
+                    spectatorCameraComponent.fieldOfView = cameraState.fov;
                 }
                 else
                 {

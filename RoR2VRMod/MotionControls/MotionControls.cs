@@ -304,11 +304,11 @@ namespace VRMod
             {
                 if (cachedSprintIcon)
                     cachedSprintIcon.color = originalSprintIconColor;
-            }
 
-            if (self.name.Contains("Bandit2"))
-            {
-                GetHandByDominance(true).animator.SetBool("IsSprinting", false);
+                if (self.name.Contains("Bandit2"))
+                {
+                    GetHandByDominance(true).animator.SetBool("IsSprinting", false);
+                }
             }
 
             orig(self);
@@ -336,11 +336,11 @@ namespace VRMod
 
                     cachedSprintIcon.color = Color.yellow;
                 }
-            }
 
-            if (self.name.Contains("Bandit2"))
-            {
-                GetHandByDominance(true).animator.SetBool("IsSprinting", true);
+                if (self.name.Contains("Bandit2"))
+                {
+                    GetHandByDominance(true).animator.SetBool("IsSprinting", true);
+                }
             }
 
             orig(self);

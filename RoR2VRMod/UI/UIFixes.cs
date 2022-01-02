@@ -56,7 +56,7 @@ namespace VRMod
             On.RoR2.UI.MainMenu.BaseMainMenuScreen.OnEnter += (orig, self, controller) =>
             {
                 orig(self, controller);
-                CanvasToWorldSpace(self.gameObject, menuResolution, menuPosition, menuScale);
+                CanvasToWorldSpace(self.gameObject, menuResolution, menuPosition, menuScale, true);
             };
             On.RoR2.UI.MainMenu.MultiplayerMenuController.Awake += (orig, self) =>
             {
@@ -66,36 +66,36 @@ namespace VRMod
             On.RoR2.UI.LogBook.LogBookController.Start += (orig, self) =>
             {
                 orig(self);
-                CanvasToWorldSpace(self.gameObject, hdResolution, menuPosition, menuScale);
+                CanvasToWorldSpace(self.gameObject, hdResolution, menuPosition, menuScale, true);
             };
             On.RoR2.UI.EclipseRunScreenController.Start += (orig, self) =>
             {
                 orig(self);
-                CanvasToWorldSpace(self.gameObject, hdResolution, menuPosition, menuScale);
+                CanvasToWorldSpace(self.gameObject, hdResolution, menuPosition, menuScale, true);
             };
             On.RoR2.UI.CharacterSelectController.Start += (orig, self) =>
             {
                 orig(self);
-                CanvasToWorldSpace(self.gameObject, hdResolution, characterSelectPosition, characterSelectScale);
+                CanvasToWorldSpace(self.gameObject, hdResolution, characterSelectPosition, characterSelectScale, true);
             };
             On.RoR2.UI.PauseScreenController.OnEnable += (orig, self) =>
             {
                 orig(self);
                 if (!GetUICamera()) return;
                 camRotation = new Vector3(0, cachedUICam.transform.eulerAngles.y, 0);
-                CanvasToWorldSpace(self.gameObject, hdResolution, menuPosition, menuScale, true);
+                CanvasToWorldSpace(self.gameObject, hdResolution, menuPosition, menuScale, true, true);
             };
             On.RoR2.UI.SimpleDialogBox.Start += (orig, self) =>
             {
                 orig(self);
-                CanvasToWorldSpace(self.rootObject, hdResolution, menuPosition, menuScale, PauseManager.isPaused);
+                CanvasToWorldSpace(self.rootObject, hdResolution, menuPosition, menuScale, true, PauseManager.isPaused);
             };
             On.RoR2.UI.GameEndReportPanelController.Awake += (orig, self) =>
             {
                 orig(self);
                 if (!GetUICamera()) return;
                 camRotation = new Vector3(0, cachedUICam.transform.eulerAngles.y, 0);
-                CanvasToWorldSpace(self.gameObject, hdResolution, menuPosition, menuScale, true);
+                CanvasToWorldSpace(self.gameObject, hdResolution, menuPosition, menuScale, true, true);
             };
             On.RoR2.SplashScreenController.Start += (orig, self) =>
             {
@@ -104,7 +104,7 @@ namespace VRMod
                 Camera.main.backgroundColor = Color.black;
                 GameObject splash = GameObject.Find("SpashScreenCanvas");
                 if (splash)
-                    CanvasToWorldSpace(splash, hdResolution, menuPosition, menuScale);
+                    CanvasToWorldSpace(splash, hdResolution, menuPosition, menuScale, false);
             };
 
             On.RoR2.GameOverController.Awake += (orig, self) =>
@@ -335,7 +335,7 @@ namespace VRMod
             }
         }
 
-        private static void CanvasToWorldSpace(GameObject uiObject, Vector2 resolution, Vector3 positionOffset, Vector3 scale, bool followRotation = false)
+        private static void CanvasToWorldSpace(GameObject uiObject, Vector2 resolution, Vector3 positionOffset, Vector3 scale, bool addCollider, bool followRotation = false)
         {
             if (!GetUICamera()) return;
 
@@ -395,6 +395,16 @@ namespace VRMod
                     rect.pivot = menuPivot;
                     rect.sizeDelta = resolution;
                 }
+            }
+
+            if (!addCollider) return;
+
+            BoxCollider collider = canvas.GetComponent<BoxCollider>();
+            if (!collider)
+            {
+                RectTransform rect = canvas.transform as RectTransform;
+                collider = canvas.gameObject.AddComponent<BoxCollider>();
+                collider.size = new Vector3(rect.sizeDelta.x, rect.sizeDelta.y, 1);
             }
         }
 
