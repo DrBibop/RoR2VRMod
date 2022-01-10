@@ -29,6 +29,7 @@ namespace VRMod
             UIFixes.Init();
             CameraFixes.Init();
             CutsceneFixes.Init();
+            FocusChecker.Init();
             if (ModConfig.InitialMotionControlsValue)
             {
                 RoR2.RoR2Application.isModded = true;

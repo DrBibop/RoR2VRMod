@@ -6,8 +6,6 @@ namespace VRMod
 {
     internal class SmoothHUD : MonoBehaviour
     {
-        internal static SmoothHUD instance;
-
         private Quaternion smoothHUDRotation;
 
         private CameraRigController cameraRig;
@@ -16,7 +14,6 @@ namespace VRMod
 
         internal void Init(Transform referenceTransform, CameraRigController cameraRig = null)
         {
-            instance = this;
             this.cameraRig = cameraRig;
             this.referenceTransform = referenceTransform;
 
@@ -35,6 +32,8 @@ namespace VRMod
 
         private void LateUpdate()
         {
+            if (!referenceTransform) return;
+
             //This slerp code block was taken from idbrii in Unity answers and from an article by Rory
             float delta = Quaternion.Angle(smoothHUDRotation, referenceTransform.rotation);
             if (delta > 0f)

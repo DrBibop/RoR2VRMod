@@ -10,6 +10,8 @@ namespace VRMod.Inputs.Legacy
         {
             bool value = UnityInputHelper.GetJoystickButtonValueByJoystickIndex(joystickID, inputIndex);
 
+            if (!value) return;
+
             foreach (int inputID in inputIDs)
             {
                 vrControllers.SetButtonValueById(inputID, value);

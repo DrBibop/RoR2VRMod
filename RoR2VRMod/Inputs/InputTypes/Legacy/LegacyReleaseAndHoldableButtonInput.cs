@@ -42,8 +42,11 @@ namespace VRMod.Inputs.Legacy
                 isReleasing = canRelease && timeSinceLastChange < 0.1f;
             }
 
-            vrControllers.SetButtonValueById(inputIDs[0], isReleasing);
-            vrControllers.SetButtonValueById(inputIDs[1], isHolding);
+            if (isReleasing)
+                vrControllers.SetButtonValueById(inputIDs[0], isReleasing);
+
+            if (isHolding)
+                vrControllers.SetButtonValueById(inputIDs[1], isHolding);
         }
     }
 }

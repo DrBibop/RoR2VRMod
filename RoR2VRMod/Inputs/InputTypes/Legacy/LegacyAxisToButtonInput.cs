@@ -12,6 +12,8 @@ namespace VRMod.Inputs.Legacy
 
             bool state = value > 0.7f;
 
+            if (!state) return;
+
             foreach (int inputID in inputIDs)
             {
                 vrControllers.SetButtonValueById(inputID, state);
