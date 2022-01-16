@@ -1,4 +1,5 @@
-﻿using Mono.Cecil.Cil;
+﻿using EntityStates;
+using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using Rewired;
 using RoR2;
@@ -175,6 +176,7 @@ namespace VRMod
             On.EntityStates.Loader.FireHook.OnExit += AnimateHookExit;
             On.EntityStates.Loader.BaseChargeFist.OnEnter += ShowLoaderRay;
             On.EntityStates.Loader.BaseChargeFist.OnExit += HideLoaderRay;
+            On.RoR2.Projectile.ProjectileGrappleController.BaseState.GetOwnerAimRay += GetGrappleArmRay;
 
             On.EntityStates.Croco.Bite.OnEnter += ChangeBiteDirection;
             On.EntityStates.Croco.BaseLeap.OnExit += AnimateAcridRest;
@@ -185,6 +187,22 @@ namespace VRMod
             On.EntityStates.Captain.Weapon.FireTazer.Fire += ChangeTazerMuzzleShoot;
 
             IL.EntityStates.GlobalSkills.LunarNeedle.FireLunarNeedle.OnEnter += ChangeNeedleMuzzle;
+        }
+
+        private static Ray GetGrappleArmRay(On.RoR2.Projectile.ProjectileGrappleController.BaseState.orig_GetOwnerAimRay orig, EntityStates.BaseState self)
+        {
+            RoR2.Projectile.ProjectileGrappleController.BaseState state = self as RoR2.Projectile.ProjectileGrappleController.BaseState;
+
+            CharacterBody body = state.owner.characterBody;
+
+            if (body && body.IsLocalBody() && body.gameObject.name.Contains("LoaderBody"))
+            {
+                return GetHandByDominance(false).aimRay;
+            }
+            else
+            {
+                return orig(self);
+            }
         }
 
         private static void ShrinkNovaBomb(On.EntityStates.Mage.Weapon.BaseChargeBombState.orig_OnEnter orig, EntityStates.Mage.Weapon.BaseChargeBombState self)
