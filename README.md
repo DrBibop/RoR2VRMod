@@ -92,7 +92,7 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 
 ### 1.1.0
 - All menus are now visible in VR.
-- Enemy healthbars are now correctly positioned above enemies.
+- Enemy health bars are now correctly positioned above enemies.
 - Ping icons have been pushed further away from the camera.
 - Added a config setting to disable VR.
 
@@ -153,7 +153,7 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - Fixed a bug that caused the profile creation pop-up to be uninteractable.
 
 ### 2.1.0
-- Added a wrist HUD setting that attaches the healthbar, money display and skills to the wrist.
+- Added a wrist HUD setting that attaches the health bar, money display and skills to the wrist.
 - Added a watch HUD setting that attaches the inventory, chat, difficulty, objective and allies to a watch-like HUD.
 - Added a smooth HUD setting that adds smoothing to the camera HUD when moving the headset.
 - Added a spectator screen that appears in front of you when spectating players.
@@ -245,7 +245,7 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - Fixed a bug that prevented the spectator screen from appearing.
 - The spectator screen will now always render on the foreground.
 - Fixed a bug that broke some hand animations after using the command or scrapper panel.
-- Fixed a bug that prevented the kick message from disaplying correctly.
+- Fixed a bug that prevented the kick message from displaying correctly.
 - Fixed a bug that made the buttons in the lobby details panel unclickable.
 - Fixed a bug that broke all inputs when no profile has been created.
 
@@ -254,3 +254,9 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - Fixed a bug that prevented the watch HUD from appearing or disappearing while paused.
 - Fixed a bug that caused the spectator camera to have the wrong field of view.
 - Fixed a bug that caused Bandit's revolver animation to cancel by mistake when other Bandit players in the lobby would start sprinting.
+
+### 2.6.3
+- The momentum direction is now controlled by the non-dominant hand when using Loader's grapple hook.
+- A warning now appears when the game window loses focus.
+- Fixed a bug that prevented the use of the triggers or the X button to interact with menus on Oculus Touch controllers when Oculus mode is enabled.
+- Fixed a bug that showed the wrong control glyphs when playing with Vive or WMR controllers.

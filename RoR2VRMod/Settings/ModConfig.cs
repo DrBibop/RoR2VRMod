@@ -362,18 +362,19 @@ namespace VRMod
 
         private static void ChangeSmoothHUD(object sender, EventArgs e)
         {
-            if (SmoothHUD.instance)
+            CameraRigController localCameraRig = Utils.localCameraRig;
+
+            if (!localCameraRig || !localCameraRig.hud) return;
+
+            SmoothHUD instance = localCameraRig.hud.GetComponent<SmoothHUD>();
+
+            if (instance)
             {
-                SmoothHUD.instance.enabled = UseSmoothHUD.Value;
+                instance.enabled = UseSmoothHUD.Value;
             }
             else if (Run.instance && UseSmoothHUD.Value)
             {
-                CameraRigController localCameraRig = LocalUserManager.GetFirstLocalUser().cameraRigController;
-
-                if (localCameraRig && localCameraRig.hud)
-                {
-                    localCameraRig.hud.gameObject.AddComponent<SmoothHUD>().Init(localCameraRig.uiCam.transform, localCameraRig);
-                }
+                localCameraRig.hud.gameObject.AddComponent<SmoothHUD>().Init(localCameraRig.uiCam.transform, localCameraRig);
             }
         }
 

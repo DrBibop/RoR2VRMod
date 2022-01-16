@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using TMPro;
 using UnityEngine.XR;
+using Valve.VR;
 
 namespace VRMod
 {
@@ -141,23 +142,31 @@ namespace VRMod
 
             glyphsSpriteAsset = VRMod.VRAssetBundle.LoadAsset<TMP_SpriteAsset>("sprVRGlyphs");
 
+            if (ModConfig.InitialOculusModeValue)
+            {
+                currentGlyphs = standardGlyphs;
+                return;
+            }
+
             RoR2Application.onUpdate += FindControllerType;
         }
 
         private static void FindControllerType()
         {
-            List<XRNodeState> states = new List<XRNodeState>();
-            InputTracking.GetNodeStates(states);
+            uint index = OpenVR.System.GetTrackedDeviceIndexForControllerRole(ETrackedControllerRole.RightHand);
 
-            List<XRNodeState> results = states.Where(x => x.nodeType == XRNode.LeftHand).ToList();
-            if (results.Count > 0)
+            StringBuilder result = new StringBuilder();
+            ETrackedPropertyError error = ETrackedPropertyError.TrackedProp_Success;
+            OpenVR.System.GetStringTrackedDeviceProperty(index, ETrackedDeviceProperty.Prop_ControllerType_String, result, 64, ref error);
+            if (error == ETrackedPropertyError.TrackedProp_Success)
             {
-                XRNodeState leftControllerState = results.First();
-                string controllerName = InputTracking.GetNodeName(leftControllerState.uniqueID);
+                string resultString = result.ToString();
 
-                if (controllerName.Contains("vive_controller"))
+                if (resultString == "") return;
+
+                if (resultString.Contains("vive_controller"))
                     currentGlyphs = viveGlyphs;
-                else if (controllerName.Contains("holographic_controller"))
+                else if (resultString.Contains("holographic_controller"))
                     currentGlyphs = wmrGlyphs;
                 else
                     currentGlyphs = standardGlyphs;

@@ -10,7 +10,7 @@ using UnityEngine;
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
 namespace VRMod
 {
-    [BepInPlugin("com.DrBibop.VRMod", "VRMod", "2.6.2")]
+    [BepInPlugin("com.DrBibop.VRMod", "VRMod", "2.6.3")]
     public class VRMod : BaseUnityPlugin
     {
         internal static ManualLogSource StaticLogger;
@@ -29,6 +29,7 @@ namespace VRMod
             UIFixes.Init();
             CameraFixes.Init();
             CutsceneFixes.Init();
+            FocusChecker.Init();
             if (ModConfig.InitialMotionControlsValue)
             {
                 RoR2.RoR2Application.isModded = true;

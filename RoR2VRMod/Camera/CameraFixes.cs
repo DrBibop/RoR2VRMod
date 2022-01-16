@@ -388,6 +388,8 @@ namespace VRMod
                 UIFixes.AdjustHUD(self.hud);
 
             RoR2Application.instance.mainCanvas.worldCamera = self.uiCam;
+
+            if (FocusChecker.instance) FocusChecker.instance.UpdateCameraRig(self);
         }
 
         //I really didnt't want to use IL for this part... so COPYING THE WHOLE METHOD IT IS

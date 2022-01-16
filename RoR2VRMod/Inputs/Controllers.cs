@@ -259,20 +259,20 @@ namespace VRMod
             {
                 inputs = new BaseInput[]
                 {
-                    new LegacyAxisInput(true, 0, false, 0, 4), //LJoyX = MoveHor, UIHor
-                    new LegacyAxisInput(true, 1, true, 1, 5), //LJoyY = MoveVer, UIVer
+                    new LegacyAxisInput(true, 0, false, 0), //LJoyX = MoveHor
+                    new LegacyAxisInput(true, 1, true, 1), //LJoyY = MoveVer
                     new LegacyAxisInput(false, 3, false, 2), //RJoyX = LookHor
                     new LegacyAxisInput(false, 4, true, 3), //RJoyY = LookVer
-                    new LegacyButtonInput(true, 2, 12, 19), //X = Equipment, Ready
+                    new LegacyButtonInput(true, 2, 12, 17), //X = Equipment, Submit
                     new LegacyReleaseAndHoldableButtonInput(true, 3, 24, 15), //Y = Pause, (Hold)Scoreboard/Profile
                     new LegacyButtonInput(false, 0, 6, 17), //A = Interact, Submit
-                    new LegacyButtonInput(false, 1, 7, 18), //B = Jump, Cancel
+                    new LegacyButtonInput(false, 1, 7), //B = Jump
                     new LegacyButtonInput(true, 8, 13), //LClick = Sprint
                     new LegacyButtonInput(false, 9, 14, 25), //RClick = Ping, Recenter
-                    new LegacyAxisToButtonInput(true, 8, 9, 20), //LTrigger = Secondary, Tab Left
-                    new LegacyAxisToButtonInput(true, 10, 10, 22), //LGrip = Utility, Submenu Left
-                    new LegacyAxisToButtonInput(false, 9, 8, 21), //RTrigger = Primary, Tab Right
-                    new LegacyAxisToButtonInput(false, 11, 11, 23) //RGrip = Special, Submenu Right
+                    new LegacyAxisToButtonInput(true, 8, 9, 17), //LTrigger = Secondary, Submit
+                    new LegacyAxisToButtonInput(true, 10, 10), //LGrip = Utility
+                    new LegacyAxisToButtonInput(false, 9, 8, 17), //RTrigger = Primary, Submit
+                    new LegacyAxisToButtonInput(false, 11, 11) //RGrip = Special
                 };
             }
             else
@@ -394,6 +394,12 @@ namespace VRMod
                     }
 
                     if (leftJoystickID == -1 || rightJoystickID == -1) return;
+                }
+
+                for (int i = 0; i < vrControllers.elementCount; i++)
+                {
+                    if (i < vrControllers.axisCount) vrControllers.ClearAxisValueById(i);
+                    else vrControllers.ClearButtonValueById(i);
                 }
             }
 
