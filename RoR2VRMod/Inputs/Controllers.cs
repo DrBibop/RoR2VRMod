@@ -375,10 +375,14 @@ namespace VRMod
             {
                 string[] joyNames = Input.GetJoystickNames();
 
-                if (leftJoystickID >= joyNames.Length || rightJoystickID >= joyNames.Length || !joyNames[leftJoystickID].ToLower().Contains("left") || !joyNames[rightJoystickID].ToLower().Contains("right"))
-                {
+                if (leftJoystickID != -1 && (leftJoystickID >= joyNames.Length || joyNames[leftJoystickID] == null || !joyNames[leftJoystickID].ToLower().Contains("left")))
                     leftJoystickID = -1;
+
+                if (rightJoystickID != -1 && (rightJoystickID >= joyNames.Length || joyNames[rightJoystickID] == null || !joyNames[rightJoystickID].ToLower().Contains("right")))
                     rightJoystickID = -1;
+
+                if (leftJoystickID == -1)
+                {
                     for (int i = 0; i < joyNames.Length; i++)
                     {
                         string joyName = joyNames[i].ToLower();
@@ -386,15 +390,22 @@ namespace VRMod
                         {
                             leftJoystickID = i;
                         }
+                    }
+                }
 
+                if (rightJoystickID == -1)
+                {
+                    for (int i = 0; i < joyNames.Length; i++)
+                    {
+                        string joyName = joyNames[i].ToLower();
                         if (joyName.Contains("right"))
                         {
                             rightJoystickID = i;
                         }
                     }
-
-                    if (leftJoystickID == -1 || rightJoystickID == -1) return;
                 }
+
+                if (leftJoystickID == -1 || rightJoystickID == -1) return;
 
                 for (int i = 0; i < vrControllers.elementCount; i++)
                 {

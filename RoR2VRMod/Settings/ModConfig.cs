@@ -57,6 +57,9 @@ namespace VRMod
         internal static bool InitialFirstPersonValue { get; private set; }
         internal static bool InitialRoomscaleValue { get; private set; }
         internal static bool InitialMotionControlsValue { get; private set; }
+        internal static bool TempWristHUDValue { get; private set; }
+        internal static bool TempWatchHUDValue { get; private set; }
+        internal static bool TempLockedCameraPitchValue { get; private set; }
 
         public static bool MotionControlsEnabled => InitialMotionControlsValue;
         public static bool LeftHanded => LeftDominantHand.Value;
@@ -260,9 +263,12 @@ namespace VRMod
             prevLeftHandedValue = LeftDominantHand.Value;
 
             InitialFirstPersonValue = FirstPerson.Value;
-            InitialMotionControlsValue = UseMotionControls.Value;
+            InitialMotionControlsValue = InitialFirstPersonValue ? UseMotionControls.Value : false;
             InitialOculusModeValue = OculusMode.Value;
             InitialRoomscaleValue = Roomscale.Value;
+            TempWristHUDValue = InitialMotionControlsValue ? WristHUD.Value : false;
+            TempWatchHUDValue = InitialMotionControlsValue ? WatchHUD.Value : false;
+            TempLockedCameraPitchValue = (SnapTurn.Value || InitialMotionControlsValue) ? true : LockedCameraPitch.Value;
 
             settings.Add("vr_snap_turn", new ConfigSetting(SnapTurn, ConfigSetting.SettingUpdate.Instant));
             settings.Add("vr_snap_angle", new ConfigSetting(SnapTurnAngle, 30, 180, ConfigSetting.SettingUpdate.Instant));
@@ -446,16 +452,12 @@ namespace VRMod
 
         private static void UpdateDependantValues()
         {
-            if (!FirstPerson.Value)
-                UseMotionControls.Value = false;
+            TempLockedCameraPitchValue = (SnapTurn.Value || InitialMotionControlsValue) ? true : LockedCameraPitch.Value;
 
-            if (SnapTurn.Value || UseMotionControls.Value)
-                LockedCameraPitch.Value = true;
-
-            if (!UseMotionControls.Value)
+            if (InitialMotionControlsValue)
             {
-                WristHUD.Value = false;
-                WatchHUD.Value = false;
+                TempWristHUDValue = WristHUD.Value;
+                TempWatchHUDValue = WatchHUD.Value;
             }
         }
 
