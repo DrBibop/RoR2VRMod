@@ -260,3 +260,9 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - A warning now appears when the game window loses focus.
 - Fixed a bug that prevented the use of the triggers or the X button to interact with menus on Oculus Touch controllers when Oculus mode is enabled.
 - Fixed a bug that showed the wrong control glyphs when playing with Vive or WMR controllers.
+
+### 2.6.4
+- VR settings that depend on other settings will no longer get forcibly switched. For example:
+	- Turning off first person deactivates motion controls, but the motion controls setting will stay intact so it stays enabled when re-enabling first person.
+	- Turning off motion controls means the wrist and watch HUDs cannot be used, but the settings will now stay enabled.
+- Fixed a bug that broke controller inputs when the controllers are no longer detected with Oculus mode on.

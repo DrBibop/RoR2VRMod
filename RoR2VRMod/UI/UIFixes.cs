@@ -455,7 +455,7 @@ namespace VRMod
             rectTransform.pivot = menuPivot;
 
 
-            if (ModConfig.WristHUD.Value)
+            if (ModConfig.TempWristHUDValue)
             {
                 RectTransform healthCluster = springCanvas.Find("BottomLeftCluster/BarRoots") as RectTransform;
                 healthCluster.pivot = new Vector2(0.5f, 0f);
@@ -506,7 +506,7 @@ namespace VRMod
                 MotionControls.SetSprintIcon(cooldownsCluster.Find("Scaler/SprintCluster/SprintIcon").GetComponent<Image>());
             }
 
-            if (ModConfig.WatchHUD.Value)
+            if (ModConfig.TempWatchHUDValue)
             {
                 Transform topCluster = springCanvas.Find("TopCenterCluster");
                 GameObject clusterClone = GameObject.Instantiate(topCluster.gameObject, topCluster.parent);

@@ -193,8 +193,12 @@ namespace VRMod
 
             c.Index++;
 
-            c.EmitDelegate<Func<bool>>(() =>
+            c.Emit(OpCodes.Ldarg_0);
+
+            c.EmitDelegate<Func<ThreeEyedGames.DecaliciousRenderer, bool>>((self) =>
             {
+                if (self._camera.stereoTargetEye == StereoTargetEyeMask.None) return true;
+
                 bool result = lastFrameCount == Time.renderedFrameCount;
                 if (result)
                 {
@@ -439,7 +443,7 @@ namespace VRMod
                 float num2 = userProfile.stickLookSensitivity * CameraRigController.aimStickGlobalScale.value * 45f;
                 Vector2 vector = new Vector2(player.GetAxisRaw(ModConfig.SnapTurn.Value ? 26 : 2), player.GetAxisRaw(3));
                 Vector2 vector2 = new Vector2(player.GetAxisRaw(16), player.GetAxisRaw(17));
-                if (ModConfig.LockedCameraPitch.Value)
+                if (ModConfig.TempLockedCameraPitchValue)
                 {
                     vector2.y = 0;
                 }
@@ -539,7 +543,7 @@ namespace VRMod
                         }
                         vector2 = vector7;
 
-                        if (ModConfig.LockedCameraPitch.Value)
+                        if (ModConfig.TempLockedCameraPitchValue)
                         {
                             vector2.y = 0;
                         }
@@ -688,7 +692,7 @@ namespace VRMod
                 if (self.cameraMode == CameraRigController.CameraMode.PlayerBasic)
                 {
                     float num18 = self.pitch - num15;
-                    if (ModConfig.LockedCameraPitch.Value || ModConfig.SnapTurn.Value)
+                    if (ModConfig.TempLockedCameraPitchValue)
                         num18 = 0;
 
                     float num19 = self.yaw + num14;
