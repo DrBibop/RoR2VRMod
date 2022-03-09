@@ -1,9 +1,9 @@
 ﻿{
     "name": "VRAPI",
-    "version_number": "1.0.0",
+    "version_number": "1.0.1",
     "website_url": "https://github.com/DrBibop/RoR2VRMod",
     "description": "Modding API for VR-compatible mods.",
     "dependencies": [
-        "bbepis-BepInExPack-5.4.9"
+        "bbepis-BepInExPack-5.4.1900"
     ]
 }
