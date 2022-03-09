@@ -1,6 +1,5 @@
 ﻿using RoR2;
 using RoR2.UI;
-using System;
 using UnityEngine;
 
 namespace VRMod

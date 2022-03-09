@@ -3,14 +3,14 @@
     "AuthorName": "DrBibop",
     "Name": "DrBibop-VRMod",
     "DisplayName": "VR Mod",
-    "Version": "2.6.4",
+    "Version": "2.6.5",
     "Licence": "MIT",
     "WebsiteURL": "https://github.com/DrBibop/RoR2VRMod",
-    "Description": "Play Risk of Rain 2 in virtual reality! Now with LIV support!",
+    "Description": "Play Risk of Rain 2 in virtual reality! Now compatible with the SotV update!",
     "GameVersion": "N/A",
     "Dependencies": [
-		"bbepis-BepInExPack-5.4.9",
-		"RiskofThunder-HookGenPatcher-1.2.1"
+		"bbepis-BepInExPack-5.4.1900",
+		"RiskofThunder-HookGenPatcher-1.2.3"
 	],
     "OptionalDependencies": [],
     "Incompatibilities": [],

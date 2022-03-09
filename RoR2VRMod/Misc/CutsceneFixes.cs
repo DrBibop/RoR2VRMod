@@ -9,6 +9,8 @@ namespace VRMod
 {
     internal static class CutsceneFixes
     {
+        private static Transform shipShot;
+
         internal static void Init()
         {
             On.RoR2.StartEvent.Start += SetupIntro;
@@ -116,23 +118,23 @@ namespace VRMod
                     if (CameraFixes.liv) CameraFixes.liv.HMDCamera = newCam;
 
                     FixIntroCanvas(cameraRig);
-                    AdjustIntroElements(cameraRig);
+                    AdjustIntroElements();
                 }
             }
             orig(self);
         }
 
-        private static void AdjustIntroElements(CameraRigController cameraRig)
+        private static void AdjustIntroElements()
         {
             GameObject[] allGameObjects = Resources.FindObjectsOfTypeAll<GameObject>();
 
-            GameObject shipShot = allGameObjects.First(x => x.name == "cutscene intro");
+            GameObject shipShotObject = allGameObjects.First(x => x.name == "cutscene intro");
             GameObject shipBackground = allGameObjects.First(x => x.name == "Set 1 - Space");
 
-            if (shipShot && shipBackground)
+            if (shipShotObject && shipBackground)
             {
-                shipShot.transform.Rotate(Vector3.up, -60);
-                shipShot.transform.localScale = Vector3.one * 50;
+                shipShot = shipShotObject.transform;
+                RoR2Application.onLateUpdate += UpdateShipShot;
                 shipBackground.transform.Rotate(Vector3.up, -60);
             }
 
@@ -160,6 +162,26 @@ namespace VRMod
 
                 PostProcessVolume ppVolume = pp.GetComponent<PostProcessVolume>();
                 ppVolume.profile.RemoveSettings<DepthOfField>();
+            }
+        }
+
+        private static void UpdateShipShot()
+        {
+            GameObject shipShotObject = GameObject.Find("cutscene intro");
+            if (shipShotObject.transform != shipShot)
+                shipShot = shipShotObject.transform;
+
+            if (shipShot)
+            {
+                if (shipShot.eulerAngles.y != 210)
+                    shipShot.transform.eulerAngles = new Vector3(0, 210, 0);
+
+                if (shipShot.localScale.x <= 1)
+                    shipShot.transform.localScale = Vector3.one * 50;
+            }
+            else
+            {
+                RoR2Application.onLateUpdate -= UpdateShipShot;
             }
         }
 

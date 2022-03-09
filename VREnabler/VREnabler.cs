@@ -58,9 +58,10 @@ namespace VRPatcher
                 "SteamVR_Actions.dll"
             };
 
-            bool flag = CopyFiles(pluginsPath, plugins, "Plugins.") || CopyFiles(VREnabler.ManagedPath, managedLibraries, "Plugins.");
+            bool copyPluginsResult = CopyFiles(pluginsPath, plugins, "Plugins.");
+            bool copyManagedLibrariesResult = CopyFiles(VREnabler.ManagedPath, managedLibraries, "Plugins.");
 
-            if (flag)
+            if (copyPluginsResult || copyManagedLibrariesResult)
                 VREnabler.Logger.LogInfo("Successfully copied VR plugins!");
             else
                 VREnabler.Logger.LogInfo("VR plugins already present");
@@ -100,9 +101,7 @@ namespace VRPatcher
                 "bindings_vive_cosmos_controller.json"
             };
 
-            flag = CopyFiles(SteamVRPath, bindingFiles, "Binds.", true);
-
-            if (flag)
+            if (CopyFiles(SteamVRPath, bindingFiles, "Binds.", true))
                 VREnabler.Logger.LogInfo("Successfully copied binding files!");
             else
                 VREnabler.Logger.LogInfo("Binding files already present");

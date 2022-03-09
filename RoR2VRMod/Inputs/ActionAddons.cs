@@ -35,10 +35,10 @@ namespace VRMod
                 }
             }
 
-            var userDataInit = typeof(UserData).GetMethod("KFIfLMJhIpfzcbhqEXHpaKpGsgeZ", BindingFlags.NonPublic | BindingFlags.Instance);
+            var userDataInit = typeof(UserData).GetMethod("wVZZKoPFwEvodLvLcYNvVAPKpUj", BindingFlags.NonPublic | BindingFlags.Instance);
             new Hook(userDataInit, (Action<Action<UserData>, UserData>)AddCustomActions);
 
-            On.RoR2.UserProfile.LoadUserProfiles += AddBindingsToLoadedProfiles;
+            On.RoR2.SaveSystem.LoadUserProfiles += AddBindingsToLoadedProfiles;
             On.RoR2.UserProfile.LoadDefaultProfile += (orig) =>
             {
                 orig();
@@ -70,15 +70,15 @@ namespace VRMod
             keyboardActionElementMaps = keyboardMaps.ToArray();
         }
 
-        private static void AddBindingsToLoadedProfiles(On.RoR2.UserProfile.orig_LoadUserProfiles orig)
+        private static void AddBindingsToLoadedProfiles(On.RoR2.SaveSystem.orig_LoadUserProfiles orig, RoR2.SaveSystem self)
         {
-            orig();
+            orig(self);
 
-            List<UserProfile> userProfiles = UserProfile.loadedUserProfiles.Values.ToList();
-            foreach (UserProfile profile in userProfiles)
+            List<UserProfile> profiles = self.loadedUserProfiles.Values.ToList();
+            foreach (UserProfile profile in profiles)
             {
                 if (AddMissingBindingsToProfile(profile))
-                    profile.RequestSave();
+                    self.RequestSave(profile);
             }
         }
 
@@ -91,7 +91,8 @@ namespace VRMod
                 List<ActionElementMap> actionElementMaps = profile.joystickMap.GetElementMaps().ToList();
                 if (!actionElementMaps.Exists((x) => x.actionId == map.actionId))
                 {
-                    profile.joystickMap.AddElementMap(map);
+                    profile.joystickMap.BakeElementMap(map);
+                    profile.joystickMap.HAkHHEgGXinZoFxIBONQnfAEbQcy(map);
                     hasAddedBind = true;
                 }
             }
@@ -101,7 +102,8 @@ namespace VRMod
                 List<ActionElementMap> actionElementMaps = profile.keyboardMap.GetElementMaps().ToList();
                 if (!actionElementMaps.Exists((x) => x.actionId == map.actionId))
                 {
-                    profile.keyboardMap.AddElementMap(map);
+                    profile.keyboardMap.BakeElementMap(map);
+                    profile.keyboardMap.HAkHHEgGXinZoFxIBONQnfAEbQcy(map);
                     hasAddedBind = true;
                 }
             }

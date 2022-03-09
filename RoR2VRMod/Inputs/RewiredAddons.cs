@@ -70,12 +70,12 @@ namespace VRMod
                 },
                 new HardwareAxisInfo[]
                 {
-                    new HardwareAxisInfo(AxisCoordinateMode.Absolute, false, SpecialAxisType.None),
-                    new HardwareAxisInfo(AxisCoordinateMode.Absolute, false, SpecialAxisType.None),
-                    new HardwareAxisInfo(AxisCoordinateMode.Absolute, false, SpecialAxisType.None),
-                    new HardwareAxisInfo(AxisCoordinateMode.Absolute, false, SpecialAxisType.None),
-                    new HardwareAxisInfo(AxisCoordinateMode.Absolute, false, SpecialAxisType.None),
-                    new HardwareAxisInfo(AxisCoordinateMode.Absolute, false, SpecialAxisType.None)
+                    new HardwareAxisInfo(AxisCoordinateMode.Absolute, false, 0, SpecialAxisType.None),
+                    new HardwareAxisInfo(AxisCoordinateMode.Absolute, false, 0, SpecialAxisType.None),
+                    new HardwareAxisInfo(AxisCoordinateMode.Absolute, false, 0, SpecialAxisType.None),
+                    new HardwareAxisInfo(AxisCoordinateMode.Absolute, false, 0, SpecialAxisType.None),
+                    new HardwareAxisInfo(AxisCoordinateMode.Absolute, false, 0, SpecialAxisType.None),
+                    new HardwareAxisInfo(AxisCoordinateMode.Absolute, false, 0, SpecialAxisType.None)
                 },
                 new HardwareButtonInfo[] { },
                 null
@@ -191,7 +191,7 @@ namespace VRMod
                 newElementMap.invert = elementMap.invert;
             }
 
-            return ReInput.HskUxHpFZhrqieMHwBDWRMVxZrz.QCRMWRcLcHpJjvmLpFMRaWPZhee(categoryId, controllerId, 0);
+            return ReInput.UserData.aHYIuJhXpYLorVzIjNgjtAekfzf(categoryId, controllerId, 0);
         }
     }
 }
