@@ -94,6 +94,7 @@ namespace VRMod
             {
                 stateMachines = body.GetComponents<EntityStateMachine>().ToList();
                 foundStateMachine = true;
+                RoR2Application.onUpdate -= FindStateMachine;
             }
         }
 

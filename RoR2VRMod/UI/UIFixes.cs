@@ -2,7 +2,6 @@
 using RoR2;
 using RoR2.UI;
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -68,14 +67,23 @@ namespace VRMod
                 orig(self);
                 CanvasToWorldSpace(self.gameObject, hdResolution, menuPosition, menuScale, true);
             };
-            On.RoR2.UI.EclipseRunScreenController.Start += (orig, self) =>
+            On.RoR2.UI.EclipseRunScreenController.Awake += (orig, self) =>
             {
                 orig(self);
                 CanvasToWorldSpace(self.gameObject, hdResolution, menuPosition, menuScale, true);
             };
-            On.RoR2.UI.CharacterSelectController.Start += (orig, self) =>
+            On.RoR2.UI.CharacterSelectController.Awake += (orig, self) =>
             {
                 orig(self);
+
+                Transform topSideFade = self.transform.Find("TopSideFade");
+                if (topSideFade)
+                    topSideFade.gameObject.SetActive(false);
+
+                Transform bottomSideFade = self.transform.Find("BottomSideFade");
+                if (bottomSideFade)
+                    bottomSideFade.gameObject.SetActive(false);
+
                 CanvasToWorldSpace(self.gameObject, hdResolution, characterSelectPosition, characterSelectScale, true);
             };
             On.RoR2.UI.PauseScreenController.OnEnable += (orig, self) =>
@@ -106,13 +114,17 @@ namespace VRMod
                 if (splash)
                     CanvasToWorldSpace(splash, hdResolution, menuPosition, menuScale, false);
             };
+            On.RoR2.UI.InfiniteTowerMenuController.Awake += (orig, self) =>
+            {
+                orig(self);
+                CanvasToWorldSpace(self.gameObject, hdResolution, menuPosition, menuScale, true);
+            };
 
             On.RoR2.GameOverController.Awake += (orig, self) =>
             {
                 orig(self);
                 self.gameEndReportPanelPrefab.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
             };
-
             
             On.RoR2.RemoteGameBrowser.RemoteGameBrowserController.Awake += (orig, self) =>
             {
@@ -144,9 +156,33 @@ namespace VRMod
 
             On.RoR2.PickupPickerController.OnDisplayEnd += DestroyPickerPanelCanvas;
 
-            On.RoR2.Networking.GameNetworkManager.HandleKick += UnparentDialogBox;
+            On.RoR2.Networking.NetworkManagerSystem.HandleKick_NetworkMessage += (orig, netMsg) =>
+            {
+                orig(netMsg);
+                UnparentDialogBoxInternal();
+            };
+            NetworkManagerSystem.HandleKick_string += (orig, token) =>
+            {
+                orig(token);
+                UnparentDialogBoxInternal();
+            };
 
             On.RoR2.SceneCatalog.OnActiveSceneChanged += ChangeDialogScene;
+
+            if (ModConfig.InitialMotionControlsValue)
+            {
+                On.RoR2.UI.CrosshairManager.UpdateCrosshair += HideCrosshair;
+            }
+        }
+
+        private static void HideCrosshair(On.RoR2.UI.CrosshairManager.orig_UpdateCrosshair orig, CrosshairManager self, CharacterBody targetBody, Vector3 crosshairWorldPosition, Camera uiCamera)
+        {
+            orig(self, targetBody, crosshairWorldPosition, uiCamera);
+
+            if (self.crosshairController && self.crosshairController.gameObject.activeSelf)
+            {
+                self.crosshairController.gameObject.SetActive(false);
+            }
         }
 
         private static void ChangeDialogScene(On.RoR2.SceneCatalog.orig_OnActiveSceneChanged orig, Scene oldScene, Scene newScene)
@@ -158,10 +194,9 @@ namespace VRMod
                 SceneManager.MoveGameObjectToScene(queuedKickDialog, newScene);
             }
         }
-
-        private static void UnparentDialogBox(GameNetworkManager.orig_HandleKick orig, NetworkMessage netMsg)
+        
+        private static void UnparentDialogBoxInternal()
         {
-            orig(netMsg);
             SimpleDialogBox dialogBox = RoR2Application.instance.mainCanvas.GetComponentInChildren<SimpleDialogBox>();
 
             if (dialogBox)
@@ -287,13 +322,10 @@ namespace VRMod
         {
             if (cachedUICam == null)
             {
-                if (Camera.main)
+                CameraRigController rig = Utils.localCameraRig;
+                if (rig)
                 {
-                    SceneCamera sceneCamera = Camera.main.GetComponent<SceneCamera>();
-                    if (sceneCamera)
-                    {
-                        cachedUICam = sceneCamera.cameraRigController.uiCam;
-                    }
+                    cachedUICam = rig.uiCam;
                 }
             }
             return cachedUICam != null;
@@ -416,8 +448,6 @@ namespace VRMod
 
                 if (crosshairManager)
                 {
-                    crosshairManager.container.gameObject.SetActive(false);
-
                     //Thanks HutchyBen
                     crosshairManager.hitmarker.enabled = false;
                 }
@@ -468,7 +498,7 @@ namespace VRMod
                     healthCluster.offsetMax = new Vector2(-300, healthCluster.offsetMax.y);
 
                     Vector3 notificationPosition = notificationArea.localPosition;
-                    notificationPosition.y += 60;
+                    notificationPosition.y += 80;
                     notificationArea.localPosition = notificationPosition;
 
                     RectTransform spectatorLabel = springCanvas.Find("BottomCenterCluster/SpectatorLabel") as RectTransform;
@@ -542,7 +572,7 @@ namespace VRMod
             }
 
             if (ModConfig.UseSmoothHUD.Value)
-                hud.mainContainer.AddComponent<SmoothHUD>().Init(hud.cameraRigController.uiCam.transform, hud.cameraRigController);
+                hud.mainContainer.AddComponent<SmoothHUD>().Init(hud.cameraRigController.uiCam.transform);
         }
 
         private static void UpdateAllHealthBarPositionsVR(On.RoR2.UI.CombatHealthBarViewer.orig_UpdateAllHealthbarPositions orig, RoR2.UI.CombatHealthBarViewer self, Camera sceneCam, Camera uiCam)

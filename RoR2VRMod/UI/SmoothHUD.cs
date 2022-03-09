@@ -8,16 +8,20 @@ namespace VRMod
     {
         private Quaternion smoothHUDRotation;
 
-        private CameraRigController cameraRig;
-
         private Transform referenceTransform;
 
-        internal void Init(Transform referenceTransform, CameraRigController cameraRig = null)
+        private int lastUpdateFrame = 0;
+
+        internal void Init(Transform referenceTransform)
         {
-            this.cameraRig = cameraRig;
             this.referenceTransform = referenceTransform;
 
             smoothHUDRotation = referenceTransform.rotation;
+        }
+
+        private void OnEnable()
+        {
+            UICamera.onUICameraPreRender += UpdateHUD;
         }
 
         private void OnDisable()
@@ -28,41 +32,44 @@ namespace VRMod
 
                 TransformRect();
             }
+
+            UICamera.onUICameraPreRender -= UpdateHUD;
         }
 
-        private void LateUpdate()
+        private void UpdateHUD(UICamera camera)
         {
-            if (!referenceTransform) return;
+            if (!referenceTransform || lastUpdateFrame == Time.renderedFrameCount) return;
+
+            lastUpdateFrame = Time.renderedFrameCount;
 
             //This slerp code block was taken from idbrii in Unity answers and from an article by Rory
             float delta = Quaternion.Angle(smoothHUDRotation, referenceTransform.rotation);
             if (delta > 0f)
             {
-                float t = Mathf.Lerp(delta, 0f, 1f - Mathf.Pow(0.03f, Time.unscaledDeltaTime));
+                float t = Mathf.Lerp(delta, 0f, 1f - Mathf.Pow(0.02f, Time.unscaledDeltaTime));
                 t = 1.0f - (t / delta);
                 smoothHUDRotation = Quaternion.Slerp(smoothHUDRotation, referenceTransform.rotation, t);
             }
 
             TransformRect();
 
-            if (!ModConfig.InitialMotionControlsValue && cameraRig)
+            if (!ModConfig.InitialMotionControlsValue && camera.cameraRigController)
             {
-                CrosshairManager crosshairManager = cameraRig.hud.GetComponent<CrosshairManager>();
+                CrosshairManager crosshairManager = camera.cameraRigController.hud.GetComponent<CrosshairManager>();
 
                 if (crosshairManager)
                 {
-                    crosshairManager.container.position = cameraRig.uiCam.transform.position + (cameraRig.uiCam.transform.forward * 12.35f);
-                    crosshairManager.container.rotation = cameraRig.uiCam.transform.rotation;
+                    crosshairManager.container.position = camera.transform.position + (camera.transform.forward * 12.35f);
+                    crosshairManager.container.rotation = camera.transform.rotation;
                     crosshairManager.hitmarker.transform.position = crosshairManager.container.position;
-                    crosshairManager.hitmarker.transform.rotation = cameraRig.uiCam.transform.rotation;
+                    crosshairManager.hitmarker.transform.rotation = camera.transform.rotation;
                 }
             }
         }
 
         private void TransformRect()
         {
-            transform.rotation = smoothHUDRotation;
-            transform.rotation = Quaternion.LookRotation(transform.forward, referenceTransform.up);
+            transform.rotation = Quaternion.LookRotation(smoothHUDRotation * Vector3.forward, referenceTransform.up);
             transform.position = referenceTransform.position + (transform.forward * 12.35f);
         }
     }

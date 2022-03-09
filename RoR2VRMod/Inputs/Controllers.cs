@@ -2,6 +2,7 @@
 using MonoMod.Cil;
 using Rewired;
 using RoR2;
+using RoR2.GamepadVibration;
 using RoR2.UI;
 using System;
 using System.Collections.Generic;
@@ -50,7 +51,7 @@ namespace VRMod
 
             PlayerCharacterMasterController.onPlayerAdded += SubscribeToBodyEvents;
 
-            On.RoR2.GamepadVibrationManager.Update += VRHaptics;
+            On.RoR2.GamepadVibration.GamepadVibrationManager.Update += VRHaptics;
 
             IL.RoR2.PlayerCharacterMasterController.Update += ControllerMovementDirection;
 
@@ -67,7 +68,7 @@ namespace VRMod
             SetupControllerInputs();
         }
 
-        private static void VRHaptics(On.RoR2.GamepadVibrationManager.orig_Update orig)
+        private static void VRHaptics(On.RoR2.GamepadVibration.GamepadVibrationManager.orig_Update orig)
         {
             orig();
             if (Utils.localUserProfile == null || Utils.localCameraRig == null) return;
@@ -76,7 +77,12 @@ namespace VRMod
 
             Vector3 rawScreenShakeDisplacement = Utils.localCameraRig.rawScreenShakeDisplacement;
 
-            GamepadVibrationManager.MotorValues motorValues = GamepadVibrationManager.CalculateMotorValuesForCameraDisplacement(vibrationScale, rawScreenShakeDisplacement);
+            VibrationContext context = new VibrationContext();
+            context.localUser = LocalUserManager.GetFirstLocalUser();
+            context.cameraRigController = Utils.localCameraRig;
+            context.userVibrationScale = Utils.localUserProfile.gamepadVibrationScale;
+
+            float motorValue = context.CalcCamDisplacementMagnitude() * context.userVibrationScale;
 
             if (ModConfig.InitialOculusModeValue)
             {
@@ -89,21 +95,21 @@ namespace VRMod
                 {
                     if (capabilities.supportsImpulse)
                     {
-                        leftHand.SendHapticImpulse(0, motorValues.deepMotor, 0.02f);
+                        leftHand.SendHapticImpulse(0, motorValue, Time.deltaTime);
                     }
                 }
                 if (rightHand.TryGetHapticCapabilities(out capabilities))
                 {
                     if (capabilities.supportsImpulse)
                     {
-                        rightHand.SendHapticImpulse(0, motorValues.deepMotor, 0.02f);
+                        rightHand.SendHapticImpulse(0, motorValue, Time.deltaTime);
                     }
                 }
             }
             else
             {
-                SteamVR_Actions.gameplay_Haptic.Execute(0, 0, 80, motorValues.quickMotor, SteamVR_Input_Sources.LeftHand);
-                SteamVR_Actions.gameplay_Haptic.Execute(0, 0, 80, motorValues.quickMotor, SteamVR_Input_Sources.RightHand);
+                SteamVR_Actions.gameplay_Haptic.Execute(0, 0, 80, motorValue, SteamVR_Input_Sources.LeftHand);
+                SteamVR_Actions.gameplay_Haptic.Execute(0, 0, 80, motorValue, SteamVR_Input_Sources.RightHand);
             }
         }
 
@@ -351,7 +357,7 @@ namespace VRMod
             if (!inputPlayer.controllers.ContainsController(vrControllers))
             {
                 inputPlayer.controllers.AddController(vrControllers, false);
-                vrControllers.SetEnabled(true);
+                vrControllers.enabled = true;
             }
 
             if (inputPlayer.controllers.maps.GetAllMaps(ControllerType.Custom).ToList().Count < 2)

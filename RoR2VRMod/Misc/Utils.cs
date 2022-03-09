@@ -1,4 +1,5 @@
 ﻿using RoR2;
+using System.Linq;
 using UnityEngine;
 
 namespace VRMod
@@ -50,11 +51,9 @@ namespace VRMod
         {
             get
             {
-                if (!_localCameraRig)
+                if (!_localCameraRig || !_localCameraRig.enabled)
                 {
-                    LocalUser user = LocalUserManager.GetFirstLocalUser();
-                    if (user != null)
-                        _localCameraRig = user.cameraRigController;
+                    _localCameraRig = CameraRigController.instancesList.FirstOrDefault(x => x.enabled = true);
                 }
 
                 return _localCameraRig;

@@ -81,16 +81,16 @@ namespace VRMod
         {
             List<ScaledEffect> scaledMuzzleFlashes = new List<ScaledEffect>()
             {
-                new ScaledEffect(Resources.Load<GameObject>("prefabs/effects/muzzleflashes/Muzzleflash1"), 0.4f),
-                new ScaledEffect(Resources.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashFMJ"), 0.4f),
-                new ScaledEffect(Resources.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashBarrage"), 0.4f),
-                new ScaledEffect(Resources.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashHuntress"), 0.5f),
-                new ScaledEffect(Resources.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashEngiGrenade"), 0.5f),
-                new ScaledEffect(Resources.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashMageFire"), 0.5f),
-                new ScaledEffect(Resources.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashMageLightning"), 0.5f),
-                new ScaledEffect(Resources.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashMageLightningLarge").transform.Find("Particles").gameObject, 0.5f),
-                new ScaledEffect(Resources.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashMageIceLarge").transform.Find("Particles").gameObject, 0.5f),
-                new ScaledEffect(Resources.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashMageLightningLargeWithTrail").transform.Find("Particles").gameObject, 0.5f)
+                new ScaledEffect(LegacyResourcesAPI.Load<GameObject>("prefabs/effects/muzzleflashes/Muzzleflash1"), 0.4f),
+                new ScaledEffect(LegacyResourcesAPI.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashFMJ"), 0.4f),
+                new ScaledEffect(LegacyResourcesAPI.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashBarrage"), 0.4f),
+                new ScaledEffect(LegacyResourcesAPI.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashHuntress"), 0.5f),
+                new ScaledEffect(LegacyResourcesAPI.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashEngiGrenade"), 0.5f),
+                new ScaledEffect(LegacyResourcesAPI.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashMageFire"), 0.5f),
+                new ScaledEffect(LegacyResourcesAPI.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashMageLightning"), 0.5f),
+                new ScaledEffect(LegacyResourcesAPI.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashMageLightningLarge").transform.Find("Particles").gameObject, 0.5f),
+                new ScaledEffect(LegacyResourcesAPI.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashMageIceLarge").transform.Find("Particles").gameObject, 0.5f),
+                new ScaledEffect(LegacyResourcesAPI.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashMageLightningLargeWithTrail").transform.Find("Particles").gameObject, 0.5f)
             };
 
             foreach (var muzzleFlash in scaledMuzzleFlashes)
@@ -102,7 +102,7 @@ namespace VRMod
                 }
             }
 
-            GameObject banditSmokeBomb = Resources.Load<GameObject>("prefabs/effects/muzzleflashes/Bandit2SmokeBomb");
+            GameObject banditSmokeBomb = LegacyResourcesAPI.Load<GameObject>("prefabs/effects/muzzleflashes/Bandit2SmokeBomb");
             banditSmokeBomb.transform.Find("Core/Dust, CenterTube").gameObject.SetActive(false);
 
             IL.RoR2.PlayerCharacterMasterController.FixedUpdate += SprintBreakDirection;
