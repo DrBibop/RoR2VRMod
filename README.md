@@ -273,3 +273,7 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - The smooth HUD now follows the camera slightly faster.
 - The top and bottom faded black bars in the character selection menu have been removed.
 - Fixed a bug that prevented SteamVR from initializing the first time the mod was loaded.
+
+### 2.6.6
+- Fixed a bug that would crash the game if attempting to start a run with snap turn disabled.
+- Fixed a harmless bug that would spam the console with errors.

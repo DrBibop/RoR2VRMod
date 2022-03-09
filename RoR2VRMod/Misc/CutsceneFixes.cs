@@ -168,7 +168,7 @@ namespace VRMod
         private static void UpdateShipShot()
         {
             GameObject shipShotObject = GameObject.Find("cutscene intro");
-            if (shipShotObject.transform != shipShot)
+            if (shipShotObject && shipShotObject.transform != shipShot)
                 shipShot = shipShotObject.transform;
 
             if (shipShot)
