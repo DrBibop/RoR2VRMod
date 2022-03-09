@@ -495,17 +495,9 @@ namespace VRMod
             );
             c.Index--;
 
-            ILLabel endLabel = c.MarkLabel();
-            c.Emit(OpCodes.Br_S, endLabel);
+            int snapTurnIndex = c.Index;
 
             c.Emit(OpCodes.Ldarg_3);
-
-            c.Index--;
-
-            ILLabel snapTurnLabel = c.MarkLabel();
-
-            c.Index++;
-
             c.Emit(OpCodes.Ldloc_S, (byte)6);
             c.Emit(OpCodes.Ldloc_S, (byte)7);
             c.EmitDelegate<Func<Vector2, Vector2, Vector2>>((mouseVector, joystickVector) =>
@@ -542,11 +534,22 @@ namespace VRMod
             });
             c.Emit(OpCodes.Stfld, typeof(RoR2.CameraModes.CameraModeBase.CollectLookInputResult).GetField("lookInput"));
 
+            ILLabel endLabel = c.MarkLabel();
+
+            c.Index = snapTurnIndex;
+
+            c.Emit(OpCodes.Br_S, endLabel);
+            VRMod.StaticLogger.LogWarning(endLabel.Target.OpCode);
+
+            ILLabel snapTurnLabel = c.MarkLabel();
+
             c.Index = startIndex;
 
             c.EmitDelegate<Func<bool>>(() => { return ModConfig.SnapTurn.Value; });
 
             c.Emit(OpCodes.Brtrue_S, snapTurnLabel);
+
+            VRMod.StaticLogger.LogWarning(il);
         }
 
         private static void SetBodyInvisible(On.RoR2.Run.orig_Update orig, Run self)
