@@ -266,3 +266,10 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 	- Turning off first person deactivates motion controls, but the motion controls setting will stay intact so it stays enabled when re-enabling first person.
 	- Turning off motion controls means the wrist and watch HUDs cannot be used, but the settings will now stay enabled.
 - Fixed a bug that broke controller inputs when the controllers are no longer detected with Oculus mode on.
+
+### 2.6.5
+- Fixed compatibility with the Survivor of the Void update.
+- Players spectating a VR player should now properly see towards the direction they're looking at.
+- The smooth HUD now follows the camera slightly faster.
+- The top and bottom faded black bars in the character selection menu have been removed.
+- Fixed a bug that prevented SteamVR from initializing the first time the mod was loaded.
