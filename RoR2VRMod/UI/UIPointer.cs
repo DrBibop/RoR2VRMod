@@ -89,7 +89,7 @@ namespace VRMod
 
         private static void EditPointerPosition(On.RoR2.UI.MPInput.orig_Update orig, MPInput self)
         {
-            if (!cachedUICam || !Utils.isUsingUI)
+            if (!cachedUICam || !Utils.isUsingUI || (Utils.localInputPlayer != null && Utils.localInputPlayer.controllers.GetLastActiveController().type == Rewired.ControllerType.Joystick))
             {
                 if (cursorInstance && cursorInstance.activeSelf)
                     cursorInstance.SetActive(false);

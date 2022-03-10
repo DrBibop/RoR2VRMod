@@ -138,17 +138,20 @@ namespace VRMod
             {
                 foreach (ActionDef actionDef in actionDefs)
                 {
-                    if (controllerMap.actionElementMaps.Exists((x) => x.actionId == actionDef.id) || keyboardMap.actionElementMaps.Exists((x) => x.actionId == actionDef.id))
-                        continue;
-
-                    foreach (ActionElementMap map in joystickActionElementMaps)
+                    if (!controllerMap.actionElementMaps.Exists((x) => x.actionId == actionDef.id))
                     {
-                        controllerMap.actionElementMaps.Add(map);
+                        foreach (ActionElementMap map in joystickActionElementMaps)
+                        {
+                            controllerMap.actionElementMaps.Add(map);
+                        }
                     }
 
-                    foreach (ActionElementMap map in keyboardActionElementMaps)
+                    if (!keyboardMap.actionElementMaps.Exists((x) => x.actionId == actionDef.id))
                     {
-                        keyboardMap.actionElementMaps.Add(map);
+                        foreach (ActionElementMap map in keyboardActionElementMaps)
+                        {
+                            controllerMap.actionElementMaps.Add(map);
+                        }
                     }
                 }
             }

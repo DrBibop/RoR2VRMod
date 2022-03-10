@@ -179,7 +179,7 @@ namespace VRMod
         {
             if (!eventSystem)
             {
-                return "UNKNOWN";
+                return "???";
             }
             if (isUsingMotionControls)
             {

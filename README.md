@@ -277,3 +277,12 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 ### 2.6.6
 - Fixed a bug that would crash the game if attempting to start a run with snap turn disabled.
 - Fixed a harmless bug that would spam the console with errors.
+
+### 2.6.7
+- Depth of field effects have been completely removed in all locations.
+- The round cursor is now hidden when playing with a gamepad.
+- Fixed a bug that caused the camera to tilt in some situations.
+- Fixed a bug that caused the spectating camera to point towards the wrong direction.
+- Fixed a bug that caused the vanilla aim-assist to reduce smooth turn speed when looking towards an enemy.
+- Fixed a bug that caused motion controllers to rumble when not using them.
+- Fixed a harmless bug that would spam the console with errors in the main menu.

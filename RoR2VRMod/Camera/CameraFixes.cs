@@ -61,7 +61,7 @@ namespace VRMod
             IL.RoR2.CameraRigController.Update += UpdateLIVHUDTargetMaster;
 
             IL.RoR2.CameraModes.CameraModePlayerBasic.CollectLookInputInternal += GetVRLookInput;
-            IL.RoR2.CameraModes.CameraModePlayerBasic.UpdateInternal += RemoveRecoil;
+            IL.RoR2.CameraModes.CameraModePlayerBasic.UpdateInternal += RemoveRecoilAndCameraPitch;
 
             On.RoR2.CameraRigController.Start += InitCamera;
 
@@ -108,6 +108,20 @@ namespace VRMod
                 LIV.SDK.Unity.SDKShaders.LoadShaders();
 
             RoR2Application.onLoad += ReplaceLoaderSmokeRampTextures;
+
+            new Hook(typeof(PostProcessProfile).GetMethod("OnEnable", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance), (Action<Action<PostProcessProfile>, PostProcessProfile>)RemoveDepthOfField);
+        }
+
+        private static void RemoveDepthOfField(Action<PostProcessProfile> orig, PostProcessProfile self)
+        {
+            orig(self);
+
+            DepthOfField dofSetting = self.GetSetting<DepthOfField>();
+
+            if (dofSetting)
+            {
+                dofSetting.active = false;
+            }
         }
 
         private static void ChangeNetworkAngles(ILContext il)
@@ -135,9 +149,27 @@ namespace VRMod
                 self.hud = Utils.localCameraRig.hud;
         }
 
-        private static void RemoveRecoil(ILContext il)
+        private static void RemoveRecoilAndCameraPitch(ILContext il)
         {
             ILCursor c = new ILCursor(il);
+            
+            c.GotoNext(x => x.MatchLdfld(typeof(CharacterCameraParamsData), "minPitch"));
+
+            c.RemoveRange(2);
+
+            c.EmitDelegate<Func<CharacterCameraParamsData, float>>((camParams) => 
+            {
+                return ModConfig.TempLockedCameraPitchValue ? 0 : camParams.minPitch.value;
+            });
+
+            c.GotoNext(x => x.MatchLdfld(typeof(CharacterCameraParamsData), "maxPitch"));
+
+            c.RemoveRange(2);
+
+            c.EmitDelegate<Func<CharacterCameraParamsData, float>>((camParams) =>
+            {
+                return ModConfig.TempLockedCameraPitchValue ? 0 : camParams.maxPitch.value;
+            });
 
             c.GotoNext(x => x.MatchLdloc(10));
 
@@ -391,15 +423,6 @@ namespace VRMod
             if (self.gameObject.scene.name == "intro" && self.sceneCam.cullingMask == (self.sceneCam.cullingMask | (1 << LayerIndex.ui.intVal)))
                 self.sceneCam.cullingMask &= ~(1 << LayerIndex.ui.intVal);
 
-            Transform pp = self.transform.Find("GlobalPostProcessVolume, Base");
-
-            if (pp)
-            {
-                PostProcessVolume ppVolume = pp.GetComponent<PostProcessVolume>();
-                if (ppVolume)
-                    ppVolume.profile.GetSetting<DepthOfField>().active = false;
-            }
-
             if (Run.instance && ModConfig.UseConfortVignette.Value)
             {
                 self.uiCam.gameObject.AddComponent<ConfortVignette>();
@@ -441,7 +464,7 @@ namespace VRMod
             }
 
             if (self.hud)
-                RoR2Application.onNextUpdate += InitHUD;
+                UIFixes.AdjustHUD(self.hud);
 
             RoR2Application.instance.mainCanvas.worldCamera = self.uiCam;
 
@@ -458,6 +481,7 @@ namespace VRMod
         {
             ILCursor c = new ILCursor(il);
 
+            //Fixing brtrue label
             c.GotoNext(x =>
                 x.MatchLdloca(6)
             );
@@ -468,6 +492,7 @@ namespace VRMod
             sussyLabel.Target = c.Next;
             c.Index--;
 
+            //Replacing input vectors
             c.Remove();
             c.Index++;
             c.RemoveRange(6);
@@ -490,9 +515,16 @@ namespace VRMod
 
             int startIndex = c.Index;
 
-            c.GotoNext(x =>
-                x.MatchLdflda(typeof(RoR2.CameraModes.CameraModeBase.CollectLookInputResult), "lookInput")
-            );
+            //Removing aim assist
+            c.GotoNext(x => x.MatchCall(typeof(RoR2.CameraModes.CameraModePlayerBasic), "PerformAimAssist"));
+
+            c.Index -= 3;
+
+            c.RemoveRange(4);
+
+            //Adding snap turn code
+            c.GotoNext(x => x.MatchLdflda(typeof(RoR2.CameraModes.CameraModeBase.CollectLookInputResult), "lookInput"));
+
             c.Index--;
 
             int snapTurnIndex = c.Index;
@@ -534,13 +566,14 @@ namespace VRMod
             });
             c.Emit(OpCodes.Stfld, typeof(RoR2.CameraModes.CameraModeBase.CollectLookInputResult).GetField("lookInput"));
 
+            //Adding jump after smooth turn code
             ILLabel endLabel = c.MarkLabel();
 
             c.Index = snapTurnIndex;
 
             c.Emit(OpCodes.Br_S, endLabel);
-            VRMod.StaticLogger.LogWarning(endLabel.Target.OpCode);
 
+            //Adding snap turn condition and jump to snap turn
             ILLabel snapTurnLabel = c.MarkLabel();
 
             c.Index = startIndex;
@@ -548,8 +581,6 @@ namespace VRMod
             c.EmitDelegate<Func<bool>>(() => { return ModConfig.SnapTurn.Value; });
 
             c.Emit(OpCodes.Brtrue_S, snapTurnLabel);
-
-            VRMod.StaticLogger.LogWarning(il);
         }
 
         private static void SetBodyInvisible(On.RoR2.Run.orig_Update orig, Run self)
@@ -600,10 +631,10 @@ namespace VRMod
                         }
 
                         if (!self.cameraMode.IsSpectating(self) && self.cameraModeContext.targetInfo.isViewerControlled && self.targetBody)
+                        {
                             VRCameraWrapper.instance.UpdateRotation(cameraState);
-
-                        if (self.targetBody)
                             cameraState.rotation = self.sceneCam.transform.rotation;
+                        }
 
                         if (self.targetBody.IsLocalBody())
                         {
@@ -690,6 +721,7 @@ namespace VRMod
 
                         spectatorCamera.SetActive(true);
                         spectatorCameraComponent.enabled = true;
+                        UnityEngine.XR.XRDevice.DisableAutoXRCameraTracking(spectatorCameraComponent, true);
                     }
 
                     if (!spectatorScreen)
