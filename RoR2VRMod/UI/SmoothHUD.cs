@@ -53,7 +53,7 @@ namespace VRMod
 
             TransformRect();
 
-            if (!ModConfig.InitialMotionControlsValue && camera.cameraRigController)
+            if (!ModConfig.InitialMotionControlsValue && camera.cameraRigController && camera.cameraRigController.hud)
             {
                 CrosshairManager crosshairManager = camera.cameraRigController.hud.GetComponent<CrosshairManager>();
 
