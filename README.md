@@ -286,3 +286,8 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - Fixed a bug that caused the vanilla aim-assist to reduce smooth turn speed when looking towards an enemy.
 - Fixed a bug that caused motion controllers to rumble when not using them.
 - Fixed a harmless bug that would spam the console with errors in the main menu.
+
+### 2.7.0
+- Void Fiend is now fully VR supported.
+- Possibly fixed a bug that prevented some animations from playing.
+- Fixed more bugs spamming errors in the console.
