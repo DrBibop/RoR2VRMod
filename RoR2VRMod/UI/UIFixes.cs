@@ -184,7 +184,7 @@ namespace VRMod
         {
             orig(self, controller, instance);
 
-            if (self.characterBody.IsLocalBody() && Utils.localCameraRig && Utils.localCameraRig.hud)
+            if (ModConfig.TempWristHUDValue && self.characterBody.IsLocalBody() && Utils.localCameraRig && Utils.localCameraRig.hud)
             {
                 RectTransform healthbarTransform = Utils.localCameraRig.hud.healthBar.transform as RectTransform;
                 instance.transform.SetParent(healthbarTransform);
