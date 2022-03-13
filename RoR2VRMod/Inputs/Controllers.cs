@@ -71,7 +71,8 @@ namespace VRMod
         private static void VRHaptics(On.RoR2.GamepadVibration.GamepadVibrationManager.orig_Update orig)
         {
             orig();
-            if (Utils.localUserProfile == null || Utils.localCameraRig == null || (Utils.localInputPlayer != null && Utils.localInputPlayer.controllers.GetLastActiveController().type != ControllerType.Custom)) return;
+
+            if (Utils.localUserProfile == null || Utils.localCameraRig == null || Utils.localInputPlayer == null || Utils.localInputPlayer.controllers.GetLastActiveController() == null || Utils.localInputPlayer.controllers.GetLastActiveController().type != ControllerType.Custom) return;
 
             float vibrationScale = Utils.localUserProfile.gamepadVibrationScale;
 

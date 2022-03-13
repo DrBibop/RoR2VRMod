@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using static VRMod.MotionControls;
 
 namespace VRMod
@@ -43,7 +44,10 @@ namespace VRMod
             typeof(EntityStates.Croco.Leap),
             typeof(EntityStates.Croco.ChainableLeap),
             typeof(EntityStates.Captain.Weapon.FireTazer),
-            typeof(EntityStates.GlobalSkills.LunarNeedle.ThrowLunarSecondary)
+            typeof(EntityStates.GlobalSkills.LunarNeedle.ThrowLunarSecondary),
+            typeof(EntityStates.VoidSurvivor.Weapon.FireMegaBlasterBig),
+            typeof(EntityStates.VoidSurvivor.Weapon.FireMegaBlasterSmall),
+            typeof(EntityStates.VoidSurvivor.Weapon.FireCorruptDisks)
         };
 
         private static Dictionary<Type, bool> forceAimRaySideTypes = new Dictionary<Type, bool>()
@@ -90,7 +94,12 @@ namespace VRMod
                 new ScaledEffect(LegacyResourcesAPI.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashMageLightning"), 0.5f),
                 new ScaledEffect(LegacyResourcesAPI.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashMageLightningLarge").transform.Find("Particles").gameObject, 0.5f),
                 new ScaledEffect(LegacyResourcesAPI.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashMageIceLarge").transform.Find("Particles").gameObject, 0.5f),
-                new ScaledEffect(LegacyResourcesAPI.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashMageLightningLargeWithTrail").transform.Find("Particles").gameObject, 0.5f)
+                new ScaledEffect(LegacyResourcesAPI.Load<GameObject>("prefabs/effects/muzzleflashes/MuzzleflashMageLightningLargeWithTrail").transform.Find("Particles").gameObject, 0.5f),
+                new ScaledEffect(Addressables.LoadAssetAsync<GameObject>("RoR2/DLC1/VoidSurvivor/VoidSurvivorBeamMuzzleflash.prefab").WaitForCompletion(), 0.4f),
+                new ScaledEffect(Addressables.LoadAssetAsync<GameObject>("RoR2/DLC1/VoidSurvivor/VoidSurvivorChargeMegaBlaster.prefab").WaitForCompletion(), 0.6f),
+                new ScaledEffect(Addressables.LoadAssetAsync<GameObject>("RoR2/DLC1/VoidSurvivor/VoidSurvivorReadyMegaBlaster.prefab").WaitForCompletion(), 0.6f),
+                new ScaledEffect(Addressables.LoadAssetAsync<GameObject>("RoR2/DLC1/VoidSurvivor/VoidSurvivorChargeCrushCorruption.prefab").WaitForCompletion(), 0.6f),
+                new ScaledEffect(Addressables.LoadAssetAsync<GameObject>("RoR2/DLC1/VoidSurvivor/VoidSurvivorChargeCrushHealth.prefab").WaitForCompletion(), 0.6f)
             };
 
             foreach (var muzzleFlash in scaledMuzzleFlashes)
@@ -104,6 +113,11 @@ namespace VRMod
 
             GameObject banditSmokeBomb = LegacyResourcesAPI.Load<GameObject>("prefabs/effects/muzzleflashes/Bandit2SmokeBomb");
             banditSmokeBomb.transform.Find("Core/Dust, CenterTube").gameObject.SetActive(false);
+
+            GameObject voidFiendCorruptBeam = Addressables.LoadAssetAsync<GameObject>("RoR2/DLC1/VoidSurvivor/VoidSurvivorBeamCorrupt.prefab").WaitForCompletion();
+            Transform beamOffset = voidFiendCorruptBeam.transform.Find("Offset");
+            beamOffset.localPosition = new Vector3(0, 0, 0.1f);
+            beamOffset.localScale = new Vector3(0.6f, 0.6f, 1);
 
             IL.RoR2.PlayerCharacterMasterController.FixedUpdate += SprintBreakDirection;
             On.RoR2.PlayerCharacterMasterController.CheckPinging += PingFromHand;
@@ -186,7 +200,22 @@ namespace VRMod
             On.EntityStates.Captain.Weapon.FireTazer.OnEnter += ChangeTazerMuzzleEnter;
             On.EntityStates.Captain.Weapon.FireTazer.Fire += ChangeTazerMuzzleShoot;
 
+            On.EntityStates.VoidSurvivor.VoidBlinkBase.OnEnter += ChangeBlinkDirection;
+
             IL.EntityStates.GlobalSkills.LunarNeedle.FireLunarNeedle.OnEnter += ChangeNeedleMuzzle;
+        }
+
+        private static void ChangeBlinkDirection(On.EntityStates.VoidSurvivor.VoidBlinkBase.orig_OnEnter orig, EntityStates.VoidSurvivor.VoidBlinkBase self)
+        {
+            orig(self);
+
+            if (self.characterBody.IsLocalBody())
+            {
+                Vector3 direction = GetHandByDominance(false).muzzle.forward;
+                direction.y = 0;
+                direction.Normalize();
+                self.forwardVector = direction;
+            }
         }
 
         private static Ray GetGrappleArmRay(On.RoR2.Projectile.ProjectileGrappleController.BaseState.orig_GetOwnerAimRay orig, EntityStates.BaseState self)

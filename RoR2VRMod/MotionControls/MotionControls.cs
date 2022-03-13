@@ -112,7 +112,9 @@ namespace VRMod
                 "AcridHand2",
                 "CaptainHand",
                 "CaptainGun",
-                "HereticWing"
+                "HereticWing",
+                "VoidFiendStub",
+                "VoidFiendHand"
             };
 
             foreach (string prefabName in prefabNames)

@@ -1,5 +1,6 @@
 ﻿using On.RoR2.Networking;
 using RoR2;
+using RoR2.HudOverlay;
 using RoR2.UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -33,6 +34,8 @@ namespace VRMod
         private static GameObject pickerCanvasPrefab;
 
         private static GameObject queuedKickDialog;
+
+        private static Transform voidFiendCorruptionMeter;
 
         internal static HUD livHUD;
 
@@ -172,6 +175,47 @@ namespace VRMod
             if (ModConfig.InitialMotionControlsValue)
             {
                 On.RoR2.UI.CrosshairManager.UpdateCrosshair += HideCrosshair;
+            }
+
+            On.RoR2.VoidSurvivorController.OnOverlayInstanceAdded += MoveOverlayNextToHealth;
+        }
+
+        private static void MoveOverlayNextToHealth(On.RoR2.VoidSurvivorController.orig_OnOverlayInstanceAdded orig, VoidSurvivorController self, OverlayController controller, GameObject instance)
+        {
+            orig(self, controller, instance);
+
+            if (self.characterBody.IsLocalBody() && Utils.localCameraRig && Utils.localCameraRig.hud)
+            {
+                RectTransform healthbarTransform = Utils.localCameraRig.hud.healthBar.transform as RectTransform;
+                instance.transform.SetParent(healthbarTransform);
+
+                RectTransform instanceTransform = instance.transform as RectTransform;
+                RectTransform fillRoot = instanceTransform.Find("FillRoot") as RectTransform;
+
+                instanceTransform.localRotation = Quaternion.identity;
+                instanceTransform.sizeDelta = new Vector2(fillRoot.sizeDelta.y, fillRoot.sizeDelta.y);
+
+                fillRoot.localPosition = Vector3.zero;
+
+                instanceTransform.anchorMin = new Vector2(1, 0.5f);
+                instanceTransform.anchorMax = new Vector2(1, 0.5f);
+                instanceTransform.pivot = new Vector2(1, 0.5f);
+
+                instanceTransform.localPosition = new Vector3(0, healthbarTransform.sizeDelta.y / 2, 0);
+
+                voidFiendCorruptionMeter = instanceTransform;
+
+                RoR2Application.onNextUpdate += MoveOverlayAgainWhyDoINeedToDoThis;
+            }
+        }
+
+        private static void MoveOverlayAgainWhyDoINeedToDoThis()
+        {
+            if (voidFiendCorruptionMeter)
+            {
+                Vector3 pos = voidFiendCorruptionMeter.localPosition;
+                pos.x = 0;
+                voidFiendCorruptionMeter.localPosition = pos;
             }
         }
 

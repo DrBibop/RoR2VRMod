@@ -31,7 +31,7 @@ namespace VRMod
 
         private void Start()
         {
-            body = Utils.localBody;
+            body = MotionControls.currentBody;
             animator = GetComponent<Animator>();
 
             if (!body || !animator)
@@ -63,7 +63,7 @@ namespace VRMod
                     if (associatedSkill)
                     {
                         foundSkill = true;
-                        RoR2Application.onUpdate += UpdateBool;
+                        RoR2Application.onLateUpdate += UpdateBool;
                     }
                 }
                 else
@@ -78,7 +78,7 @@ namespace VRMod
             if (parameterType == ParameterType.OnAvailableBool)
             {
                 if (foundSkill)
-                    RoR2Application.onUpdate -= UpdateBool;
+                    RoR2Application.onLateUpdate -= UpdateBool;
             }
             else if (body)
             {
