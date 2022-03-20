@@ -1,7 +1,9 @@
-﻿using On.RoR2.Networking;
+﻿using HG;
+using On.RoR2.Networking;
 using RoR2;
 using RoR2.HudOverlay;
 using RoR2.UI;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -172,12 +174,20 @@ namespace VRMod
 
             On.RoR2.SceneCatalog.OnActiveSceneChanged += ChangeDialogScene;
 
+            On.RoR2.VoidSurvivorController.OnOverlayInstanceAdded += MoveOverlayNextToHealth;
+
             if (ModConfig.InitialMotionControlsValue)
             {
                 On.RoR2.UI.CrosshairManager.UpdateCrosshair += HideCrosshair;
-            }
 
-            On.RoR2.VoidSurvivorController.OnOverlayInstanceAdded += MoveOverlayNextToHealth;
+                On.RoR2.UI.SniperTargetViewer.OnTransformParentChanged += FixHUDReference;
+            }
+        }
+
+        private static void FixHUDReference(On.RoR2.UI.SniperTargetViewer.orig_OnTransformParentChanged orig, SniperTargetViewer self)
+        {
+            orig(self);
+            if (!self.hud) self.hud = Utils.localCameraRig.hud;
         }
 
         private static void MoveOverlayNextToHealth(On.RoR2.VoidSurvivorController.orig_OnOverlayInstanceAdded orig, VoidSurvivorController self, OverlayController controller, GameObject instance)
@@ -295,8 +305,8 @@ namespace VRMod
 
             if (cameraRig && cameraRig.hud)
             {
-                GameObject gameObject = Object.Instantiate(Resources.Load<GameObject>("Prefabs/HUDSimple"));
-                HUD hud = gameObject.GetComponent<HUD>();
+                GameObject hudInstance = Object.Instantiate(Resources.Load<GameObject>("Prefabs/HUDSimple"));
+                HUD hud = hudInstance.GetComponent<HUD>();
                 hud.cameraRigController = cameraRig;
                 Canvas canvas = hud.GetComponent<Canvas>();
                 canvas.worldCamera = livCamera;
@@ -304,11 +314,11 @@ namespace VRMod
                 Object.Destroy(hud.GetComponent<CrosshairManager>());
                 hud.localUserViewer = cameraRig.localUserViewer;
 
-                Object.Destroy(gameObject.transform.Find("MainContainer/MainUIArea/CrosshairCanvas").gameObject);
-                Object.Destroy(gameObject.transform.Find("MainContainer/MainUIArea/Hitmarker").gameObject);
+                Object.Destroy(hudInstance.transform.Find("MainContainer/MainUIArea/CrosshairCanvas").gameObject);
+                Object.Destroy(hudInstance.transform.Find("MainContainer/MainUIArea/Hitmarker").gameObject);
 
                 int dummyLayer = LayerIndex.triggerZone.intVal;
-                gameObject.SetLayerRecursive(dummyLayer);
+                hudInstance.SetLayerRecursive(dummyLayer);
 
                 livHUD = hud;
             }

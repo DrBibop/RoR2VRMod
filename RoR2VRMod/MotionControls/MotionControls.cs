@@ -114,7 +114,9 @@ namespace VRMod
                 "CaptainGun",
                 "HereticWing",
                 "VoidFiendStub",
-                "VoidFiendHand"
+                "VoidFiendHand",
+                "RailgunnerRifle",
+                "RailgunnerHand"
             };
 
             foreach (string prefabName in prefabNames)
@@ -205,6 +207,11 @@ namespace VRMod
             dominantWatchHUD.transform.localPosition = nonDominantWatchHUDpos;
             dominantWatchHUD.transform.localRotation = nonDominantWatchHUDrot;
             nonDominantHand.watchHud = dominantWatchHUD;
+
+            if (currentBody.name.Contains("RailgunnerBody"))
+            {
+                dominantHand.currentHand.GetComponent<SniperScopeController>().UpdateDominance(ModConfig.LeftDominantHand.Value);
+            }
         }
 
         internal static void UpdateRayColor()

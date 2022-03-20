@@ -1,4 +1,7 @@
-﻿using RoR2;
+﻿using EntityStates;
+using RoR2;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -16,13 +19,41 @@ namespace VRMod
         [SerializeField]
         private string parameterName;
 
+        private static List<EntityStateAnimationParameter> instances;
+
         private CharacterBody body;
 
         private Animator animator;
 
         private EntityStateMachine[] bodyStateMachines;
 
-        private bool previousBoolValue;
+        internal static void Init()
+        {
+            On.RoR2.EntityStateMachine.SetState += CheckStateMachine;
+            instances = new List<EntityStateAnimationParameter>();
+        }
+
+        private static void CheckStateMachine(On.RoR2.EntityStateMachine.orig_SetState orig, EntityStateMachine self, EntityState newState)
+        {
+            if (self.commonComponents.characterBody.IsLocalBody())
+            {
+                foreach (EntityStateAnimationParameter animationParameter in instances)
+                {
+                    animationParameter.DoUpdate(self, newState);
+                }
+            }
+            orig(self, newState);
+        }
+
+        private void OnEnable()
+        {
+            instances.Add(this);
+        }
+
+        private void OnDisable()
+        {
+            instances.Remove(this);
+        }
 
         private void Start()
         {
@@ -38,7 +69,7 @@ namespace VRMod
             bodyStateMachines = body.GetComponents<EntityStateMachine>();
         }
 
-        private void LateUpdate()
+        private void DoUpdate(EntityStateMachine stateMachine, EntityState newState)
         {
             if (!body || !animator)
             {
@@ -46,27 +77,19 @@ namespace VRMod
                 return;
             }
 
-            bool foundState = false;
-            foreach (EntityStateMachine stateMachine in bodyStateMachines)
-            {
-                if (stateNames.Contains(stateMachine.state.GetType().Name))
-                {
-                    foundState = true;
-                    break;
-                }
-            }
+            bool isCurrentStateValid = stateNames.Contains(stateMachine.state.GetType().Name);
+            bool isNextStateValid = stateNames.Contains(newState.GetType().Name);
 
-            if (previousBoolValue != foundState)
+            if ((parameterType == EntityStateParameterType.OnStateEnterTrigger && isNextStateValid) || (parameterType == EntityStateParameterType.OnStateExitTrigger && isCurrentStateValid))
             {
-                if ((foundState && parameterType == EntityStateParameterType.OnStateEnterTrigger) || (!foundState && parameterType == EntityStateParameterType.OnStateExitTrigger))
-                {
-                    animator.SetTrigger(parameterName);
-                }
-                else if (parameterType == EntityStateParameterType.IsInStateBool)
-                {
-                    animator.SetBool(parameterName, foundState);
-                }
-                previousBoolValue = foundState;
+                animator.SetTrigger(parameterName);
+            }
+            else if (parameterType == EntityStateParameterType.IsInStateBool)
+            {
+                if (isNextStateValid)
+                    animator.SetBool(parameterName, true);
+                else if (isCurrentStateValid)
+                    animator.SetBool(parameterName, false);
             }
         }
 

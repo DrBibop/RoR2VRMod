@@ -35,6 +35,7 @@ namespace VRMod
                 RoR2.RoR2Application.isModded = true;
                 MotionControls.Init();
                 MotionControlledAbilities.Init();
+                EntityStateAnimationParameter.Init();
             }
 
             RoR2.RoR2Application.onLoad += () =>

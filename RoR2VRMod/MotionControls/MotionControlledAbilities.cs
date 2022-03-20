@@ -45,6 +45,8 @@ namespace VRMod
             typeof(EntityStates.Croco.ChainableLeap),
             typeof(EntityStates.Captain.Weapon.FireTazer),
             typeof(EntityStates.GlobalSkills.LunarNeedle.ThrowLunarSecondary),
+            typeof(EntityStates.Railgunner.Weapon.FireMineConcussive),
+            typeof(EntityStates.Railgunner.Weapon.FireMineBlinding),
             typeof(EntityStates.VoidSurvivor.Weapon.FireMegaBlasterBig),
             typeof(EntityStates.VoidSurvivor.Weapon.FireMegaBlasterSmall),
             typeof(EntityStates.VoidSurvivor.Weapon.FireCorruptDisks)
@@ -200,9 +202,53 @@ namespace VRMod
             On.EntityStates.Captain.Weapon.FireTazer.OnEnter += ChangeTazerMuzzleEnter;
             On.EntityStates.Captain.Weapon.FireTazer.Fire += ChangeTazerMuzzleShoot;
 
+            On.EntityStates.Railgunner.Scope.BaseWindUp.OnEnter += SetScopeFOV;
+            On.EntityStates.Railgunner.Scope.BaseScopeState.OnEnter += RemoveOverlay;
+            On.EntityStates.Railgunner.Weapon.BaseFireSnipe.OnEnter += ChangeSniperMuzzle;
+
             On.EntityStates.VoidSurvivor.VoidBlinkBase.OnEnter += ChangeBlinkDirection;
 
             IL.EntityStates.GlobalSkills.LunarNeedle.FireLunarNeedle.OnEnter += ChangeNeedleMuzzle;
+        }
+
+        private static void ChangeSniperMuzzle(On.EntityStates.Railgunner.Weapon.BaseFireSnipe.orig_OnEnter orig, EntityStates.Railgunner.Weapon.BaseFireSnipe self)
+        {
+            if (self.characterBody.IsLocalBody())
+            {
+                self.muzzleName = "MuzzleSniper";
+            }
+
+            orig(self);
+        }
+
+        private static void RemoveOverlay(On.EntityStates.Railgunner.Scope.BaseScopeState.orig_OnEnter orig, EntityStates.Railgunner.Scope.BaseScopeState self)
+        {
+            if (self.characterBody.IsLocalBody())
+            {
+                Transform overlay = self.scopeOverlayPrefab.transform.Find("ScopeOverlay");
+
+                if (overlay) GameObject.Destroy(overlay.gameObject);
+
+                orig(self);
+
+                self.overlayController.onInstanceAdded += (controller, instance) =>
+                {
+                    GetHandByDominance(true).currentHand.GetComponent<SniperScopeController>().SetOverlay(instance);
+                };
+                return;
+            }
+
+            orig(self);
+        }
+
+        private static void SetScopeFOV(On.EntityStates.Railgunner.Scope.BaseWindUp.orig_OnEnter orig, EntityStates.Railgunner.Scope.BaseWindUp self)
+        {
+            orig(self);
+
+            if (self.characterBody.IsLocalBody())
+            {
+                GetHandByDominance(true).currentHand.GetComponent<SniperScopeController>().SetFOV(self.cameraParams.data.fov.value / 3);
+            }
         }
 
         private static void ChangeBlinkDirection(On.EntityStates.VoidSurvivor.VoidBlinkBase.orig_OnEnter orig, EntityStates.VoidSurvivor.VoidBlinkBase self)

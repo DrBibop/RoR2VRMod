@@ -25,9 +25,10 @@ namespace VRMod
         private static bool initializedMainPlayer;
         private static bool initializedLocalUser;
 
-        private static List<SkillRemap> skillRemaps = new List<SkillRemap>()
+        private static List<SkillBindingOverride> skillBindingOverrides = new List<SkillBindingOverride>()
         {
-            new SkillRemap("LoaderBody", SkillSlot.Utility, SkillSlot.Special)
+            new SkillBindingOverride("LoaderBody", SkillSlot.Primary, SkillSlot.Secondary, SkillSlot.Special, SkillSlot.Utility),
+            new SkillBindingOverride("RailgunnerBody", SkillSlot.Primary, SkillSlot.Utility, SkillSlot.Special, SkillSlot.Secondary)
         };
 
         private static BaseInput[] inputs;
@@ -114,45 +115,112 @@ namespace VRMod
             }
         }
 
+        [Obsolete("Deprecated. Use AddSkillBindingOverride instead.")]
         public static void AddSkillRemap(string bodyName, SkillSlot skill1, SkillSlot skill2)
         {
-            skillRemaps.Add(new SkillRemap(bodyName, skill1, skill2));
+            if (skill1 == SkillSlot.None || skill2 == SkillSlot.None)
+            {
+                throw new ArgumentException("VR Mod: Cannot override a skill binding with None.");
+            }
+
+            SkillSlot[] skillSlots = new SkillSlot[] { SkillSlot.Primary, SkillSlot.Secondary, SkillSlot.Utility, SkillSlot.Special };
+
+            int skill1Index = Array.IndexOf(skillSlots, skill1);
+            int skill2Index = Array.IndexOf(skillSlots, skill2);
+
+            skillSlots[skill1Index] = skill2;
+            skillSlots[skill2Index] = skill1;
+
+            AddSkillBindingOverride(bodyName, skillSlots[0], skillSlots[1], skillSlots[2], skillSlots[3]);
+        }
+
+        public static void AddSkillBindingOverride(string bodyName, SkillSlot dominantTrigger, SkillSlot nonDominantTrigger, SkillSlot nonDominantGrip, SkillSlot dominantGrip)
+        {
+            if (skillBindingOverrides.Exists(x => x.bodyName == bodyName))
+            {
+                throw new ArgumentException("VR Mod: Cannot add multiple skill binding overrides on the same body.");
+            }
+
+            if (dominantTrigger == SkillSlot.None || nonDominantTrigger == SkillSlot.None || nonDominantGrip == SkillSlot.None || dominantGrip == SkillSlot.None)
+            {
+                throw new ArgumentException("VR Mod: Cannot override a skill binding with None.");
+            }
+
+            skillBindingOverrides.Add(new SkillBindingOverride(bodyName, dominantTrigger, nonDominantTrigger, nonDominantGrip, dominantGrip));
         }
 
         private static void SubscribeToBodyEvents(PlayerCharacterMasterController obj)
         {
             obj.master.onBodyStart += ApplyRemapsFromBody;
-            obj.master.onBodyDestroyed += ApplyRemapsFromBody;
+            obj.master.onBodyDestroyed += RevertRemap;
         }
 
         private static void ApplyRemapsFromBody(CharacterBody obj)
         {
-            if (obj.master != LocalUserManager.GetFirstLocalUser().cachedMaster) return;
+            if (obj.master != Utils.localMaster) return;
             ApplyRemaps(obj.name.Remove(obj.name.IndexOf("(Clone)")));
         }
 
         internal static void ApplyRemaps(string bodyName)
         {
+            SkillBindingOverride bindingOverride = skillBindingOverrides.Where(x => x.bodyName == bodyName).FirstOrDefault();
 
-            SkillRemap[] remaps = skillRemaps.Where(x => x.bodyName == bodyName).ToArray();
-
-            foreach (SkillRemap remap in remaps)
+            if (bindingOverride.bodyName == bodyName)
             {
-                ActionElementMap originalMap1 = vrGameplayMap.GetElementMapsWithAction(7 + (int)remap.skill1)[0];
-                ActionElementMap originalMap2 = vrGameplayMap.GetElementMapsWithAction(7 + (int)remap.skill2)[0];
-
-                int elementIdentifierId1 = originalMap1.elementIdentifierId;
-                int elementIdentifierId2 = originalMap2.elementIdentifierId;
-
-                Player player = LocalUserManager.GetFirstLocalUser().inputPlayer;
-
-                bool result1 = player.controllers.maps.GetMap(vrControllers, vrGameplayMap.id).ReplaceElementMap(originalMap1.id, originalMap1.actionId, originalMap1.axisContribution, elementIdentifierId2, originalMap1.elementType, originalMap1.axisRange, originalMap1.invert);
-                bool result2 = player.controllers.maps.GetMap(vrControllers, vrGameplayMap.id).ReplaceElementMap(originalMap2.id, originalMap2.actionId, originalMap2.axisContribution, elementIdentifierId1, originalMap2.elementType, originalMap2.axisRange, originalMap2.invert);
-
-                if (!(result1 && result2))
+                int[] originalSkillBindingIDs = new int[]
                 {
-                    VRMod.StaticLogger.LogError("Failed to remap");
-                }    
+                    (ModConfig.LeftDominantHand.Value ? 9 : 8),
+                    (ModConfig.LeftDominantHand.Value ? 8 : 9),
+                    (ModConfig.LeftDominantHand.Value ? 11 : 10),
+                    (ModConfig.LeftDominantHand.Value ? 10 : 11)
+                };
+
+                ActionElementMap[] newMapOrder = new ActionElementMap[]
+                {
+                    vrGameplayMap.GetElementMapsWithAction(7 + (int)bindingOverride.dominantTrigger)[0],
+                    vrGameplayMap.GetElementMapsWithAction(7 + (int)bindingOverride.nonDominantTrigger)[0],
+                    vrGameplayMap.GetElementMapsWithAction(7 + (int)bindingOverride.nonDominantGrip)[0],
+                    vrGameplayMap.GetElementMapsWithAction(7 + (int)bindingOverride.dominantGrip)[0]
+                };
+
+                ControllerMap controllerMap = Utils.localInputPlayer.controllers.maps.GetMap(vrControllers, vrGameplayMap.id);
+
+                for (int i = 0; i < 4; i++)
+                {
+                    ActionElementMap elementMap = newMapOrder[i];
+
+                    if (elementMap.elementIdentifierId == originalSkillBindingIDs[i]) continue;
+
+                    if (!controllerMap.ReplaceElementMap(elementMap.id, elementMap.actionId, elementMap.axisContribution, originalSkillBindingIDs[i], elementMap.elementType, elementMap.axisRange, elementMap.invert))
+                    {
+                        VRMod.StaticLogger.LogError("An error occured while trying to override skill bindings.");
+                    }
+                }
+            }
+        }
+
+        internal static void RevertRemap(CharacterBody body)
+        {
+            ControllerMap map = Utils.localInputPlayer.controllers.maps.GetMap(vrControllers, vrGameplayMap.id);
+
+            int[] originalSkillBindingIDs = new int[]
+            {
+                (ModConfig.LeftDominantHand.Value ? 9 : 8),
+                (ModConfig.LeftDominantHand.Value ? 8 : 9),
+                (ModConfig.LeftDominantHand.Value ? 11 : 10),
+                (ModConfig.LeftDominantHand.Value ? 10 : 11)
+            };
+
+            for (int i = 0; i < 4; i++)
+            {
+                ActionElementMap elementMap = vrGameplayMap.GetElementMapsWithAction(7 + i)[0];
+
+                if (elementMap.elementIdentifierId == originalSkillBindingIDs[i]) continue;
+
+                if (!map.ReplaceElementMap(elementMap.id, elementMap.actionId, elementMap.axisContribution, originalSkillBindingIDs[i], elementMap.elementType, elementMap.axisRange, elementMap.invert))
+                {
+                    VRMod.StaticLogger.LogError("An error occured while trying to revert skill binding overrides.");
+                }
             }
         }
 
@@ -432,17 +500,21 @@ namespace VRMod
             }
         }
 
-        public struct SkillRemap
+        public struct SkillBindingOverride
         {
             public string bodyName;
-            public SkillSlot skill1;
-            public SkillSlot skill2;
+            public SkillSlot dominantTrigger;
+            public SkillSlot nonDominantTrigger;
+            public SkillSlot nonDominantGrip;
+            public SkillSlot dominantGrip;
 
-            public SkillRemap(string bodyName, SkillSlot skill1, SkillSlot skill2)
+            public SkillBindingOverride(string bodyName, SkillSlot dominantTrigger, SkillSlot nonDominantTrigger, SkillSlot nonDominantGrip, SkillSlot dominantGrip)
             {
                 this.bodyName = bodyName;
-                this.skill1 = skill1;
-                this.skill2 = skill2;
+                this.dominantTrigger = dominantTrigger;
+                this.nonDominantTrigger = nonDominantTrigger;
+                this.nonDominantGrip = nonDominantGrip;
+                this.dominantGrip = dominantGrip;
             }
         }
     }
