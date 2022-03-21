@@ -42,14 +42,8 @@ namespace VRMod
 
             lastUpdateFrame = Time.renderedFrameCount;
 
-            //This slerp code block was taken from idbrii in Unity answers and from an article by Rory
-            float delta = Quaternion.Angle(smoothHUDRotation, referenceTransform.rotation);
-            if (delta > 0f)
-            {
-                float t = Mathf.Lerp(delta, 0f, 1f - Mathf.Pow(0.02f, Time.unscaledDeltaTime));
-                t = 1.0f - (t / delta);
-                smoothHUDRotation = Quaternion.Slerp(smoothHUDRotation, referenceTransform.rotation, t);
-            }
+            Quaternion deriv = new Quaternion();
+            smoothHUDRotation = smoothHUDRotation.SmoothDamp(referenceTransform.rotation, ref deriv, 0.07f);
 
             TransformRect();
 

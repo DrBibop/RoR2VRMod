@@ -289,6 +289,9 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 
 ### 2.7.0
 - Railgunner and Void Fiend are now fully VR supported.
+- Added aim stabilisation to improve overall accuracy.
+	- Rotational stabilisation is applied everywhere, but positional stabilisation is also applied when holding two-handed weapons.
+	- The amount of stabilisation can be changed with a new setting.
 - Sprinting and scoping no longer affect the smooth turn speed.
 - Possibly fixed a bug that prevented some animations from playing.
 - Fixed more bugs spamming errors in the console.

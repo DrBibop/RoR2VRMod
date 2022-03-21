@@ -52,6 +52,7 @@ namespace VRMod
         internal static ConfigEntry<bool> UseMotionControls { get; private set; }
         internal static ConfigEntry<bool> LeftDominantHand { get; private set; }
         internal static ConfigEntry<bool> ControllerMovementDirection { get; private set; }
+        internal static ConfigEntry<float> AimStabiliserAmount { get; private set; }
 
         internal static bool InitialOculusModeValue { get; private set; }
         internal static bool InitialFirstPersonValue { get; private set; }
@@ -257,6 +258,12 @@ namespace VRMod
                 false,
                 "When enabled, pushing forward on the joystick will move the character towards the direction the controller is pointing instead of the head."
             );
+            AimStabiliserAmount = configFile.Bind<float>(
+                "Controls",
+                "Aim stabiliser amount",
+                0.5f,
+                "The amount of smoothing applied to the hand position and rotation. Set to 0 to completely remove stabilisation."
+            );
 
             UpdateDependantValues();
 
@@ -275,12 +282,13 @@ namespace VRMod
             settings.Add("vr_snap_delay", new ConfigSetting(SnapTurnHoldDelay, 0.2f, 1, ConfigSetting.SettingUpdate.Instant));
             settings.Add("vr_controller_movement", new ConfigSetting(ControllerMovementDirection, ConfigSetting.SettingUpdate.Instant));
             settings.Add("vr_vignette", new ConfigSetting(UseConfortVignette, ConfigSetting.SettingUpdate.Instant, ChangeVignetteSetting));
+            settings.Add("vr_left_handed", new ConfigSetting(LeftDominantHand, ConfigSetting.SettingUpdate.Instant, ChangeHandDominance));
+            settings.Add("vr_aim_stabiliser_amount", new ConfigSetting(AimStabiliserAmount, 0f, 1f, ConfigSetting.SettingUpdate.Instant));
             settings.Add("vr_wrist_hud", new ConfigSetting(WristHUD, ConfigSetting.SettingUpdate.NextStage));
             settings.Add("vr_watch_hud", new ConfigSetting(WatchHUD, ConfigSetting.SettingUpdate.NextStage));
             settings.Add("vr_better_health", new ConfigSetting(BetterHealthBar, ConfigSetting.SettingUpdate.NextStage));
             settings.Add("vr_smooth_hud", new ConfigSetting(UseSmoothHUD, ConfigSetting.SettingUpdate.Instant, ChangeSmoothHUD));
             settings.Add("vr_liv_hud", new ConfigSetting(LIVHUD, ConfigSetting.SettingUpdate.Instant, ChangeLIVHUD));
-            settings.Add("vr_left_handed", new ConfigSetting(LeftDominantHand, ConfigSetting.SettingUpdate.Instant, ChangeHandDominance));
             settings.Add("vr_roomscale", new ConfigSetting(Roomscale, ConfigSetting.SettingUpdate.AfterRestart));
             settings.Add("vr_height", new ConfigSetting(PlayerHeight, 1.5f, 2.2f, ConfigSetting.SettingUpdate.NextStage));
             settings.Add("vr_ray_color", new ConfigSetting(RayColorHex, ConfigSetting.SettingUpdate.Instant, ChangeRayColor));
