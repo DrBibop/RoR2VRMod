@@ -29,6 +29,7 @@ namespace VRMod
         internal static ConfigEntry<float> MercSwingSpeedThreshold { get; private set; }
         internal static ConfigEntry<float> LoaderSwingSpeedThreshold { get; private set; }
         internal static ConfigEntry<float> AcridSwingSpeedThreshold { get; private set; }
+        internal static ConfigEntry<float> RailgunnerWeaponGripSnapAngle { get; private set; }
         internal static Color RayColor = Color.white;
 
         internal static ConfigEntry<bool> WristHUD { get; private set; }
@@ -141,6 +142,12 @@ namespace VRMod
                 "Acrid: Swing speed threshold",
                 12,
                 "The claw tip speed required to trigger an attack."
+            );
+            RailgunnerWeaponGripSnapAngle = configFile.Bind<float>(
+                "Survivor Settings",
+                "Railgunner: Weapon grip snap angle",
+                50,
+                "Angle in which the non-dominant hand can grip the weapon. Set to 0 to completely disable two-handed gripping. Set to 180 for constant grip."
             );
 
             RayColor = HexToColor(RayColorHex.Value);
@@ -298,6 +305,7 @@ namespace VRMod
             settings.Add("vr_merc_threshold", new ConfigSetting(MercSwingSpeedThreshold, 5, 50, ConfigSetting.SettingUpdate.Instant, MotionControls.UpdateMercMeleeThreshold));
             settings.Add("vr_loader_threshold", new ConfigSetting(LoaderSwingSpeedThreshold, 5, 50, ConfigSetting.SettingUpdate.Instant, MotionControls.UpdateLoaderMeleeThreshold));
             settings.Add("vr_acrid_threshold", new ConfigSetting(AcridSwingSpeedThreshold, 5, 50, ConfigSetting.SettingUpdate.Instant, MotionControls.UpdateAcridMeleeThreshold));
+            settings.Add("vr_railgunner_angle", new ConfigSetting(RailgunnerWeaponGripSnapAngle, 0, 180, ConfigSetting.SettingUpdate.Instant, MotionControls.UpdateRailgunnerSnapAngle));
             settings.Add("vr_hud_width", new ConfigSetting(HUDWidth, 400, 2400, ConfigSetting.SettingUpdate.Instant, ChangeHUDSize));
             settings.Add("vr_hud_height", new ConfigSetting(HUDHeight, 400, 2400, ConfigSetting.SettingUpdate.Instant, ChangeHUDSize));
             settings.Add("vr_anchor_bottom", new ConfigSetting(BottomAnchor, 0, 1, ConfigSetting.SettingUpdate.Instant, ChangeHUDAnchors));

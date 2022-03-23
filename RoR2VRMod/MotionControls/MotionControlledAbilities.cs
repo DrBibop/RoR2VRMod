@@ -223,22 +223,20 @@ namespace VRMod
 
         private static void RemoveOverlay(On.EntityStates.Railgunner.Scope.BaseScopeState.orig_OnEnter orig, EntityStates.Railgunner.Scope.BaseScopeState self)
         {
+            Transform overlay = self.scopeOverlayPrefab.transform.Find("ScopeOverlay");
+
+            if (overlay) GameObject.Destroy(overlay.gameObject);
+
+            orig(self);
+
             if (self.characterBody.IsLocalBody())
             {
-                Transform overlay = self.scopeOverlayPrefab.transform.Find("ScopeOverlay");
-
-                if (overlay) GameObject.Destroy(overlay.gameObject);
-
-                orig(self);
-
                 self.overlayController.onInstanceAdded += (controller, instance) =>
                 {
                     GetHandByDominance(true).currentHand.GetComponent<SniperScopeController>().SetOverlay(instance);
                 };
                 return;
             }
-
-            orig(self);
         }
 
         private static void SetScopeFOV(On.EntityStates.Railgunner.Scope.BaseWindUp.orig_OnEnter orig, EntityStates.Railgunner.Scope.BaseWindUp self)
