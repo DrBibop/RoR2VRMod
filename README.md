@@ -296,5 +296,6 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - Sprinting and scoping no longer affect the smooth turn speed.
 - The shield generator, plasma shrimp and shaped glass overlay effects on the hands are now smaller and more transparent.
 - Fixed a bug that made the melee swing threshold settings affect only one hand on Loader and Acrid on future runs after changing it.
-- Possibly fixed a bug that prevented some animations from playing.
+- Possibly fixed a bug that sometimes prevented some animations from playing.
+- Possibly fixed a bug that sometimes prevented binding overrides from applying correctly on Loader.
 - Fixed more bugs spamming errors in the console.
