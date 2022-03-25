@@ -471,15 +471,18 @@ namespace VRMod
             if (FocusChecker.instance) FocusChecker.instance.UpdateCameraRig(self);
         }
 
-        private static void InitHUD()
-        {
-            if (Utils.localCameraRig && Utils.localCameraRig.hud)
-                UIFixes.AdjustHUD(Utils.localCameraRig.hud);
-        }
-
         private static void GetVRLookInput(ILContext il)
         {
             ILCursor c = new ILCursor(il);
+
+            //Remove target info from stack. Why is it pushed so early anyway?
+            c.GotoNext(x => 
+                x.MatchLdflda(typeof(RoR2.CameraModes.CameraModeBase.CameraModeContext), "targetInfo")
+            );
+
+            c.Index--;
+
+            c.RemoveRange(2);
 
             //Fixing brtrue label
             c.GotoNext(x =>
@@ -565,6 +568,16 @@ namespace VRMod
                 return result;
             });
             c.Emit(OpCodes.Stfld, typeof(RoR2.CameraModes.CameraModeBase.CollectLookInputResult).GetField("lookInput"));
+            
+            //Removing sensitivity modifications;
+            var labels = il.GetIncomingLabels(c.Next);
+
+            c.RemoveRange(24);
+
+            foreach (var label in labels)
+            {
+                label.Target = c.Next;
+            }
 
             //Adding jump after smooth turn code
             ILLabel endLabel = c.MarkLabel();
@@ -696,6 +709,7 @@ namespace VRMod
                         }
 
                         spectatorCamera = GameObject.Instantiate(cameraReference.gameObject, null);
+                        
                         Component[] components = spectatorCamera.GetComponents<Component>();
 
                         foreach (Component component in components)

@@ -1,6 +1,9 @@
-﻿using On.RoR2.Networking;
+﻿using HG;
+using On.RoR2.Networking;
 using RoR2;
+using RoR2.HudOverlay;
 using RoR2.UI;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -33,6 +36,8 @@ namespace VRMod
         private static GameObject pickerCanvasPrefab;
 
         private static GameObject queuedKickDialog;
+
+        private static Transform voidFiendCorruptionMeter;
 
         internal static HUD livHUD;
 
@@ -169,9 +174,58 @@ namespace VRMod
 
             On.RoR2.SceneCatalog.OnActiveSceneChanged += ChangeDialogScene;
 
+            On.RoR2.VoidSurvivorController.OnOverlayInstanceAdded += MoveOverlayNextToHealth;
+
             if (ModConfig.InitialMotionControlsValue)
             {
                 On.RoR2.UI.CrosshairManager.UpdateCrosshair += HideCrosshair;
+
+                On.RoR2.UI.SniperTargetViewer.OnTransformParentChanged += FixHUDReference;
+            }
+        }
+
+        private static void FixHUDReference(On.RoR2.UI.SniperTargetViewer.orig_OnTransformParentChanged orig, SniperTargetViewer self)
+        {
+            orig(self);
+            if (!self.hud) self.hud = Utils.localCameraRig.hud;
+        }
+
+        private static void MoveOverlayNextToHealth(On.RoR2.VoidSurvivorController.orig_OnOverlayInstanceAdded orig, VoidSurvivorController self, OverlayController controller, GameObject instance)
+        {
+            orig(self, controller, instance);
+
+            if (ModConfig.TempWristHUDValue && self.characterBody.IsLocalBody() && Utils.localCameraRig && Utils.localCameraRig.hud)
+            {
+                RectTransform healthbarTransform = Utils.localCameraRig.hud.healthBar.transform as RectTransform;
+                instance.transform.SetParent(healthbarTransform);
+
+                RectTransform instanceTransform = instance.transform as RectTransform;
+                RectTransform fillRoot = instanceTransform.Find("FillRoot") as RectTransform;
+
+                instanceTransform.localRotation = Quaternion.identity;
+                instanceTransform.sizeDelta = new Vector2(fillRoot.sizeDelta.y, fillRoot.sizeDelta.y);
+
+                fillRoot.localPosition = Vector3.zero;
+
+                instanceTransform.anchorMin = new Vector2(1, 0.5f);
+                instanceTransform.anchorMax = new Vector2(1, 0.5f);
+                instanceTransform.pivot = new Vector2(1, 0.5f);
+
+                instanceTransform.localPosition = new Vector3(0, healthbarTransform.sizeDelta.y / 2, 0);
+
+                voidFiendCorruptionMeter = instanceTransform;
+
+                RoR2Application.onNextUpdate += MoveOverlayAgainWhyDoINeedToDoThis;
+            }
+        }
+
+        private static void MoveOverlayAgainWhyDoINeedToDoThis()
+        {
+            if (voidFiendCorruptionMeter)
+            {
+                Vector3 pos = voidFiendCorruptionMeter.localPosition;
+                pos.x = 0;
+                voidFiendCorruptionMeter.localPosition = pos;
             }
         }
 
@@ -212,8 +266,6 @@ namespace VRMod
             Transform parentCanvas = self.panelInstance.transform.parent;
             orig(self, networkUIPromptController, localUser, cameraRigController);
             if (parentCanvas) GameObject.Destroy(parentCanvas.gameObject);
-
-            Utils.isPickerPanelOpen = false;
         }
 
         private static void MovePickerPanelToWorld(On.RoR2.PickupPickerController.orig_OnDisplayBegin orig, PickupPickerController self, NetworkUIPromptController networkUIPromptController, LocalUser localUser, CameraRigController cameraRigController)
@@ -240,8 +292,6 @@ namespace VRMod
                 LeTai.Asset.TranslucentImage.TranslucentImage translucentImage = self.panelInstance.gameObject.GetComponent<LeTai.Asset.TranslucentImage.TranslucentImage>();
 
                 if (translucentImage) translucentImage.enabled = false;
-
-                Utils.isPickerPanelOpen = true;
             }
         }
 
@@ -251,8 +301,8 @@ namespace VRMod
 
             if (cameraRig && cameraRig.hud)
             {
-                GameObject gameObject = Object.Instantiate(Resources.Load<GameObject>("Prefabs/HUDSimple"));
-                HUD hud = gameObject.GetComponent<HUD>();
+                GameObject hudInstance = Object.Instantiate(Resources.Load<GameObject>("Prefabs/HUDSimple"));
+                HUD hud = hudInstance.GetComponent<HUD>();
                 hud.cameraRigController = cameraRig;
                 Canvas canvas = hud.GetComponent<Canvas>();
                 canvas.worldCamera = livCamera;
@@ -260,11 +310,11 @@ namespace VRMod
                 Object.Destroy(hud.GetComponent<CrosshairManager>());
                 hud.localUserViewer = cameraRig.localUserViewer;
 
-                Object.Destroy(gameObject.transform.Find("MainContainer/MainUIArea/CrosshairCanvas").gameObject);
-                Object.Destroy(gameObject.transform.Find("MainContainer/MainUIArea/Hitmarker").gameObject);
+                Object.Destroy(hudInstance.transform.Find("MainContainer/MainUIArea/CrosshairCanvas").gameObject);
+                Object.Destroy(hudInstance.transform.Find("MainContainer/MainUIArea/Hitmarker").gameObject);
 
                 int dummyLayer = LayerIndex.triggerZone.intVal;
-                gameObject.SetLayerRecursive(dummyLayer);
+                hudInstance.SetLayerRecursive(dummyLayer);
 
                 livHUD = hud;
             }

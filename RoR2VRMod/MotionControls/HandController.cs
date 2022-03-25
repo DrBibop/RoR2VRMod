@@ -48,9 +48,15 @@ namespace VRMod
 
         internal bool forceRay;
 
+        internal bool stabilisePosition;
+
         private Hand uiHand;
 
         private bool _uiMode;
+
+        private Vector3 lastPosition;
+
+        private Quaternion lastRotation;
 
         private bool rayActive => (!uiMode && (currentHand.useRay || forceRay)) || (uiMode && this == MotionControls.GetHandByDominance(true));
 
@@ -96,6 +102,9 @@ namespace VRMod
             uiHand.gameObject.SetActive(false);
 
             ray.material.color = ModConfig.RayColor;
+
+            lastPosition = Vector3.zero;
+            lastRotation = Quaternion.identity;
         }
 
         private void OnEnable()
@@ -139,11 +148,23 @@ namespace VRMod
                 handPosition += handRotation * Vector3.back * 0.05f;
             }
 
+            if (!uiMode && stabilisePosition)
+            {
+                Vector3 posVel = new Vector3();
+                handPosition = Vector3.SmoothDamp(lastPosition, handPosition, ref posVel, 0.05f * ModConfig.AimStabiliserAmount.Value, int.MaxValue, Time.unscaledDeltaTime);
+            }
+
+            Quaternion deriv = new Quaternion();
+            handRotation = lastRotation.SmoothDamp(handRotation, ref deriv, 0.05f * ModConfig.AimStabiliserAmount.Value);
+
             transform.localPosition = handPosition;
             transform.localRotation = handRotation;
 
             uiHand.transform.position = handPosition;
             uiHand.transform.rotation = handRotation;
+
+            lastPosition = handPosition;
+            lastRotation = handRotation;
         }
 
         private void LateUpdate()
@@ -198,7 +219,7 @@ namespace VRMod
                 }
             }
 
-            VRMod.StaticLogger.LogWarning(string.Format("Could not find hand with name \'{0}\'. Using default pointer.", bodyName));
+            VRMod.StaticLogger.LogWarning(string.Format("Could not find hand with name \'{0}\'. This character is likely not VR supported and some abilities might not work as intended. Using default pointer.", bodyName));
         }
 
         internal void SetPrefabs(List<GameObject> prefabs)

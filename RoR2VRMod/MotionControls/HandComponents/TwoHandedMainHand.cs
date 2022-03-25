@@ -28,17 +28,25 @@ namespace VRMod
 
         private Quaternion originalRotation;
 
+        private HandController parentHand;
+
         private void Awake()
         {
+            parentHand = GetComponentInParent<HandController>();
             originalRotation = objectToGuide.localRotation;
+        }
+
+        private void OnDisable()
+        {
+            if (parentHand) parentHand.stabilisePosition = false;
         }
 
         private void Update()
         {
+            HandController hand = GetComponentInParent<HandController>();
+
             if (!targetHand)
             {
-                HandController hand = GetComponentInParent<HandController>();
-
                 if (hand)
                 {
                     targetHand = hand.oppositeHand.currentHand.GetComponent<TwoHandedGuidingHand>();
@@ -81,6 +89,8 @@ namespace VRMod
                     targetHand.objectToDisableWhenTwoHanded.SetActive(true);
                 }
             }
+
+            if (parentHand && parentHand.stabilisePosition != isHandWithinRange) parentHand.stabilisePosition = isHandWithinRange;
         }
     }
 }

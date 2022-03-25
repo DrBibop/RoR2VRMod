@@ -38,8 +38,9 @@ namespace VRMod
 
         private static TwoHandedMainHand banditMainHand;
         private static MeleeSkill mercMelee;
-        private static MeleeSkill loaderMelee;
-        private static MeleeSkill acridMelee;
+        private static MeleeSkill[] loaderMelee;
+        private static MeleeSkill[] acridMelee;
+        private static TwoHandedMainHand railgunnerMainHand;
 
         internal struct HUDQueueEntry
         {
@@ -66,13 +67,14 @@ namespace VRMod
             {
                 pcmc.master.onBodyStart += (body) =>
                 {
-                    if (!body.master.IsLocalMaster()) return;
+                    if (!body.master.IsLocalMaster() || body == currentBody) return;
 
                     currentBody = body;
                     string bodyName = body.name.Substring(0, body.name.IndexOf("(Clone)"));
                     VRMod.StaticLogger.LogInfo(String.Format("Local cached body \'{0}\' found. Applying hand pair.", bodyName));
 
                     SetHandPair(body);
+                    Controllers.ApplyRemaps(bodyName);
                 };
             };
 
@@ -86,6 +88,8 @@ namespace VRMod
             };
 
             On.RoR2.CharacterBody.OnInventoryChanged += OnInventoryChanged;
+
+            On.RoR2.CharacterModel.InitMaterials += ShrinkShieldEffects;
 
             handControllerPrefab = VRMod.VRAssetBundle.LoadAsset<GameObject>("VRHand");
 
@@ -112,8 +116,15 @@ namespace VRMod
                 "AcridHand2",
                 "CaptainHand",
                 "CaptainGun",
-                "HereticWing"
+                "HereticWing",
+                "VoidFiendStub",
+                "VoidFiendHand",
+                "RailgunnerRifle",
+                "RailgunnerHand"
             };
+
+            loaderMelee = new MeleeSkill[2];
+            acridMelee = new MeleeSkill[2];
 
             foreach (string prefabName in prefabNames)
             {
@@ -125,23 +136,41 @@ namespace VRMod
 
                     banditMainHand.snapAngle = ModConfig.BanditWeaponGripSnapAngle.Value;
                 }
-                if (prefabName == "MercSword")
+                else if (prefabName == "MercSword")
                 {
                     mercMelee = prefab.GetComponent<MeleeSkill>();
 
                     mercMelee.speedThreshold = ModConfig.MercSwingSpeedThreshold.Value;
                 }
-                if (prefabName == "LoaderHand" || prefabName == "LoaderHand2")
+                else if (prefabName == "LoaderHand")
                 {
-                    loaderMelee = prefab.GetComponent<MeleeSkill>();
+                    loaderMelee[0] = prefab.GetComponent<MeleeSkill>();
 
-                    loaderMelee.speedThreshold = ModConfig.LoaderSwingSpeedThreshold.Value;
+                    loaderMelee[0].speedThreshold = ModConfig.LoaderSwingSpeedThreshold.Value;
                 }
-                if (prefabName == "AcridHand" || prefabName == "AcridHand2")
+                else if (prefabName == "LoaderHand2")
                 {
-                    acridMelee = prefab.GetComponent<MeleeSkill>();
+                    loaderMelee[1] = prefab.GetComponent<MeleeSkill>();
 
-                    acridMelee.speedThreshold = ModConfig.AcridSwingSpeedThreshold.Value;
+                    loaderMelee[1].speedThreshold = ModConfig.LoaderSwingSpeedThreshold.Value;
+                }
+                else if (prefabName == "AcridHand")
+                {
+                    acridMelee[0] = prefab.GetComponent<MeleeSkill>();
+
+                    acridMelee[0].speedThreshold = ModConfig.AcridSwingSpeedThreshold.Value;
+                }
+                else if (prefabName == "AcridHand2")
+                {
+                    acridMelee[1] = prefab.GetComponent<MeleeSkill>();
+
+                    acridMelee[1].speedThreshold = ModConfig.AcridSwingSpeedThreshold.Value;
+                }
+                else if (prefabName == "RailgunnerRifle")
+                {
+                    railgunnerMainHand = prefab.GetComponent<TwoHandedMainHand>();
+
+                    railgunnerMainHand.snapAngle = ModConfig.RailgunnerWeaponGripSnapAngle.Value;
                 }
 
                 if (prefab)
@@ -149,6 +178,20 @@ namespace VRMod
                     AddHandPrefab(prefab);
                 }
             }
+        }
+
+        private static void ShrinkShieldEffects(On.RoR2.CharacterModel.orig_InitMaterials orig)
+        {
+            orig();
+
+            CharacterModel.energyShieldMaterial.SetFloat("_OffsetAmount", 0.01f);
+            CharacterModel.energyShieldMaterial.SetFloat("_AlphaBoost", 0.5f);
+
+            CharacterModel.voidShieldMaterial.SetFloat("_OffsetAmount", 0.01f);
+            CharacterModel.voidShieldMaterial.SetFloat("_AlphaBoost", 0.5f);
+
+            CharacterModel.brittleMaterial.SetFloat("_OffsetAmount", 0.006f);
+            CharacterModel.brittleMaterial.SetFloat("_AlphaBoost", 0.6f);
         }
 
         internal static void UpdateDominance()
@@ -203,6 +246,11 @@ namespace VRMod
             dominantWatchHUD.transform.localPosition = nonDominantWatchHUDpos;
             dominantWatchHUD.transform.localRotation = nonDominantWatchHUDrot;
             nonDominantHand.watchHud = dominantWatchHUD;
+
+            if (currentBody.name.Contains("RailgunnerBody"))
+            {
+                dominantHand.currentHand.GetComponent<SniperScopeController>().UpdateDominance(ModConfig.LeftDominantHand.Value);
+            }
         }
 
         internal static void UpdateRayColor()
@@ -217,11 +265,7 @@ namespace VRMod
 
             banditMainHand.snapAngle = ModConfig.BanditWeaponGripSnapAngle.Value;
 
-            if (HandsReady && dominantHand.currentHand.gameObject.name.Contains("BanditRifle"))
-            {
-                TwoHandedMainHand hand = dominantHand.currentHand.GetComponent<TwoHandedMainHand>();
-                hand.snapAngle = ModConfig.BanditWeaponGripSnapAngle.Value;
-            }
+            UpdateTwoHandedSnapAngleOnCurrentHand(true, "BanditRifle", ModConfig.BanditWeaponGripSnapAngle.Value);
         }
 
         internal static void UpdateMercMeleeThreshold(object sender, EventArgs e)
@@ -237,7 +281,10 @@ namespace VRMod
         {
             if (!ModConfig.MotionControlsEnabled) return;
 
-            loaderMelee.speedThreshold = ModConfig.LoaderSwingSpeedThreshold.Value;
+            for (int i = 0; i < loaderMelee.Length; i++)
+            {
+                loaderMelee[i].speedThreshold = ModConfig.LoaderSwingSpeedThreshold.Value;
+            }
 
             UpdateMeleeThresholdOnCurrentHand(true, "LoaderHand", ModConfig.LoaderSwingSpeedThreshold.Value);
             UpdateMeleeThresholdOnCurrentHand(false, "LoaderHand", ModConfig.LoaderSwingSpeedThreshold.Value);
@@ -247,10 +294,22 @@ namespace VRMod
         {
             if (!ModConfig.MotionControlsEnabled) return;
 
-            acridMelee.speedThreshold = ModConfig.AcridSwingSpeedThreshold.Value;
+            for (int i = 0; i < acridMelee.Length; i++)
+            {
+                acridMelee[i].speedThreshold = ModConfig.LoaderSwingSpeedThreshold.Value;
+            }
 
             UpdateMeleeThresholdOnCurrentHand(true, "AcridHand", ModConfig.AcridSwingSpeedThreshold.Value);
             UpdateMeleeThresholdOnCurrentHand(false, "AcridHand", ModConfig.AcridSwingSpeedThreshold.Value);
+        }
+
+        internal static void UpdateRailgunnerSnapAngle(object sender, EventArgs e)
+        {
+            if (!ModConfig.MotionControlsEnabled) return;
+
+            railgunnerMainHand.snapAngle = ModConfig.RailgunnerWeaponGripSnapAngle.Value;
+
+            UpdateTwoHandedSnapAngleOnCurrentHand(true, "RailgunnerRifle", ModConfig.RailgunnerWeaponGripSnapAngle.Value);
         }
 
         private static void UpdateMeleeThresholdOnCurrentHand(bool dominant, string expectedName, float threshold)
@@ -259,6 +318,15 @@ namespace VRMod
             {
                 MeleeSkill melee = (dominant ? dominantHand : nonDominantHand).currentHand.GetComponent<MeleeSkill>();
                 melee.speedThreshold = threshold;
+            }
+        }
+
+        private static void UpdateTwoHandedSnapAngleOnCurrentHand(bool dominant, string expectedName, float angle)
+        {
+            if (HandsReady && (dominant ? dominantHand : nonDominantHand).currentHand.gameObject.name.Contains(expectedName))
+            {
+                TwoHandedMainHand hand = (dominant ? dominantHand : nonDominantHand).currentHand.GetComponent<TwoHandedMainHand>();
+                hand.snapAngle = angle;
             }
         }
 

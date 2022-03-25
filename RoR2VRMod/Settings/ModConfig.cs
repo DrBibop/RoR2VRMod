@@ -29,6 +29,9 @@ namespace VRMod
         internal static ConfigEntry<float> MercSwingSpeedThreshold { get; private set; }
         internal static ConfigEntry<float> LoaderSwingSpeedThreshold { get; private set; }
         internal static ConfigEntry<float> AcridSwingSpeedThreshold { get; private set; }
+        internal static ConfigEntry<float> RailgunnerWeaponGripSnapAngle { get; private set; }
+        internal static ConfigEntry<float> RailgunnerZoomMultiplier { get; private set; }
+        internal static ConfigEntry<bool> RailgunnerDisableScopeRay { get; private set; }
         internal static Color RayColor = Color.white;
 
         internal static ConfigEntry<bool> WristHUD { get; private set; }
@@ -52,6 +55,7 @@ namespace VRMod
         internal static ConfigEntry<bool> UseMotionControls { get; private set; }
         internal static ConfigEntry<bool> LeftDominantHand { get; private set; }
         internal static ConfigEntry<bool> ControllerMovementDirection { get; private set; }
+        internal static ConfigEntry<float> AimStabiliserAmount { get; private set; }
 
         internal static bool InitialOculusModeValue { get; private set; }
         internal static bool InitialFirstPersonValue { get; private set; }
@@ -140,6 +144,24 @@ namespace VRMod
                 "Acrid: Swing speed threshold",
                 12,
                 "The claw tip speed required to trigger an attack."
+            );
+            RailgunnerWeaponGripSnapAngle = configFile.Bind<float>(
+                "Survivor Settings",
+                "Railgunner: Weapon grip snap angle",
+                50,
+                "Angle in which the non-dominant hand can grip the weapon. Set to 0 to completely disable two-handed gripping. Set to 180 for constant grip."
+            );
+            RailgunnerZoomMultiplier = configFile.Bind<float>(
+                "Survivor Settings",
+                "Railgunner: Zoom multiplier",
+                3f,
+                "Changes the zoom multiplier of the scope."
+            );
+            RailgunnerDisableScopeRay = configFile.Bind<bool>(
+                "Survivor Settings",
+                "Railgunner: Hide ray while scoping",
+                false,
+                "Disables the aim ray while using the scope. Enable this setting if you find it obstructs the scope too much... or if you're a gamer and think no scopes should be harder."
             );
 
             RayColor = HexToColor(RayColorHex.Value);
@@ -257,6 +279,12 @@ namespace VRMod
                 false,
                 "When enabled, pushing forward on the joystick will move the character towards the direction the controller is pointing instead of the head."
             );
+            AimStabiliserAmount = configFile.Bind<float>(
+                "Controls",
+                "Aim stabiliser amount",
+                0.5f,
+                "The amount of smoothing applied to the hand position and rotation. Set to 0 to completely remove stabilisation."
+            );
 
             UpdateDependantValues();
 
@@ -275,12 +303,13 @@ namespace VRMod
             settings.Add("vr_snap_delay", new ConfigSetting(SnapTurnHoldDelay, 0.2f, 1, ConfigSetting.SettingUpdate.Instant));
             settings.Add("vr_controller_movement", new ConfigSetting(ControllerMovementDirection, ConfigSetting.SettingUpdate.Instant));
             settings.Add("vr_vignette", new ConfigSetting(UseConfortVignette, ConfigSetting.SettingUpdate.Instant, ChangeVignetteSetting));
+            settings.Add("vr_left_handed", new ConfigSetting(LeftDominantHand, ConfigSetting.SettingUpdate.Instant, ChangeHandDominance));
+            settings.Add("vr_aim_stabiliser_amount", new ConfigSetting(AimStabiliserAmount, 0f, 1f, ConfigSetting.SettingUpdate.Instant));
             settings.Add("vr_wrist_hud", new ConfigSetting(WristHUD, ConfigSetting.SettingUpdate.NextStage));
             settings.Add("vr_watch_hud", new ConfigSetting(WatchHUD, ConfigSetting.SettingUpdate.NextStage));
             settings.Add("vr_better_health", new ConfigSetting(BetterHealthBar, ConfigSetting.SettingUpdate.NextStage));
             settings.Add("vr_smooth_hud", new ConfigSetting(UseSmoothHUD, ConfigSetting.SettingUpdate.Instant, ChangeSmoothHUD));
             settings.Add("vr_liv_hud", new ConfigSetting(LIVHUD, ConfigSetting.SettingUpdate.Instant, ChangeLIVHUD));
-            settings.Add("vr_left_handed", new ConfigSetting(LeftDominantHand, ConfigSetting.SettingUpdate.Instant, ChangeHandDominance));
             settings.Add("vr_roomscale", new ConfigSetting(Roomscale, ConfigSetting.SettingUpdate.AfterRestart));
             settings.Add("vr_height", new ConfigSetting(PlayerHeight, 1.5f, 2.2f, ConfigSetting.SettingUpdate.NextStage));
             settings.Add("vr_ray_color", new ConfigSetting(RayColorHex, ConfigSetting.SettingUpdate.Instant, ChangeRayColor));
@@ -290,6 +319,9 @@ namespace VRMod
             settings.Add("vr_merc_threshold", new ConfigSetting(MercSwingSpeedThreshold, 5, 50, ConfigSetting.SettingUpdate.Instant, MotionControls.UpdateMercMeleeThreshold));
             settings.Add("vr_loader_threshold", new ConfigSetting(LoaderSwingSpeedThreshold, 5, 50, ConfigSetting.SettingUpdate.Instant, MotionControls.UpdateLoaderMeleeThreshold));
             settings.Add("vr_acrid_threshold", new ConfigSetting(AcridSwingSpeedThreshold, 5, 50, ConfigSetting.SettingUpdate.Instant, MotionControls.UpdateAcridMeleeThreshold));
+            settings.Add("vr_railgunner_angle", new ConfigSetting(RailgunnerWeaponGripSnapAngle, 0, 180, ConfigSetting.SettingUpdate.Instant, MotionControls.UpdateRailgunnerSnapAngle));
+            settings.Add("vr_railgunner_zoom", new ConfigSetting(RailgunnerZoomMultiplier, 2, 4, ConfigSetting.SettingUpdate.Instant));
+            settings.Add("vr_railgunner_scoperay", new ConfigSetting(RailgunnerDisableScopeRay, ConfigSetting.SettingUpdate.Instant));
             settings.Add("vr_hud_width", new ConfigSetting(HUDWidth, 400, 2400, ConfigSetting.SettingUpdate.Instant, ChangeHUDSize));
             settings.Add("vr_hud_height", new ConfigSetting(HUDHeight, 400, 2400, ConfigSetting.SettingUpdate.Instant, ChangeHUDSize));
             settings.Add("vr_anchor_bottom", new ConfigSetting(BottomAnchor, 0, 1, ConfigSetting.SettingUpdate.Instant, ChangeHUDAnchors));

@@ -1,4 +1,5 @@
 ﻿using RoR2;
+using RoR2.Skills;
 using System.Linq;
 using UnityEngine;
 
@@ -31,7 +32,7 @@ namespace VRMod
 
         private void Start()
         {
-            body = Utils.localBody;
+            body = MotionControls.currentBody;
             animator = GetComponent<Animator>();
 
             if (!body || !animator)
@@ -49,26 +50,19 @@ namespace VRMod
                     associatedSkill = body.skillLocator.FindSkill(skillName);
 
                     if (!associatedSkill)
-                    {
-                        try
-                        {
-                            associatedSkill = body.skillLocator.allSkills.ToList().First(x => x.skillDef.skillName == skillName);
-                        }
-                        catch
-                        {
-                            return;
-                        }
-                    }
-
-                    if (associatedSkill)
-                    {
-                        foundSkill = true;
-                        RoR2Application.onUpdate += UpdateBool;
+                    { 
+                        associatedSkill = body.skillLocator.allSkills.ToList().FirstOrDefault(x => x.skillDef.skillName == skillName || SkillCatalog.GetSkillName(x.skillDef.skillIndex) == skillName);
                     }
                 }
                 else
                 {
                     associatedSkill = body.skillLocator.GetSkill(forceSkillSlot);
+                }
+
+                if (associatedSkill)
+                {
+                    foundSkill = true;
+                    RoR2Application.onLateUpdate += UpdateBool;
                 }
             }
         }
@@ -78,7 +72,7 @@ namespace VRMod
             if (parameterType == ParameterType.OnAvailableBool)
             {
                 if (foundSkill)
-                    RoR2Application.onUpdate -= UpdateBool;
+                    RoR2Application.onLateUpdate -= UpdateBool;
             }
             else if (body)
             {
@@ -89,21 +83,23 @@ namespace VRMod
 
         private void OnActivatedAuthority(GenericSkill skill)
         {
-            if ((forceSkillSlot != SkillSlot.None && body.skillLocator.FindSkillSlot(skill) != forceSkillSlot) || skill.skillDef.skillName != skillName) return;
+            if (forceSkillSlot != SkillSlot.None && body.skillLocator.FindSkillSlot(skill) != forceSkillSlot) return;
 
-            animator.SetTrigger(parameterName);
+            if (RoR2.Skills.SkillCatalog.GetSkillName(skill.skillDef.skillIndex) == skillName || skill.skillDef.skillName == skillName)
+                animator.SetTrigger(parameterName);
         }
 
         private void OnActivatedServer(GenericSkill skill)
         {
-            if (body.hasEffectiveAuthority || (forceSkillSlot != SkillSlot.None && body.skillLocator.FindSkillSlot(skill) != forceSkillSlot) || skill.skillDef.skillName != skillName) return;
+            if (body.hasEffectiveAuthority || (forceSkillSlot != SkillSlot.None && body.skillLocator.FindSkillSlot(skill) != forceSkillSlot)) return;
 
-            animator.SetTrigger(parameterName);
+            if (RoR2.Skills.SkillCatalog.GetSkillName(skill.skillDef.skillIndex) == skillName || skill.skillDef.skillName == skillName)
+                animator.SetTrigger(parameterName);
         }
 
         private void UpdateBool()
         {
-            bool available = associatedSkill != null && (associatedSkill.skillDef.skillName == skillName || associatedSkill.skillName == skillName) && associatedSkill.stock > 0;
+            bool available = associatedSkill != null && (associatedSkill.skillDef.skillName == skillName || associatedSkill.skillName == skillName || SkillCatalog.GetSkillName(associatedSkill.skillDef.skillIndex) == skillName) && associatedSkill.stock > 0;
 
             if (available != wasAvailable)
             {

@@ -286,3 +286,19 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - Fixed a bug that caused the vanilla aim-assist to reduce smooth turn speed when looking towards an enemy.
 - Fixed a bug that caused motion controllers to rumble when not using them.
 - Fixed a harmless bug that would spam the console with errors in the main menu.
+
+### 2.7.0
+- Railgunner and Void Fiend are now fully VR supported.
+- Three settings have been added for Railgunner:
+	- "Railgunner: Weapon grip snap angle".
+	- "Railgunner: Zoom multiplier".
+	- "Railgunner: Hide ray while scoping".
+- Added aim stabilisation to improve overall accuracy.
+	- Rotational stabilisation is applied everywhere, but positional stabilisation is also applied when holding two-handed weapons.
+	- The amount of stabilisation can be changed with the new "Aim stabiliser amount" setting.
+- Sprinting and scoping no longer affect the smooth turn speed.
+- The shield generator, plasma shrimp and shaped glass overlay effects on the hands are now smaller and more transparent.
+- Fixed a bug that made the melee swing threshold settings affect only one hand on Loader and Acrid on future runs after changing it.
+- Possibly fixed a bug that sometimes prevented some animations from playing.
+- Possibly fixed a bug that sometimes prevented binding overrides from applying correctly on Loader.
+- Fixed more bugs spamming errors in the console.
