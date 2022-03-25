@@ -289,10 +289,13 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 
 ### 2.7.0
 - Railgunner and Void Fiend are now fully VR supported.
-- A new setting has been added to change the two-handed grip snap angle on Railgunner.
+- Three settings have been added for Railgunner:
+	- "Railgunner: Weapon grip snap angle".
+	- "Railgunner: Zoom multiplier".
+	- "Railgunner: Hide ray while scoping".
 - Added aim stabilisation to improve overall accuracy.
 	- Rotational stabilisation is applied everywhere, but positional stabilisation is also applied when holding two-handed weapons.
-	- The amount of stabilisation can be changed with a new setting.
+	- The amount of stabilisation can be changed with the new "Aim stabiliser amount" setting.
 - Sprinting and scoping no longer affect the smooth turn speed.
 - The shield generator, plasma shrimp and shaped glass overlay effects on the hands are now smaller and more transparent.
 - Fixed a bug that made the melee swing threshold settings affect only one hand on Loader and Acrid on future runs after changing it.
