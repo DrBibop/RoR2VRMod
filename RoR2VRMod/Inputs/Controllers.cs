@@ -50,8 +50,6 @@ namespace VRMod
             if (ModConfig.InitialMotionControlsValue)
                 On.RoR2.UI.MainMenu.MainMenuController.Start += ShowRecenterDialog;
 
-            PlayerCharacterMasterController.onPlayerAdded += SubscribeToBodyEvents;
-
             On.RoR2.GamepadVibration.GamepadVibrationManager.Update += VRHaptics;
 
             IL.RoR2.PlayerCharacterMasterController.Update += ControllerMovementDirection;
@@ -74,10 +72,6 @@ namespace VRMod
             orig();
 
             if (Utils.localUserProfile == null || Utils.localCameraRig == null || Utils.localInputPlayer == null || Utils.localInputPlayer.controllers.GetLastActiveController() == null || Utils.localInputPlayer.controllers.GetLastActiveController().type != ControllerType.Custom) return;
-
-            float vibrationScale = Utils.localUserProfile.gamepadVibrationScale;
-
-            Vector3 rawScreenShakeDisplacement = Utils.localCameraRig.rawScreenShakeDisplacement;
 
             VibrationContext context = new VibrationContext();
             context.localUser = LocalUserManager.GetFirstLocalUser();
@@ -118,6 +112,11 @@ namespace VRMod
         [Obsolete("Deprecated. Use AddSkillBindingOverride instead.")]
         public static void AddSkillRemap(string bodyName, SkillSlot skill1, SkillSlot skill2)
         {
+            if (skillBindingOverrides.Exists(x => x.bodyName == bodyName))
+            {
+                throw new ArgumentException("VR Mod: Cannot add multiple skill binding overrides on the same body.");
+            }
+
             if (skill1 == SkillSlot.None || skill2 == SkillSlot.None)
             {
                 throw new ArgumentException("VR Mod: Cannot override a skill binding with None.");
@@ -149,21 +148,17 @@ namespace VRMod
             skillBindingOverrides.Add(new SkillBindingOverride(bodyName, dominantTrigger, nonDominantTrigger, nonDominantGrip, dominantGrip));
         }
 
-        private static void SubscribeToBodyEvents(PlayerCharacterMasterController obj)
-        {
-            obj.master.onBodyStart += ApplyRemapsFromBody;
-            obj.master.onBodyDestroyed += RevertRemap;
-        }
-
-        private static void ApplyRemapsFromBody(CharacterBody obj)
-        {
-            if (obj.master != Utils.localMaster) return;
-            ApplyRemaps(obj.name.Remove(obj.name.IndexOf("(Clone)")));
-        }
-
         internal static void ApplyRemaps(string bodyName)
         {
-            SkillBindingOverride bindingOverride = skillBindingOverrides.Where(x => x.bodyName == bodyName).FirstOrDefault();
+            if (!skillBindingOverrides.Exists(x => x.bodyName == bodyName))
+            {
+                VRMod.StaticLogger.LogInfo(String.Format("No binding overrides found for \'{0}\'. Using default binding.", bodyName));
+                RevertRemap();
+                return;
+            }
+
+            VRMod.StaticLogger.LogInfo(String.Format("Binding overrides were found for \'{0}\'. Applying overrides.", bodyName));
+            SkillBindingOverride bindingOverride = skillBindingOverrides.FirstOrDefault(x => x.bodyName == bodyName);
 
             if (bindingOverride.bodyName == bodyName)
             {
@@ -199,7 +194,7 @@ namespace VRMod
             }
         }
 
-        internal static void RevertRemap(CharacterBody body)
+        internal static void RevertRemap()
         {
             ControllerMap map = Utils.localInputPlayer.controllers.maps.GetMap(vrControllers, vrGameplayMap.id);
 
@@ -226,7 +221,7 @@ namespace VRMod
 
         internal static void ChangeDominanceDependantMaps()
         {
-            Player player = LocalUserManager.GetFirstLocalUser().inputPlayer;
+            Player player = Utils.localInputPlayer;
 
             for (int i = 7; i < 11; i++)
             {

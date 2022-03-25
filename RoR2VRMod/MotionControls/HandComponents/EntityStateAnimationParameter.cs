@@ -55,7 +55,7 @@ namespace VRMod
             instances.Remove(this);
         }
 
-        private void Start()
+        private void Awake()
         {
             body = MotionControls.currentBody;
             animator = GetComponent<Animator>();

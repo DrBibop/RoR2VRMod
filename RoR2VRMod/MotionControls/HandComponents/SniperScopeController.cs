@@ -61,6 +61,8 @@ namespace VRMod
             scopeUIRenderTexture = new RenderTexture(scopeRenderTexture);
             scopeUIRenderTexture.Create();
 
+            scopeViewRenderer.material = clearMaterial;
+
             On.RoR2.UI.PointViewer.FindCamera += DidntAsk;
             On.RoR2.UI.PointViewer.UpdateAllElementPositions += ReplaceWithScopeCameras;
             On.RoR2.UI.PointViewer.AddElement += ReplaceLayer;
@@ -199,6 +201,8 @@ namespace VRMod
 
         private void OnDestroy()
         {
+            scopeUIRenderTexture.Release();
+
             On.RoR2.UI.PointViewer.FindCamera -= DidntAsk;
             On.RoR2.UI.PointViewer.UpdateAllElementPositions -= ReplaceWithScopeCameras;
             On.RoR2.UI.PointViewer.AddElement -= ReplaceLayer;

@@ -219,7 +219,7 @@ namespace VRMod
                 }
             }
 
-            VRMod.StaticLogger.LogWarning(string.Format("Could not find hand with name \'{0}\'. Using default pointer.", bodyName));
+            VRMod.StaticLogger.LogWarning(string.Format("Could not find hand with name \'{0}\'. This character is likely not VR supported and some abilities might not work as intended. Using default pointer.", bodyName));
         }
 
         internal void SetPrefabs(List<GameObject> prefabs)

@@ -67,13 +67,14 @@ namespace VRMod
             {
                 pcmc.master.onBodyStart += (body) =>
                 {
-                    if (!body.master.IsLocalMaster()) return;
+                    if (!body.master.IsLocalMaster() || body == currentBody) return;
 
                     currentBody = body;
                     string bodyName = body.name.Substring(0, body.name.IndexOf("(Clone)"));
                     VRMod.StaticLogger.LogInfo(String.Format("Local cached body \'{0}\' found. Applying hand pair.", bodyName));
 
                     SetHandPair(body);
+                    Controllers.ApplyRemaps(bodyName);
                 };
             };
 

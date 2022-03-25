@@ -6,8 +6,6 @@ namespace VRMod
 {
     internal static class Utils
     {
-        internal static bool isPickerPanelOpen;
-
         internal static bool isUsingUI => !Run.instance || MPEventSystemManager.primaryEventSystem.isCursorVisible || !MotionControls.currentBody;
 
         private static CharacterMaster _localMaster;
@@ -36,9 +34,16 @@ namespace VRMod
             {
                 if (!_localBody)
                 {
-                    LocalUser user = LocalUserManager.GetFirstLocalUser();
-                    if (user != null)
-                        _localBody = user.cachedBody;
+                    if (MotionControls.HandsReady)
+                    {
+                        _localBody = MotionControls.currentBody;
+                    }
+                    else
+                    {
+                        LocalUser user = LocalUserManager.GetFirstLocalUser();
+                        if (user != null)
+                            _localBody = user.cachedBody;
+                    }
                 }
 
                 return _localBody;

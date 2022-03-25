@@ -266,8 +266,6 @@ namespace VRMod
             Transform parentCanvas = self.panelInstance.transform.parent;
             orig(self, networkUIPromptController, localUser, cameraRigController);
             if (parentCanvas) GameObject.Destroy(parentCanvas.gameObject);
-
-            Utils.isPickerPanelOpen = false;
         }
 
         private static void MovePickerPanelToWorld(On.RoR2.PickupPickerController.orig_OnDisplayBegin orig, PickupPickerController self, NetworkUIPromptController networkUIPromptController, LocalUser localUser, CameraRigController cameraRigController)
@@ -294,8 +292,6 @@ namespace VRMod
                 LeTai.Asset.TranslucentImage.TranslucentImage translucentImage = self.panelInstance.gameObject.GetComponent<LeTai.Asset.TranslucentImage.TranslucentImage>();
 
                 if (translucentImage) translucentImage.enabled = false;
-
-                Utils.isPickerPanelOpen = true;
             }
         }
 
