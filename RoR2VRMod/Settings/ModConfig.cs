@@ -30,6 +30,8 @@ namespace VRMod
         internal static ConfigEntry<float> LoaderSwingSpeedThreshold { get; private set; }
         internal static ConfigEntry<float> AcridSwingSpeedThreshold { get; private set; }
         internal static ConfigEntry<float> RailgunnerWeaponGripSnapAngle { get; private set; }
+        internal static ConfigEntry<float> RailgunnerZoomMultiplier { get; private set; }
+        internal static ConfigEntry<bool> RailgunnerDisableScopeRay { get; private set; }
         internal static Color RayColor = Color.white;
 
         internal static ConfigEntry<bool> WristHUD { get; private set; }
@@ -148,6 +150,18 @@ namespace VRMod
                 "Railgunner: Weapon grip snap angle",
                 50,
                 "Angle in which the non-dominant hand can grip the weapon. Set to 0 to completely disable two-handed gripping. Set to 180 for constant grip."
+            );
+            RailgunnerZoomMultiplier = configFile.Bind<float>(
+                "Survivor Settings",
+                "Railgunner: Zoom multiplier",
+                3f,
+                "Changes the zoom multiplier of the scope."
+            );
+            RailgunnerDisableScopeRay = configFile.Bind<bool>(
+                "Survivor Settings",
+                "Railgunner: Hide ray while scoping",
+                false,
+                "Disables the aim ray while using the scope. Enable this setting if you find it obstructs the scope too much... or if you're a gamer and think no scopes should be harder."
             );
 
             RayColor = HexToColor(RayColorHex.Value);
@@ -306,6 +320,8 @@ namespace VRMod
             settings.Add("vr_loader_threshold", new ConfigSetting(LoaderSwingSpeedThreshold, 5, 50, ConfigSetting.SettingUpdate.Instant, MotionControls.UpdateLoaderMeleeThreshold));
             settings.Add("vr_acrid_threshold", new ConfigSetting(AcridSwingSpeedThreshold, 5, 50, ConfigSetting.SettingUpdate.Instant, MotionControls.UpdateAcridMeleeThreshold));
             settings.Add("vr_railgunner_angle", new ConfigSetting(RailgunnerWeaponGripSnapAngle, 0, 180, ConfigSetting.SettingUpdate.Instant, MotionControls.UpdateRailgunnerSnapAngle));
+            settings.Add("vr_railgunner_zoom", new ConfigSetting(RailgunnerZoomMultiplier, 2, 4, ConfigSetting.SettingUpdate.Instant));
+            settings.Add("vr_railgunner_scoperay", new ConfigSetting(RailgunnerDisableScopeRay, ConfigSetting.SettingUpdate.Instant));
             settings.Add("vr_hud_width", new ConfigSetting(HUDWidth, 400, 2400, ConfigSetting.SettingUpdate.Instant, ChangeHUDSize));
             settings.Add("vr_hud_height", new ConfigSetting(HUDHeight, 400, 2400, ConfigSetting.SettingUpdate.Instant, ChangeHUDSize));
             settings.Add("vr_anchor_bottom", new ConfigSetting(BottomAnchor, 0, 1, ConfigSetting.SettingUpdate.Instant, ChangeHUDAnchors));

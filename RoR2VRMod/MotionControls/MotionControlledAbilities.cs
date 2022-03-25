@@ -245,7 +245,8 @@ namespace VRMod
 
             if (self.characterBody.IsLocalBody())
             {
-                GetHandByDominance(true).currentHand.GetComponent<SniperScopeController>().SetFOV(self.cameraParams.data.fov.value / 3);
+                GetHandByDominance(true).currentHand.GetComponent<SniperScopeController>().SetFOV(self.cameraParams.data.fov.value / ModConfig.RailgunnerZoomMultiplier.Value);
+                GetHandByDominance(true).animator.SetBool("DisableRayOnScope", ModConfig.RailgunnerDisableScopeRay.Value);
             }
         }
 
