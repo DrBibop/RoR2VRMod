@@ -247,37 +247,51 @@ namespace VRMod
         {
             ILCursor c = new ILCursor(il);
 
+            c.GotoNext(x => x.MatchStloc(5));
+            c.EmitDelegate<Func<Transform, Transform>>((headTransform) =>
+            {
+                if (!ModConfig.ControllerMovementDirection.Value) return headTransform;
+
+                if (MotionControls.HandsReady)
+                {
+                    // If controller movement tracking is enabled, replace the base camera transform with the controller transform.
+                    return MotionControls.GetHandByDominance(false).muzzle.transform;
+                }
+                else
+                {
+                    // See below for handling of the case where hands are not ready.
+                    return headTransform;
+                }
+            });
+
             c.GotoNext(x => x.MatchLdloca(6));
             c.GotoNext(x => x.MatchLdloca(6));
 
             c.Emit(OpCodes.Ldloc_S, (byte)6);
             c.EmitDelegate<Func<Vector2, Vector2>>((vector) =>
             {
-                if (!ModConfig.ControllerMovementDirection.Value) return vector;
+                if (!ModConfig.ControllerMovementDirection.Value || MotionControls.HandsReady) return vector;
 
-                float angleDifference;
+                // Special case only for if hands are not ready; in this case, we can't assume a hand transform exists, so we fall back to old logic.
+                // Note: this will only provide y-axis rotation (yaw); z-axis rotation (pitch) will still be controlled by the head.
+                
+                Quaternion controllerRotation = InputTracking.GetLocalRotation(XRNode.LeftHand);
+                Quaternion headRotation = Camera.main.transform.localRotation;
 
-                if (MotionControls.HandsReady)
-                {
-                    Vector3 controllerDirection = MotionControls.GetHandByDominance(false).muzzle.forward;
-                    Vector3 cameraDirection = Camera.main.transform.forward;
-
-                    controllerDirection.y = 0;
-                    cameraDirection.y = 0;
-
-                    angleDifference = Vector3.SignedAngle(controllerDirection, cameraDirection, Vector3.up);
-                }
-                else
-                {
-                    Quaternion controllerRotation = InputTracking.GetLocalRotation(XRNode.LeftHand);
-                    Quaternion headRotation = Camera.main.transform.localRotation;
-
-                    angleDifference = headRotation.eulerAngles.y - controllerRotation.eulerAngles.y;
-                }
+                float angleDifference = headRotation.eulerAngles.y - controllerRotation.eulerAngles.y;
 
                 return Quaternion.Euler(new Vector3(0, 0, angleDifference)) * vector;
             });
             c.Emit(OpCodes.Stloc_S, (byte)6);
+
+            c.GotoNext(x => x.MatchCallvirt<Transform>("get_right"));
+            c.Index += 1;
+            c.EmitDelegate<Func<Vector3, Vector3>>((vector) =>
+            {
+                if (!ModConfig.ControllerMovementDirection.Value || !MotionControls.HandsReady) return vector;
+                // In flight mode, clamp the controller's left-right vector to the xz plane (normal to Vector3.up) so that only pitch and yaw are affected, not roll.
+                return Vector3.ProjectOnPlane(vector, Vector3.up).normalized * vector.magnitude;
+            });
         }
 
         private static void ShowRecenterDialog(On.RoR2.UI.MainMenu.MainMenuController.orig_Start orig, RoR2.UI.MainMenu.MainMenuController self)
