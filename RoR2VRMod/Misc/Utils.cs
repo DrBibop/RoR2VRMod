@@ -76,6 +76,9 @@ namespace VRMod
                     LocalUser user = LocalUserManager.GetFirstLocalUser();
                     if (user != null)
                         _localInputPlayer = user.inputPlayer;
+
+                    if (_localInputPlayer == null)
+                        _localInputPlayer = LocalUserManager.GetRewiredMainPlayer();
                 }
 
                 return _localInputPlayer;

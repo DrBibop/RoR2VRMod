@@ -399,6 +399,12 @@ namespace VRMod
 
         private static void Update()
         {
+            if (!initializedMainPlayer)
+            {
+                if (AddVRController(LocalUserManager.GetRewiredMainPlayer()))
+                    initializedMainPlayer = true;
+            }
+
             LocalUser localUser = LocalUserManager.GetFirstLocalUser();
 
             if (localUser != null)
@@ -408,11 +414,6 @@ namespace VRMod
                     initializedLocalUser = true;
                     RoR2Application.onUpdate -= Update;
                 }
-            }
-            else if (!initializedMainPlayer)
-            {
-                if (AddVRController(LocalUserManager.GetRewiredMainPlayer()))
-                    initializedMainPlayer = true;
             }
         }
 

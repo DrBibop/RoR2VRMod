@@ -90,8 +90,6 @@ namespace VRMod
 
         private List<GameObject> handPrefabs;
 
-        private List<Hand> instantiatedHands = new List<Hand>();
-
         private void Awake()
         {
             SetCurrentHand(pointerHand);
@@ -171,8 +169,10 @@ namespace VRMod
         {
             if (!currentHand) return;
 
-            if (ray.gameObject.activeSelf != rayActive)
-                ray.gameObject.SetActive(rayActive);
+            bool active = rayActive;
+
+            if (ray.gameObject.activeSelf != active)
+                ray.gameObject.SetActive(active);
 
             if (ray.gameObject.activeSelf)
             {
@@ -193,14 +193,6 @@ namespace VRMod
 
         internal void SetCurrentHand(string bodyName)
         {
-            Hand matchingInstantiatedHands = instantiatedHands.FirstOrDefault((hand) => hand.bodyName == bodyName);
-
-            if (matchingInstantiatedHands)
-            {
-                SetCurrentHand(matchingInstantiatedHands);
-                return;
-            }
-
             foreach (GameObject handPrefab in handPrefabs)
             {
                 Hand hand = handPrefab.GetComponent<Hand>();
@@ -211,8 +203,6 @@ namespace VRMod
                 if (hand.bodyName == bodyName)
                 {
                     Hand newHand = Object.Instantiate(handPrefab, transform).GetComponent<Hand>();
-                    instantiatedHands.Add(newHand);
-
                     SetCurrentHand(newHand);
 
                     return;
@@ -233,7 +223,7 @@ namespace VRMod
         private void SetCurrentHand(Hand hand)
         {
             if (currentHand)
-                currentHand.gameObject.SetActive(false);
+                GameObject.Destroy(currentHand.gameObject);
 
             currentHand = hand;
             currentHand.gameObject.SetActive(true);
