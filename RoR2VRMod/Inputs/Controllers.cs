@@ -283,6 +283,15 @@ namespace VRMod
                 return Quaternion.Euler(new Vector3(0, 0, angleDifference)) * vector;
             });
             c.Emit(OpCodes.Stloc_S, (byte)6);
+
+            c.GotoNext(x => x.MatchCallvirt<Transform>("get_right"));
+            c.Index += 1;
+            c.EmitDelegate<Func<Vector3, Vector3>>((vector) =>
+            {
+                if (!ModConfig.ControllerMovementDirection.Value || !MotionControls.HandsReady) return vector;
+                // In flight mode, clamp the controller's left-right vector to the xz plane (normal to Vector3.up) so that only pitch and yaw are affected, not roll.
+                return Vector3.ProjectOnPlane(vector, Vector3.up).normalized * vector.magnitude;
+            });
         }
 
         private static void ShowRecenterDialog(On.RoR2.UI.MainMenu.MainMenuController.orig_Start orig, RoR2.UI.MainMenu.MainMenuController self)
