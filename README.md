@@ -84,6 +84,7 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 **Ncognito:** 3D artist\
 **eliotttate:** Original creator, code assist\
 **HutchyBen:** Code assist\
+**AmadeusMop:** Code assist\
 **Daerst:** Fixed the biggest and oldest bug of this mod. Thank you so much.
 
 # Changelog
@@ -302,3 +303,8 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - Possibly fixed a bug that sometimes prevented some animations from playing.
 - Possibly fixed a bug that sometimes prevented binding overrides from applying correctly on Loader.
 - Fixed more bugs spamming errors in the console.
+
+### 2.7.1
+- Fixed a bug that broke the UI pointer when no profile was loaded.
+- Fixed a bug that prevented players from controlling their vertical flying direction with Milky Chrysalis when using controller direction for movement.
+- Fixed a bug that broke the command/scrapper UI when closing it.
