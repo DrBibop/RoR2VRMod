@@ -39,6 +39,8 @@ namespace VRMod
 
         private static Transform voidFiendCorruptionMeter;
 
+        private static GameObject pickerCanvas;
+
         internal static HUD livHUD;
 
         internal static void Init()
@@ -263,9 +265,8 @@ namespace VRMod
 
         private static void DestroyPickerPanelCanvas(On.RoR2.PickupPickerController.orig_OnDisplayEnd orig, PickupPickerController self, NetworkUIPromptController networkUIPromptController, LocalUser localUser, CameraRigController cameraRigController)
         {
-            Transform parentCanvas = self.panelInstance.transform.parent;
             orig(self, networkUIPromptController, localUser, cameraRigController);
-            if (parentCanvas) GameObject.Destroy(parentCanvas.gameObject);
+            if (pickerCanvas) GameObject.Destroy(pickerCanvas);
         }
 
         private static void MovePickerPanelToWorld(On.RoR2.PickupPickerController.orig_OnDisplayBegin orig, PickupPickerController self, NetworkUIPromptController networkUIPromptController, LocalUser localUser, CameraRigController cameraRigController)
@@ -274,7 +275,7 @@ namespace VRMod
 
             if (self.panelInstance && GetUICamera())
             {
-                GameObject pickerCanvas = GameObject.Instantiate(pickerCanvasPrefab);
+                pickerCanvas = GameObject.Instantiate(pickerCanvasPrefab);
                 pickerCanvas.GetComponent<Canvas>().worldCamera = cachedUICam;
                 pickerCanvas.transform.rotation = Quaternion.Euler(0, cachedUICam.transform.eulerAngles.y, 0);
                 pickerCanvas.transform.position = pickerCanvas.transform.forward * 4;
