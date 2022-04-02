@@ -203,7 +203,7 @@ namespace VRMod
             On.EntityStates.Captain.Weapon.FireTazer.Fire += ChangeTazerMuzzleShoot;
 
             On.EntityStates.Railgunner.Scope.BaseWindUp.OnEnter += SetScopeFOV;
-            On.EntityStates.Railgunner.Scope.BaseScopeState.OnEnter += RemoveScopeCritOverlay;
+            On.EntityStates.Railgunner.Scope.BaseScopeState.OnEnter += RemoveScopeOverlay;
             On.EntityStates.Railgunner.Weapon.BaseFireSnipe.OnEnter += ChangeSniperMuzzle;
             IL.EntityStates.Railgunner.Reload.Waiting.CanReload += AllowReloadWhileScoped;
 
@@ -222,7 +222,7 @@ namespace VRMod
             orig(self);
         }
 
-        private static void RemoveScopeCritOverlay(On.EntityStates.Railgunner.Scope.BaseScopeState.orig_OnEnter orig, EntityStates.Railgunner.Scope.BaseScopeState self)
+        private static void RemoveScopeOverlay(On.EntityStates.Railgunner.Scope.BaseScopeState.orig_OnEnter orig, EntityStates.Railgunner.Scope.BaseScopeState self)
         {
             Transform overlay = self.scopeOverlayPrefab.transform.Find("ScopeOverlay");
 
