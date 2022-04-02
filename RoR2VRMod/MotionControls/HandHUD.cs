@@ -29,6 +29,7 @@ namespace VRMod
         {
             canvas = GetComponentInChildren<Canvas>();
             canvas.transform.SetParent(null);
+            canvas.gameObject.layer = LayerIndex.ui.intVal;
 
             origScale = transform.localScale;
         }
