@@ -32,6 +32,9 @@ namespace VRMod
         internal static ConfigEntry<float> RailgunnerWeaponGripSnapAngle { get; private set; }
         internal static ConfigEntry<float> RailgunnerZoomMultiplier { get; private set; }
         internal static ConfigEntry<bool> RailgunnerDisableScopeRay { get; private set; }
+        internal static ConfigEntry<bool> RailgunnerKeepScopeVisible { get; private set; }
+        internal static ConfigEntry<bool> RailgunnerShowCritTargetsInWorld { get; private set; }
+        internal static ConfigEntry<bool> RailgunnerReloadWhileScoped { get; private set; }
         internal static Color RayColor = Color.white;
 
         internal static ConfigEntry<bool> WristHUD { get; private set; }
@@ -162,6 +165,24 @@ namespace VRMod
                 "Railgunner: Hide ray while scoping",
                 false,
                 "Disables the aim ray while using the scope. Enable this setting if you find it obstructs the scope too much... or if you're a gamer and think no scopes should be harder."
+            );
+            RailgunnerKeepScopeVisible = configFile.Bind<bool>(
+                "Survivor Settings",
+                "Railgunner: Keep scope visible when not scoping",
+                false,
+                "Keeps the scope view visible all the time, not just while sniping."
+            );
+            RailgunnerShowCritTargetsInWorld = configFile.Bind<bool>(
+                "Survivor Settings",
+                "Railgunner: Show critical hit targets in the world",
+                false,
+                "Displays critical hit boxes on enemies in the world rather than through the scope."
+            );
+            RailgunnerReloadWhileScoped = configFile.Bind<bool>(
+                "Survivor Settings",
+                "Railgunner: Reload while scoped",
+                false,
+                "Allows Railgunner to reload even while scoped."
             );
 
             RayColor = HexToColor(RayColorHex.Value);
@@ -322,6 +343,9 @@ namespace VRMod
             settings.Add("vr_railgunner_angle", new ConfigSetting(RailgunnerWeaponGripSnapAngle, 0, 180, ConfigSetting.SettingUpdate.Instant, MotionControls.UpdateRailgunnerSnapAngle));
             settings.Add("vr_railgunner_zoom", new ConfigSetting(RailgunnerZoomMultiplier, 2, 4, ConfigSetting.SettingUpdate.Instant));
             settings.Add("vr_railgunner_scoperay", new ConfigSetting(RailgunnerDisableScopeRay, ConfigSetting.SettingUpdate.Instant));
+            settings.Add("vr_railgunner_scopevisible", new ConfigSetting(RailgunnerKeepScopeVisible, ConfigSetting.SettingUpdate.Instant));
+            settings.Add("vr_railgunner_crit_targets", new ConfigSetting(RailgunnerShowCritTargetsInWorld, ConfigSetting.SettingUpdate.Instant));
+            settings.Add("vr_railgunner_reloadscoped", new ConfigSetting(RailgunnerReloadWhileScoped, ConfigSetting.SettingUpdate.Instant));
             settings.Add("vr_hud_width", new ConfigSetting(HUDWidth, 400, 2400, ConfigSetting.SettingUpdate.Instant, ChangeHUDSize));
             settings.Add("vr_hud_height", new ConfigSetting(HUDHeight, 400, 2400, ConfigSetting.SettingUpdate.Instant, ChangeHUDSize));
             settings.Add("vr_anchor_bottom", new ConfigSetting(BottomAnchor, 0, 1, ConfigSetting.SettingUpdate.Instant, ChangeHUDAnchors));

@@ -203,8 +203,9 @@ namespace VRMod
             On.EntityStates.Captain.Weapon.FireTazer.Fire += ChangeTazerMuzzleShoot;
 
             On.EntityStates.Railgunner.Scope.BaseWindUp.OnEnter += SetScopeFOV;
-            On.EntityStates.Railgunner.Scope.BaseScopeState.OnEnter += RemoveOverlay;
+            On.EntityStates.Railgunner.Scope.BaseScopeState.OnEnter += RemoveScopeCritOverlay;
             On.EntityStates.Railgunner.Weapon.BaseFireSnipe.OnEnter += ChangeSniperMuzzle;
+            IL.EntityStates.Railgunner.Reload.Waiting.CanReload += AllowReloadWhileScoped;
 
             On.EntityStates.VoidSurvivor.VoidBlinkBase.OnEnter += ChangeBlinkDirection;
 
@@ -221,7 +222,7 @@ namespace VRMod
             orig(self);
         }
 
-        private static void RemoveOverlay(On.EntityStates.Railgunner.Scope.BaseScopeState.orig_OnEnter orig, EntityStates.Railgunner.Scope.BaseScopeState self)
+        private static void RemoveScopeCritOverlay(On.EntityStates.Railgunner.Scope.BaseScopeState.orig_OnEnter orig, EntityStates.Railgunner.Scope.BaseScopeState self)
         {
             Transform overlay = self.scopeOverlayPrefab.transform.Find("ScopeOverlay");
 
@@ -233,10 +234,22 @@ namespace VRMod
             {
                 self.overlayController.onInstanceAdded += (controller, instance) =>
                 {
-                    GetHandByDominance(true).currentHand.GetComponent<SniperScopeController>().SetOverlay(instance);
+                    if(!ModConfig.RailgunnerShowCritTargetsInWorld.Value) GetHandByDominance(true).currentHand.GetComponent<SniperScopeController>().SetOverlay(instance);
                 };
                 return;
             }
+        }
+
+        private static void AllowReloadWhileScoped(ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
+
+            c.GotoNext(x => x.MatchCallvirt<EntityStateMachine>("IsInMainState"));
+            c.Index += 1;
+            c.EmitDelegate<Func<bool, bool>>((orig) =>
+            {
+                return ModConfig.RailgunnerReloadWhileScoped.Value || orig;
+            });
         }
 
         private static void SetScopeFOV(On.EntityStates.Railgunner.Scope.BaseWindUp.orig_OnEnter orig, EntityStates.Railgunner.Scope.BaseWindUp self)
