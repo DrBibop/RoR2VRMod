@@ -1,9 +1,7 @@
-﻿using HG;
-using On.RoR2.Networking;
+﻿using On.RoR2.Networking;
 using RoR2;
 using RoR2.HudOverlay;
 using RoR2.UI;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -628,13 +626,16 @@ namespace VRMod
 
         private static void UpdateAllHealthBarPositionsVR(On.RoR2.UI.CombatHealthBarViewer.orig_UpdateAllHealthbarPositions orig, RoR2.UI.CombatHealthBarViewer self, Camera sceneCam, Camera uiCam)
         {
-            foreach (CombatHealthBarViewer.HealthBarInfo healthBarInfo in self.victimToHealthBarInfo.Values)
+            if (sceneCam && uiCam)
             {
-                Vector3 position = healthBarInfo.sourceTransform.position;
-                position.y += healthBarInfo.verticalOffset;
-                Vector3 vector = sceneCam.transform.parent.InverseTransformPoint(position);
-                healthBarInfo.healthBarRootObjectTransform.position = vector;
-                healthBarInfo.healthBarRootObjectTransform.localScale = 0.1f * Vector3.Distance(uiCam.transform.position, vector) * Vector3.one;
+                foreach (CombatHealthBarViewer.HealthBarInfo healthBarInfo in self.victimToHealthBarInfo.Values)
+                {
+                    Vector3 position = healthBarInfo.sourceTransform.position;
+                    position.y += healthBarInfo.verticalOffset;
+                    Vector3 vector = sceneCam.transform.parent.InverseTransformPoint(position);
+                    healthBarInfo.healthBarRootObjectTransform.position = vector;
+                    healthBarInfo.healthBarRootObjectTransform.localScale = 0.1f * Vector3.Distance(uiCam.transform.position, vector) * Vector3.one;
+                }
             }
         }
     }

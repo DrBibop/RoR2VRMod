@@ -9,68 +9,25 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath>C:\Users\olipo\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Default\BepInEx\core\0Harmony.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\stubs\Assembly-CSharp-nstrip.dll</HintPath>
-    </Reference>
-    <Reference Include="BepInEx">
-      <HintPath>C:\Users\olipo\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Default\BepInEx\core\BepInEx.dll</HintPath>
-    </Reference>
-    <Reference Include="BepInEx.Harmony">
-      <HintPath>C:\Users\olipo\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Default\BepInEx\core\BepInEx.Harmony.dll</HintPath>
-    </Reference>
-    <Reference Include="BepInEx.Preloader">
-      <HintPath>C:\Users\olipo\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Default\BepInEx\core\BepInEx.Preloader.dll</HintPath>
-    </Reference>
-    <Reference Include="com.unity.multiplayer-hlapi.Runtime">
-      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\com.unity.multiplayer-hlapi.Runtime.dll</HintPath>
-    </Reference>
+    <PackageReference Include="BepInEx.Analyzers" Version="1.0.*">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="BepInEx.Core" Version="5.4.19" />
+    <PackageReference Include="RiskOfRain2.GameLibs" Version="1.2.3.1-r.0" />
+    <PackageReference Include="UnityEngine.Modules" Version="2019.4.26" />
+    <PackageReference Include="MMHOOK.RoR2" Version="2022.4.19">
+      <NoWarn>NU1701</NoWarn>
+    </PackageReference>
+    <PackageReference Include="R2API" Version="4.3.5" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="Decalicious">
       <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\stubs\Decalicious-nstrip.dll</HintPath>
     </Reference>
-    <Reference Include="HarmonyXInterop">
-      <HintPath>C:\Users\olipo\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Default\BepInEx\core\HarmonyXInterop.dll</HintPath>
-    </Reference>
-    <Reference Include="HGCSharpUtils">
-      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\HGCSharpUtils.dll</HintPath>
-    </Reference>
-    <Reference Include="HGUnityUtils">
-      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\HGUnityUtils.dll</HintPath>
-    </Reference>
-    <Reference Include="LegacyResourcesAPI">
-      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\LegacyResourcesAPI.dll</HintPath>
-    </Reference>
     <Reference Include="MMHOOK_RoR2">
       <HintPath>..\..\MMHOOK_RoR2.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Cecil">
-      <HintPath>C:\Users\olipo\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Default\BepInEx\core\Mono.Cecil.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Cecil.Mdb">
-      <HintPath>C:\Users\olipo\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Default\BepInEx\core\Mono.Cecil.Mdb.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Cecil.Pdb">
-      <HintPath>C:\Users\olipo\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Default\BepInEx\core\Mono.Cecil.Pdb.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Cecil.Rocks">
-      <HintPath>C:\Users\olipo\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Default\BepInEx\core\Mono.Cecil.Rocks.dll</HintPath>
-    </Reference>
-    <Reference Include="MonoMod.RuntimeDetour">
-      <HintPath>C:\Users\olipo\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Default\BepInEx\core\MonoMod.RuntimeDetour.dll</HintPath>
-    </Reference>
-    <Reference Include="MonoMod.Utils">
-      <HintPath>C:\Users\olipo\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Default\BepInEx\core\MonoMod.Utils.dll</HintPath>
-    </Reference>
-    <Reference Include="Rewired_Core">
-      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\stubs\Rewired_Core-nstrip.dll</HintPath>
-    </Reference>
-    <Reference Include="Rewired_CSharp">
-      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\stubs\Rewired_CSharp-nstrip.dll</HintPath>
-    </Reference>
-    <Reference Include="RoR2">
-      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\stubs\RoR2.refstub.dll</HintPath>
     </Reference>
     <Reference Include="SteamVR">
       <HintPath>..\..\..\Unity\risk of rain 2\build\risk of rain 2_Data\Managed\SteamVR.dll</HintPath>
@@ -78,56 +35,8 @@
     <Reference Include="SteamVR_Actions">
       <HintPath>..\..\..\Unity\risk of rain 2\build\risk of rain 2_Data\Managed\SteamVR_Actions.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.Addressables">
-      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\Unity.Addressables.dll</HintPath>
-    </Reference>
     <Reference Include="Unity.Postprocessing.Runtime">
       <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\Unity.Postprocessing.Runtime.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.ResourceManager">
-      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\Unity.ResourceManager.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.TextMeshPro">
-      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\Unity.TextMeshPro.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\UnityEngine.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.AnimationModule">
-      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.AssetBundleModule">
-      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.DirectorModule">
-      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\UnityEngine.DirectorModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.InputModule">
-      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\UnityEngine.InputModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.ParticleSystemModule">
-      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\UnityEngine.UI.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UIModule">
-      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\UnityEngine.UIModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.VRModule">
-      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\UnityEngine.VRModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.XRModule">
-      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\UnityEngine.XRModule.dll</HintPath>
     </Reference>
   </ItemGroup>
 

@@ -5,6 +5,7 @@ using UnityEngine.XR;
 using System.Collections;
 using BepInEx.Logging;
 using UnityEngine;
+using Valve.VR;
 
 [module: UnverifiableCode]
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -57,11 +58,11 @@ namespace VRMod
 
             if (!useOculus)
             {
-                Valve.VR.SteamVR_Settings.instance.trackingSpace = ModConfig.InitialRoomscaleValue ? Valve.VR.ETrackingUniverseOrigin.TrackingUniverseStanding : Valve.VR.ETrackingUniverseOrigin.TrackingUniverseSeated;
-                Valve.VR.SteamVR_Settings.instance.pauseGameWhenDashboardVisible = false;
-                Valve.VR.SteamVR.Initialize();
-                Valve.VR.SteamVR_Actions.gameplay.Activate();
-                Valve.VR.SteamVR_Actions.ui.Activate();
+                SteamVR_Settings.instance.trackingSpace = ModConfig.InitialRoomscaleValue ? ETrackingUniverseOrigin.TrackingUniverseStanding : ETrackingUniverseOrigin.TrackingUniverseSeated;
+                SteamVR_Settings.instance.pauseGameWhenDashboardVisible = false;
+                SteamVR.Initialize();
+                SteamVR_Actions.gameplay.Activate();
+                SteamVR_Actions.ui.Activate();
             }
             Controllers.Init();
             ControllerGlyphs.Init();
