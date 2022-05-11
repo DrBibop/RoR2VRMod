@@ -26,7 +26,7 @@ namespace VRMod
 
         public static SetHandPairEventHandler onHandPairSet;
 
-        internal delegate void SkinAppliedEventHandler();
+        internal delegate void SkinAppliedEventHandler(SkinDef skinDef);
 
         internal static SkinAppliedEventHandler onSkinApplied;
 
@@ -81,9 +81,9 @@ namespace VRMod
             On.RoR2.ModelSkinController.ApplySkin += (orig, self, index) =>
             {
                 orig(self, index);
-                if (self.characterModel.body == currentBody && onSkinApplied != null)
+                if (index == self.currentSkinIndex && self.characterModel.body == currentBody && onSkinApplied != null)
                 {
-                    onSkinApplied();
+                    onSkinApplied(self.skins[index]);
                 }
             };
 
@@ -476,6 +476,29 @@ namespace VRMod
             }
 
             handPrefabs.Add(handPrefab);
+        }
+
+        /// <summary>
+        /// Adds a hand skin definition to be used on a certain hand prefab.
+        /// </summary>
+        /// <param name="skinDef">The skin definition.</param>
+        public static void AddHandSkin(HandSkinDef skinDef)
+        {
+            List<GameObject> associatedHandPrefabs = handPrefabs.Where(x => {
+                Hand hand = x.GetComponent<Hand>();
+                return hand.bodyName == skinDef.characterBodyName && (skinDef.handType == HandType.Both || skinDef.handType == hand.handType);
+            }).ToList();
+
+            if (associatedHandPrefabs == null && associatedHandPrefabs.Count <= 0)
+            {
+                VRMod.StaticLogger.LogError("No hand prefab was found for hand skin " + skinDef.originalSkinNameToken);
+                return;
+            }
+
+            foreach (GameObject prefab in associatedHandPrefabs)
+            {
+                prefab.GetComponent<Hand>().AddSkin(skinDef);
+            }
         }
 
         /// <summary>
