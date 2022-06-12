@@ -1,6 +1,5 @@
 ﻿using RoR2;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.XR;
 
@@ -30,6 +29,8 @@ namespace VRMod
             }
         }
 
+        public CharacterModel.RendererInfo[] rendererInfos => currentHand.rendererInfos;
+
         internal Ray uiRay
         {
             get
@@ -46,7 +47,9 @@ namespace VRMod
 
         internal HandController oppositeHand;
 
-        internal bool forceRay;
+        internal bool hasAimableEquipment;
+
+        internal bool hasAimableHeresySkill;
 
         internal bool stabilisePosition;
 
@@ -58,7 +61,7 @@ namespace VRMod
 
         private Quaternion lastRotation;
 
-        private bool rayActive => (!uiMode && (currentHand.useRay || forceRay)) || (uiMode && this == MotionControls.GetHandByDominance(true));
+        private bool rayActive => uiMode ? (this == MotionControls.GetHandByDominance(true)) : (currentHand.useRay || hasAimableHeresySkill || (hasAimableEquipment && MotionControls.currentBody?.equipmentSlot?.stock > 0));
 
         internal bool uiMode
         {

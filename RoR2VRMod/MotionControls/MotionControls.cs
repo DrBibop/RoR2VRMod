@@ -336,6 +336,13 @@ namespace VRMod
 
             if (self != currentBody) return;
 
+            RoR2Application.onNextUpdate += UpdateForcedAimRay;
+        }
+
+        private static void UpdateForcedAimRay()
+        {
+            if (!currentBody) return;
+
             EquipmentDef[] aimableEquipments = new EquipmentDef[]
             {
                 RoR2Content.Equipment.Blackhole,
@@ -346,19 +353,22 @@ namespace VRMod
                 RoR2Content.Equipment.Saw
             };
 
-            EquipmentDef currentEquipment = EquipmentCatalog.GetEquipmentDef(self.inventory.currentEquipmentIndex);
+            EquipmentDef currentEquipment = EquipmentCatalog.GetEquipmentDef(currentBody.inventory.currentEquipmentIndex);
 
-            dominantHand.forceRay = false;
-            nonDominantHand.forceRay = false;
+            dominantHand.hasAimableEquipment = false;
+            nonDominantHand.hasAimableEquipment = false;
+
+            dominantHand.hasAimableHeresySkill = false;
+            nonDominantHand.hasAimableHeresySkill = false;
 
             if (aimableEquipments.Contains(currentEquipment))
-                (ModConfig.LeftDominantHand.Value != (currentEquipment == RoR2Content.Equipment.GoldGat) ? dominantHand : nonDominantHand).forceRay = true;
+                (ModConfig.LeftDominantHand.Value != (currentEquipment == RoR2Content.Equipment.GoldGat) ? dominantHand : nonDominantHand).hasAimableEquipment = true;
 
-            if (self.inventory.GetItemCount(RoR2Content.Items.LunarPrimaryReplacement.itemIndex) > 0)
-                dominantHand.forceRay = true;
+            if (currentBody.inventory.GetItemCount(RoR2Content.Items.LunarPrimaryReplacement.itemIndex) > 0)
+                dominantHand.hasAimableHeresySkill = true;
 
-            if (self.inventory.GetItemCount(RoR2Content.Items.LunarSecondaryReplacement.itemIndex) > 0)
-                nonDominantHand.forceRay = true;
+            if (currentBody.inventory.GetItemCount(RoR2Content.Items.LunarSecondaryReplacement.itemIndex) > 0)
+                nonDominantHand.hasAimableHeresySkill = true;
         }
 
         internal static void SetSprintIcon(Image sprintIcon)
@@ -668,6 +678,8 @@ namespace VRMod
                     }
                 }
             }
+
+            UpdateForcedAimRay();
 
             if (onHandPairSet != null)
                 onHandPairSet(body);

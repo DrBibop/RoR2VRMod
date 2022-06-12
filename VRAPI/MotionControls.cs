@@ -5,6 +5,10 @@ namespace VRAPI
 {
     public static class MotionControls
     {
+        public delegate void SetHandPairEventHandler(RoR2.CharacterBody body);
+
+        public static SetHandPairEventHandler onHandPairSet;
+
         private static HandController _dominantHand;
 
         private static HandController _nonDominantHand;
@@ -156,6 +160,7 @@ namespace VRAPI
             public Transform muzzle => handController.muzzle;
             public Ray aimRay => handController.aimRay;
             public Animator animator => handController.animator;
+            public RoR2.CharacterModel.RendererInfo[] rendererInfos => handController.rendererInfos;
 
             public Transform GetMuzzleByIndex(uint index)
             {

@@ -1,7 +1,9 @@
-﻿using On.RoR2.Networking;
+﻿using Mono.Cecil.Cil;
+using MonoMod.Cil;
 using RoR2;
 using RoR2.HudOverlay;
 using RoR2.UI;
+using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -141,12 +143,12 @@ namespace VRMod
 
             On.RoR2.UI.MainMenu.ProfileMainMenuScreen.OpenCreateProfileMenu += SetAddProfileButtonAsDefaultFallback;
 
-            On.RoR2.UI.CreditsPanelController.OnEnable += MoveCreditsToWorldSpace;
+            On.RoR2.CreditsController.OnEnable += MoveCreditsToWorldSpace;
 
             On.RoR2.CameraRigController.OnDestroy += (orig, self) =>
             {
                 orig(self);
-                if (livHUD) Object.Destroy(livHUD.gameObject);
+                if (livHUD) GameObject.Destroy(livHUD.gameObject);
             };
 
             On.RoR2.GameOverController.GenerateReportScreen += (orig, self, hud) =>
@@ -166,7 +168,7 @@ namespace VRMod
                 orig(netMsg);
                 UnparentDialogBoxInternal();
             };
-            NetworkManagerSystem.HandleKick_string += (orig, token) =>
+            On.RoR2.Networking.NetworkManagerSystem.HandleKick_string += (orig, token) =>
             {
                 orig(token);
                 UnparentDialogBoxInternal();
@@ -300,17 +302,17 @@ namespace VRMod
 
             if (cameraRig && cameraRig.hud)
             {
-                GameObject hudInstance = Object.Instantiate(Resources.Load<GameObject>("Prefabs/HUDSimple"));
+                GameObject hudInstance = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/HUDSimple"));
                 HUD hud = hudInstance.GetComponent<HUD>();
                 hud.cameraRigController = cameraRig;
                 Canvas canvas = hud.GetComponent<Canvas>();
                 canvas.worldCamera = livCamera;
                 canvas.planeDistance = 1f;
-                Object.Destroy(hud.GetComponent<CrosshairManager>());
+                GameObject.Destroy(hud.GetComponent<CrosshairManager>());
                 hud.localUserViewer = cameraRig.localUserViewer;
 
-                Object.Destroy(hudInstance.transform.Find("MainContainer/MainUIArea/CrosshairCanvas").gameObject);
-                Object.Destroy(hudInstance.transform.Find("MainContainer/MainUIArea/Hitmarker").gameObject);
+                GameObject.Destroy(hudInstance.transform.Find("MainContainer/MainUIArea/CrosshairCanvas").gameObject);
+                GameObject.Destroy(hudInstance.transform.Find("MainContainer/MainUIArea/Hitmarker").gameObject);
 
                 int dummyLayer = LayerIndex.triggerZone.intVal;
                 hudInstance.SetLayerRecursive(dummyLayer);
@@ -319,7 +321,7 @@ namespace VRMod
             }
         }
 
-        private static void MoveCreditsToWorldSpace(On.RoR2.UI.CreditsPanelController.orig_OnEnable orig, CreditsPanelController self)
+        private static void MoveCreditsToWorldSpace(On.RoR2.CreditsController.orig_OnEnable orig, CreditsController self)
         {
             orig(self);
 
@@ -329,14 +331,14 @@ namespace VRMod
                 creditsCanvas.transform.position = new Vector3(0, 0, 8);
             }
 
-            if (creditsCanvas)
+            if (creditsCanvas && self.creditsPanelController)
             {
-                Transform credits = self.scrollRect.transform;
+                Transform credits = self.creditsPanelController.scrollRect.transform;
                 credits.SetParent(creditsCanvas.transform);
                 credits.localPosition = Vector3.zero;
                 credits.localRotation = Quaternion.identity;
                 credits.localScale = Vector3.one;
-                GameObject.Destroy(self.transform.Find("Backdrop").gameObject);
+                GameObject.Destroy(self.creditsPanelController.transform.Find("Backdrop").gameObject);
             }
         }
 
@@ -369,7 +371,7 @@ namespace VRMod
 
         private static bool GetUICamera()
         {
-            if (cachedUICam == null)
+            if (cachedUICam == null || !cachedUICam.isActiveAndEnabled)
             {
                 CameraRigController rig = Utils.localCameraRig;
                 if (rig)
@@ -533,6 +535,10 @@ namespace VRMod
             rectTransform.localPosition = new Vector3(0, 0, 12.35f);
             rectTransform.pivot = menuPivot;
 
+            if (ModConfig.UseSmoothHUD.Value)
+                hud.mainContainer.AddComponent<SmoothHUD>().Init(hud.cameraRigController.uiCam.transform);
+
+            if (SceneCatalog.mostRecentSceneDef.sceneType == SceneType.Cutscene) return;
 
             if (ModConfig.TempWristHUDValue)
             {
@@ -619,9 +625,6 @@ namespace VRMod
                 alliesCluster.localPosition = Vector3.zero;
                 MotionControls.AddWatchHUD(false, alliesCluster);
             }
-
-            if (ModConfig.UseSmoothHUD.Value)
-                hud.mainContainer.AddComponent<SmoothHUD>().Init(hud.cameraRigController.uiCam.transform);
         }
 
         private static void UpdateAllHealthBarPositionsVR(On.RoR2.UI.CombatHealthBarViewer.orig_UpdateAllHealthbarPositions orig, RoR2.UI.CombatHealthBarViewer self, Camera sceneCam, Camera uiCam)

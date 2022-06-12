@@ -1,5 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
+using System;
 
 namespace VRAPI
 {
@@ -12,6 +13,22 @@ namespace VRAPI
         private void Awake()
         {
             StaticLogger = Logger;
+
+            if (VR.enabled && MotionControls.enabled)
+            {
+                SubscribeToHandPairEvent();
+            }
+        }
+
+        private void SubscribeToHandPairEvent()
+        {
+            VRMod.MotionControls.onHandPairSet += (body) =>
+            {
+                if (MotionControls.onHandPairSet != null)
+                {
+                    MotionControls.onHandPairSet(body);
+                }
+            };
         }
     }
 }

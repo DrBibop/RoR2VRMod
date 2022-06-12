@@ -93,7 +93,7 @@ namespace VRMod
                 materialName = materialName.Remove(materialName.IndexOf(" (Instance)"));
             }
 
-            CharacterModel.RendererInfo? matchingRendererInfo = model.baseRendererInfos.FirstOrDefault(x => x.defaultMaterial && (x.defaultMaterial.name == materialName || x.defaultMaterial.name.Replace("Alt", "") == materialName));
+            CharacterModel.RendererInfo? matchingRendererInfo = model.baseRendererInfos.FirstOrDefault(x => x.defaultMaterial && (x.defaultMaterial.name.Replace(" (Instance)", "") == materialName || x.defaultMaterial.name.Replace("Alt", "").Replace(" (Instance)", "") == materialName));
 
             if (!matchingRendererInfo.HasValue || matchingRendererInfo.Value.defaultMaterial == null)
             {
@@ -113,7 +113,7 @@ namespace VRMod
 
             if (bodyRendererInfo.defaultMaterial)
             {
-                VRMod.StaticLogger.LogWarning("APPLYING BODY MATERIAL " + bodyRendererInfo.defaultMaterial.name);
+                VRMod.StaticLogger.LogInfo("Applying body material " + bodyRendererInfo.defaultMaterial.name + " on renderer " + rendererInfo.renderer.gameObject.name);
                 rendererInfo.renderer.material = bodyRendererInfo.defaultMaterial;
                 rendererInfo.defaultMaterial = bodyRendererInfo.defaultMaterial;
 

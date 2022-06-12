@@ -56,9 +56,9 @@ namespace VRMod
         {
             get
             {
-                if (!_localCameraRig || !_localCameraRig.enabled)
+                if (!_localCameraRig || !_localCameraRig.isActiveAndEnabled)
                 {
-                    _localCameraRig = CameraRigController.instancesList.FirstOrDefault(x => x.enabled = true);
+                    _localCameraRig = CameraRigController.instancesList.FirstOrDefault(x => x.isActiveAndEnabled == true);
                 }
 
                 return _localCameraRig;

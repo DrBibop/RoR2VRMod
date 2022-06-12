@@ -2,6 +2,7 @@
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using RoR2;
+using RoR2.CameraModes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -157,18 +158,22 @@ namespace VRMod
 
             c.RemoveRange(2);
 
-            c.EmitDelegate<Func<CharacterCameraParamsData, float>>((camParams) => 
+            c.Emit(OpCodes.Ldarg_0);
+
+            c.EmitDelegate<Func<CharacterCameraParamsData, CameraModePlayerBasic, float>>((camParams, camMode) => 
             {
-                return ModConfig.TempLockedCameraPitchValue ? 0 : camParams.minPitch.value;
+                return ModConfig.TempLockedCameraPitchValue && !camMode.isSpectatorMode ? 0 : camParams.minPitch.value;
             });
 
             c.GotoNext(x => x.MatchLdfld(typeof(CharacterCameraParamsData), "maxPitch"));
 
             c.RemoveRange(2);
 
-            c.EmitDelegate<Func<CharacterCameraParamsData, float>>((camParams) =>
+            c.Emit(OpCodes.Ldarg_0);
+
+            c.EmitDelegate<Func<CharacterCameraParamsData, CameraModePlayerBasic, float>>((camParams, camMode) =>
             {
-                return ModConfig.TempLockedCameraPitchValue ? 0 : camParams.maxPitch.value;
+                return ModConfig.TempLockedCameraPitchValue && !camMode.isSpectatorMode ? 0 : camParams.maxPitch.value;
             });
 
             c.GotoNext(x => x.MatchLdloc(10));
