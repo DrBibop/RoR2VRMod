@@ -11,7 +11,7 @@ If you want to support me and gain access to pre-release testing builds, you can
 # Installation
 It is strongly recommended to use a mod manager such as the [Thunderstore Mod Manager](https://www.overwolf.com/app/Thunderstore-Thunderstore_Mod_Manager) or [r2modman](https://thunderstore.io/package/ebkr/r2modman/) and press the "Install with Mod Manager" button. Once done, you can start the game using the "Start modded" button.
 
-For manual download, make sure to have [BepInEx](https://thunderstore.io/package/bbepis/BepInExPack/) and [HookGenPatcher](https://thunderstore.io/package/RiskofThunder/HookGenPatcher/) installed. You can then download the VR mod with the "Manual Download" button and copy the `plugins` and `patchers` folder into the `BepInEx` folder.
+For manual download, make sure to have [BepInEx](https://thunderstore.io/package/bbepis/BepInExPack/), [HookGenPatcher](https://thunderstore.io/package/RiskofThunder/HookGenPatcher/) and [FixPluginTypesSerialization](https://thunderstore.io/package/RiskofThunder/FixPluginTypesSerialization/) installed. You can then download the VR mod with the "Manual Download" button and copy the `plugins` and `patchers` folder into the `BepInEx` folder.
 
 # Default controls
 Shoutout to laila, HutchyBen, Skarl1n, Geb, Popzix and Terrorcotta211 for helping me add support for all these controllers!
@@ -319,6 +319,7 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 ### 2.8.0
 - Added custom skins support through the VRAPI.
 - Added alternate models on Bandit's and Void Fiend's mastery skin.
+- The FixPluginTypesSerialization mod is now a dependency in order to support custom skins.
 - Aim rays for equipments now only appear when the equipment is off cooldown.
 - Fixed a bug that prevented the game report screen from appearing after the credits.
 - Fixed a bug that prevented the spectator camera from rotating vertically when the "Locked camera pitch" setting was on.
