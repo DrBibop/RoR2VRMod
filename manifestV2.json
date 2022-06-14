@@ -3,14 +3,15 @@
     "AuthorName": "DrBibop",
     "Name": "DrBibop-VRMod",
     "DisplayName": "VR Mod",
-    "Version": "2.7.1",
+    "Version": "2.8.0",
     "Licence": "MIT",
     "WebsiteURL": "https://github.com/DrBibop/RoR2VRMod",
     "Description": "Play Risk of Rain 2 in virtual reality! Railgunner and Void Fiend now fully VR supported!",
     "GameVersion": "N/A",
     "Dependencies": [
 		"bbepis-BepInExPack-5.4.1900",
-		"RiskofThunder-HookGenPatcher-1.2.3"
+		"RiskofThunder-HookGenPatcher-1.2.3",
+		"RiskofThunder-FixPluginTypesSerialization-1.0.2"
 	],
     "OptionalDependencies": [],
     "Incompatibilities": [],

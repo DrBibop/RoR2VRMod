@@ -37,10 +37,17 @@ The VR Mod uses the SteamVR binding system to bind controls. Some binds have bee
 [**SkillsPlusPlus**](https://thunderstore.io/package/Volvary/SkillsPlusPlus_UnofficialRelease/): Buy menu\
 [**ProperSave**](https://thunderstore.io/package/KingEnderBrine/ProperSave/): Load
 
+# Custom characters
+Custom characters can receive full VR support using the [VRAPI](https://thunderstore.io/package/DrBibop/VRAPI/). You should still be able to play any custom characters without the API and aim with your dominant hand but the default pointer will be used for the hand model.
+
+### List of fully VR supported custom characters as of June 2022:
+- [Samus](https://thunderstore.io/package/dgosling/dgoslings_Samus_Mod/) by dgosling
+- [Enforcer](https://thunderstore.io/package/EnforcerGang/Enforcer/) by EnforcerGang
+
 # FAQ
 
 ### Wouldn't it be nauseating to play in VR?
-Each person has a different level of tolerance regarding motion sickness and VR. Despite that, Risk of Rain 2 was not intended to be played in VR. This means that getting motion sick is more likely, especially with high mobility characters such as Loader or Mercenary. We plan to make the VR experience better for players in the future and feedback regarding this issue would be very appreciated.
+Each person has a different level of tolerance regarding motion sickness and VR. Despite that, Risk of Rain 2 was not intended to be played in VR. This means that getting motion sick is more likely, especially with high mobility characters such as Loader or Mercenary. Feedback regarding this issue would be very appreciated.
 
 ### Can I play using the VR Mod in multiplayer with my non-VR friends?
 Yes! The mod is only required for VR players. You can play with vanilla players just fine too!
@@ -49,7 +56,7 @@ Yes! The mod is only required for VR players. You can play with vanilla players 
 The VR Mod settings can be accessed with the in-game settings in the "VR" tab. You can also use the mod manager instead while the game is closed. On the left, click on `Config Editor > VRMod > Edit Config`. You can then change the settings to your liking. Once you're done, make sure to save your changes with the `Save` button on the top-right.
 
 ### Why play a 3rd person game in VR?
-This mod makes you play in first person by default but you can always come back to third person by going in the settings or the config editor. It's honestly not a bad experience!
+This mod makes you play in first person by default but you can always come back to third person by going in the settings or the config editor. It still plays well but currently doesn't support motion controls.
 
 ### I can't press any buttons when I launch the game.
 This is likely because the game is not in focus on your PC. Make sure to click on the game window to pull it to the front. If your cursor is stuck in place, you can press the Windows key or Ctrl+Escape to unlock it and click on the game. If that doesn't fix it, relaunching the game should work.
@@ -61,7 +68,7 @@ If you are using SteamVR and the game launches in game theatre mode, right click
 You can change your binds using SteamVR's binding system. Note that changing your binds won't change the icons shown in-game. There is currently no way to change your binds when using the Oculus Runtime instead of SteamVR.
 
 ### The game is lagging. What can I do to improve performance?
-Disabling SSAO and Bloom in the game's settings should improve the performance. Make sure you also don't have too many other applications running in the background. You can also try the [OpenVR FSR mod](https://github.com/fholger/openvr_fsr) which adds AMD's upscaling technology to the game.
+Disabling SSAO and Bloom in the game's settings should improve the performance. Make sure you also don't have too many other applications running in the background. You can also try the [VR Performance Toolkit](https://github.com/fholger/vrperfkit) which adds upscaling technology like FSR and NIS to the game.
 
 ### I have an Oculus headset and I don't want to use SteamVR.
 No worries! You can switch to Oculus mode with the in-game settings.
@@ -308,3 +315,12 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - Fixed a bug that broke the UI pointer when no profile was loaded.
 - Fixed a bug that prevented players from controlling their vertical flying direction with Milky Chrysalis when using controller direction for movement.
 - Fixed a bug that broke the command/scrapper UI when closing it.
+
+### 2.8.0
+- Added custom skins support through the VRAPI.
+- Added alternate models on Bandit's and Void Fiend's mastery skin.
+- Aim rays for equipments now only appear when the equipment is off cooldown.
+- Fixed a bug that prevented the game report screen from appearing after the credits.
+- Fixed a bug that prevented the spectator camera from rotating vertically when the "Locked camera pitch" setting was on.
+- Fixed a bug that prevented the equipment aim ray or heresy item aim ray from appearing when first loading into a stage.
+- Fixed a bug that prevented the difficulty icon, stage count, enemy level and simulacrum waves from appearing on the right watch HUD.
