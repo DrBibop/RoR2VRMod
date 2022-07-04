@@ -60,6 +60,7 @@ namespace VRMod
             {
                 SteamVR_Settings.instance.trackingSpace = ModConfig.InitialRoomscaleValue ? ETrackingUniverseOrigin.TrackingUniverseStanding : ETrackingUniverseOrigin.TrackingUniverseSeated;
                 SteamVR_Settings.instance.pauseGameWhenDashboardVisible = false;
+                SteamVR_Settings.instance.lockPhysicsUpdateRateToRenderFrequency = false;
                 SteamVR.Initialize();
                 SteamVR_Actions.gameplay.Activate();
                 SteamVR_Actions.ui.Activate();

@@ -19,8 +19,8 @@ namespace VRMod
         internal static ConfigEntry<bool> OculusMode { get; private set; }
         internal static ConfigEntry<bool> FirstPerson { get; private set; }
         internal static ConfigEntry<bool> UseConfortVignette { get; private set; }
-        internal static ConfigEntry<bool> Roomscale { get; private set; }
-        internal static ConfigEntry<float> PlayerHeight { get; private set; }
+        internal static ConfigEntry<bool> SeatedMode { get; private set; }
+        internal static ConfigEntry<float> HeightMultiplier { get; private set; }
 
         internal static ConfigEntry<string> RayColorHex { get; private set; }
         internal static ConfigEntry<float> RayOpacity { get; private set; }
@@ -90,24 +90,24 @@ namespace VRMod
                 true,
                 "Adds a black vignette during high-mobility abilities to reduce motion sickness."
             );
-            Roomscale = configFile.Bind<bool>(
+            SeatedMode = configFile.Bind<bool>(
                 "VR Settings",
-                "Roomscale Tracking Space",
-                true,
-                "TRUE: Sets the tracking space to roomscale. Your ground will match the in-game ground. Better for standing play and required for LIV's XR Capture. FALSE: Sets the tracking space to stationary. The camera's center position will be placed at head level of the survivor. Better for seated play."
+                "Seated Mode",
+                false,
+                "Enable this setting for a better seated experience. Recentering your HMD will place the camera at eye level of the in-game character. Keep in mind that seated play is not compatible with LIV XR Capture."
             );
-            PlayerHeight = configFile.Bind<float>(
+            HeightMultiplier = configFile.Bind<float>(
                 "VR Settings",
-                "Player Height in meters",
-                1.82f,
-                "Used for scaling the view. Your view scale will be adjusted to make you feel as tall as the survivor you're playing. In order to adjust to the survivor's height, raising your height will make you feel smaller while lowering your height will make you feel taller."
+                "Character height multiplier",
+                1.0f,
+                "Used for scaling the view. This multiplier will be applied to the character's height. Increase this value to feel taller or decrease it to feel smaller."
             );
 
             RayColorHex = configFile.Bind<string>(
                 "Survivor Settings",
                 "General: Aim ray color",
                 "FFFFFF",
-                "Changes the color of aim rays. You can use Google's color picker to find your desired color's hex value."
+                "Changes the color of aim rays."
             );
             RayOpacity = configFile.Bind<float>(
                 "Survivor Settings",
@@ -293,7 +293,7 @@ namespace VRMod
             InitialFirstPersonValue = FirstPerson.Value;
             InitialMotionControlsValue = InitialFirstPersonValue ? UseMotionControls.Value : false;
             InitialOculusModeValue = OculusMode.Value;
-            InitialRoomscaleValue = Roomscale.Value;
+            InitialRoomscaleValue = !SeatedMode.Value;
             TempWristHUDValue = InitialMotionControlsValue ? WristHUD.Value : false;
             TempWatchHUDValue = InitialMotionControlsValue ? WatchHUD.Value : false;
             TempLockedCameraPitchValue = (SnapTurn.Value || InitialMotionControlsValue) ? true : LockedCameraPitch.Value;
@@ -310,8 +310,8 @@ namespace VRMod
             settings.Add("vr_better_health", new ConfigSetting(BetterHealthBar, ConfigSetting.SettingUpdate.NextStage));
             settings.Add("vr_smooth_hud", new ConfigSetting(UseSmoothHUD, ConfigSetting.SettingUpdate.Instant, ChangeSmoothHUD));
             settings.Add("vr_liv_hud", new ConfigSetting(LIVHUD, ConfigSetting.SettingUpdate.Instant, ChangeLIVHUD));
-            settings.Add("vr_roomscale", new ConfigSetting(Roomscale, ConfigSetting.SettingUpdate.AfterRestart));
-            settings.Add("vr_height", new ConfigSetting(PlayerHeight, 1.5f, 2.2f, ConfigSetting.SettingUpdate.NextStage));
+            settings.Add("vr_seated", new ConfigSetting(SeatedMode, ConfigSetting.SettingUpdate.AfterRestart));
+            settings.Add("vr_height", new ConfigSetting(HeightMultiplier, 0.5f, 2.0f, ConfigSetting.SettingUpdate.NextStage));
             settings.Add("vr_ray_color", new ConfigSetting(RayColorHex, ConfigSetting.SettingUpdate.Instant, ChangeRayColor));
             settings.Add("vr_ray_opacity", new ConfigSetting(RayOpacity, 0, 1, ConfigSetting.SettingUpdate.Instant, ChangeRayColor));
             settings.Add("vr_com_dual", new ConfigSetting(CommandoDualWield, ConfigSetting.SettingUpdate.Instant));

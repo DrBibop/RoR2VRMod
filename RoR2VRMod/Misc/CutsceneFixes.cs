@@ -94,7 +94,7 @@ namespace VRMod
 
                     Vector3 offset = new Vector3(-0.3387751f, 0.1797891f, -0.5321155f) * 5 / 6;
 
-                    if (ModConfig.InitialRoomscaleValue) offset.y -= ModConfig.PlayerHeight.Value / 6;
+                    if (ModConfig.InitialRoomscaleValue) offset.y -= 0.3f;
 
                     cameraRig.desiredCameraState = new CameraState
                     {

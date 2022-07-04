@@ -280,7 +280,7 @@ namespace VRMod
                 pickerCanvas.transform.rotation = Quaternion.Euler(0, cachedUICam.transform.eulerAngles.y, 0);
                 pickerCanvas.transform.position = pickerCanvas.transform.forward * 4;
                 if (ModConfig.InitialRoomscaleValue)
-                    pickerCanvas.transform.Translate(0, ModConfig.PlayerHeight.Value, 0);
+                    pickerCanvas.transform.Translate(0, 1.8f, 0);
 
                 RectTransform panelTransform = self.panelInstance.transform as RectTransform;
                 panelTransform.SetParent(pickerCanvas.transform);
@@ -464,7 +464,7 @@ namespace VRMod
                 }
 
                 if (ModConfig.InitialRoomscaleValue)
-                    offset.y += ModConfig.PlayerHeight.Value;
+                    offset.y += 1.8f;
 
                 if (uiObject.transform.parent)
                     uiObject.transform.parent.position = offset;

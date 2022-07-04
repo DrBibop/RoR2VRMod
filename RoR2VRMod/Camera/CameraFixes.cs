@@ -684,9 +684,9 @@ namespace VRMod
                                         }
                                         else
                                         {
-                                            cachedCameraTargetTransform.Translate(collider.center + new Vector3(0, collider.height / 2, 0), Space.Self);
+                                            cachedCameraTargetTransform.Translate(collider.center + new Vector3(0, (-collider.height / 2) + (ModConfig.HeightMultiplier.Value * collider.height), 0), Space.Self);
                                         }
-                                        VRCameraWrapper.instance.transform.localScale = Vector3.one * (collider.height / ModConfig.PlayerHeight.Value);
+                                        VRCameraWrapper.instance.transform.localScale = Vector3.one * ModConfig.HeightMultiplier.Value * (collider.height / 1.82f);
                                     }
                                 }
                             }
