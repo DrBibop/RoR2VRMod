@@ -330,3 +330,8 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - Replaced the "Player height in meters" setting with a simpler "Height multiplier" setting. Increasing the new slider will make you fell taller.
 - Replaced the "Roomscale tracking space" setting with a "Seated mode" setting to better communicate its functionality.
 - Fixed a bug that forced the physics update rate to match the headset's refresh rate when using SteamVR which impacted performance.
+
+### 2.8.2
+- Removed FixPluginTypesSerialization dependency as it is now included with BepInEx.
+- Railgunner's scope crosshair texture is no longer affected by graphic settings.
+- Fixed some animations on Bandit's revolver when using the Bandit Tweaks mod.
