@@ -10,8 +10,7 @@
     "GameVersion": "N/A",
     "Dependencies": [
 		"bbepis-BepInExPack-5.4.1900",
-		"RiskofThunder-HookGenPatcher-1.2.3",
-		"RiskofThunder-FixPluginTypesSerialization-1.0.2"
+		"RiskofThunder-HookGenPatcher-1.2.3"
 	],
     "OptionalDependencies": [],
     "Incompatibilities": [],

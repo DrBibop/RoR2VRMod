@@ -12,6 +12,7 @@ using Valve.VR;
 namespace VRMod
 {
     [BepInPlugin("com.DrBibop.VRMod", "VRMod", "2.8.1")]
+    [BepInDependency("com.Moffein.BanditTweaks", BepInDependency.DependencyFlags.SoftDependency)]
     public class VRMod : BaseUnityPlugin
     {
         internal static ManualLogSource StaticLogger;

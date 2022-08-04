@@ -107,7 +107,7 @@ namespace VRAPI
         }
 
         /// <summary>
-        /// Adds a hand prefab to use when the associated character is being played in VR. This must only be called once per prefab.
+        /// Adds a hand prefab to use when the associated survivor is being played in VR. This must only be called once per prefab.
         /// </summary>
         /// <param name="handPrefab">The hand prefab containing a hand script.</param>
         public static void AddHandPrefab(GameObject handPrefab)
@@ -116,9 +116,9 @@ namespace VRAPI
         }
 
         /// <summary>
-        /// Adds a hand prefab to use when the associated character is being played in VR. This must only be called once per prefab.
+        /// Adds a hand skin to use when the associated survivor skin is equipped. This only accepts scriptable objects of type HandSkinDef.
         /// </summary>
-        /// <param name="handPrefab">The hand prefab containing a hand script.</param>
+        /// <param name="handPrefab">The hand skin definition.</param>
         public static void AddHandSkin(ScriptableObject handSkinDef)
         {
             if (!(handSkinDef is VRMod.HandSkinDef))

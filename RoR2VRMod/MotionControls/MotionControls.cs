@@ -42,6 +42,8 @@ namespace VRMod
         private static MeleeSkill[] acridMelee;
         private static TwoHandedMainHand railgunnerMainHand;
 
+        private static bool isBanditTweaksInstalled;
+
         internal struct HUDQueueEntry
         {
             internal RectTransform transform;
@@ -178,6 +180,8 @@ namespace VRMod
                     AddHandPrefab(prefab);
                 }
             }
+
+            isBanditTweaksInstalled = BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.Moffein.BanditTweaks");
         }
 
         private static void ShrinkShieldEffects(On.RoR2.CharacterModel.orig_InitMaterials orig)
@@ -383,7 +387,7 @@ namespace VRMod
                 if (cachedSprintIcon)
                     cachedSprintIcon.color = originalSprintIconColor;
 
-                if (self.name.Contains("Bandit2"))
+                if (self.name.Contains("Bandit2") && !isBanditTweaksInstalled)
                 {
                     GetHandByDominance(true).animator.SetBool("IsSprinting", false);
                 }
@@ -415,7 +419,7 @@ namespace VRMod
                     cachedSprintIcon.color = Color.yellow;
                 }
 
-                if (self.name.Contains("Bandit2"))
+                if (self.name.Contains("Bandit2") && !isBanditTweaksInstalled)
                 {
                     GetHandByDominance(true).animator.SetBool("IsSprinting", true);
                 }
