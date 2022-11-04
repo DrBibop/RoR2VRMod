@@ -50,12 +50,16 @@ namespace VRPatcher
                 "openvr_api.dll",
                 "OVRGamepad.dll",
                 "OVRPlugin.dll",
-                "LIV_Bridge.dll"
+                "LIV_Bridge.dll",
+                "ShockWaveIMU.dll",
+                "bhaptics_library.dll"
             };
             string[] managedLibraries = new string[]
             {
                 "SteamVR.dll",
-                "SteamVR_Actions.dll"
+                "SteamVR_Actions.dll",
+                "ShockwaveManager.dll",
+                "BHaptics.dll"
             };
 
             bool copyPluginsResult = CopyFiles(pluginsPath, plugins, "Plugins.");

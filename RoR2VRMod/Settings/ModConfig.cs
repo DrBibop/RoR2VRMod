@@ -21,6 +21,7 @@ namespace VRMod
         internal static ConfigEntry<bool> UseConfortVignette { get; private set; }
         internal static ConfigEntry<bool> SeatedMode { get; private set; }
         internal static ConfigEntry<float> HeightMultiplier { get; private set; }
+        internal static ConfigEntry<string> HapticsSuit { get; private set; }
 
         internal static ConfigEntry<string> RayColorHex { get; private set; }
         internal static ConfigEntry<float> RayOpacity { get; private set; }
@@ -101,6 +102,12 @@ namespace VRMod
                 "Character height multiplier",
                 1.0f,
                 "Used for scaling the view. This multiplier will be applied to the character's height. Increase this value to feel taller or decrease it to feel smaller."
+            );
+            HapticsSuit = configFile.Bind<string>(
+                "VR Settings",
+                "Haptics Suit",
+                "None",
+                "The type of haptics suit you're wearing. The mod currently supports the Shockwave suit. The bHaptics suit may also come in the future."
             );
 
             RayColorHex = configFile.Bind<string>(
@@ -332,6 +339,7 @@ namespace VRMod
             settings.Add("vr_first_person", new ConfigSetting(FirstPerson, ConfigSetting.SettingUpdate.AfterRestart));
             settings.Add("vr_locked_camera", new ConfigSetting(LockedCameraPitch, ConfigSetting.SettingUpdate.Instant));
             settings.Add("vr_motion_controls", new ConfigSetting(UseMotionControls, ConfigSetting.SettingUpdate.AfterRestart));
+            settings.Add("vr_haptics_suit", new ConfigSetting(HapticsSuit, ConfigSetting.SettingUpdate.AfterRestart));
         }
 
         private static void ChangeLIVHUD(object sender, EventArgs e)

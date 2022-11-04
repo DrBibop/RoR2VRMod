@@ -134,7 +134,10 @@ namespace VRMod
                         }
                         else
                         {
-                            return "#FFFFFF";
+                            if (self.settingName == "vr_ray_color")
+                                return "#FFFFFF";
+                            else if (self.settingName == "vr_haptics_suit")
+                                return "None";
                         }
                     }
                 }
@@ -273,6 +276,22 @@ namespace VRMod
                         {
                             CarouselController.Choice choice = new CarouselController.Choice();
                             choice.convarValue = hexStrings[i];
+                            choice.suboptionDisplayToken = choiceStrings[i];
+                            choices.Add(choice);
+                        }
+                    }
+                    else if (keyValuePair.Key == "vr_haptics_suit")
+                    {
+                        string[] choiceStrings = new string[]
+                        {
+                            "None",
+                            "Shockwave"
+                        };
+
+                        for (int i = 0; i < choiceStrings.Length; i++)
+                        {
+                            CarouselController.Choice choice = new CarouselController.Choice();
+                            choice.convarValue = choiceStrings[i];
                             choice.suboptionDisplayToken = choiceStrings[i];
                             choices.Add(choice);
                         }

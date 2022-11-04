@@ -23,11 +23,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="BHaptics">
+      <HintPath>..\VREnabler\Plugins\BHaptics.dll</HintPath>
+    </Reference>
     <Reference Include="Decalicious">
       <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\stubs\Decalicious-nstrip.dll</HintPath>
     </Reference>
     <Reference Include="MMHOOK_RoR2">
       <HintPath>..\..\MMHOOK_RoR2.dll</HintPath>
+    </Reference>
+    <Reference Include="ShockwaveManager">
+      <HintPath>..\VREnabler\Plugins\ShockwaveManager.dll</HintPath>
     </Reference>
     <Reference Include="SteamVR">
       <HintPath>..\..\..\Unity\risk of rain 2\build\risk of rain 2_Data\Managed\SteamVR.dll</HintPath>

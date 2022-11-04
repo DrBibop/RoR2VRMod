@@ -45,6 +45,7 @@ namespace VRMod
                 StartCoroutine(InitVR(ModConfig.InitialOculusModeValue));
                 RecenterController.Init();
                 UIPointer.Init();
+                Haptics.HapticsManager.Init();
             };
         }
 

@@ -20,10 +20,14 @@
     <None Remove="Binds\binding_vive_pro.json" />
     <None Remove="Binds\binding_vive_tracker_camera.json" />
     <None Remove="Plugins\AudioPluginOculusSpatializer.dll" />
+    <None Remove="Plugins\BHaptics.dll" />
+    <None Remove="Plugins\bhaptics_library.dll" />
     <None Remove="Plugins\LIV_Bridge.dll" />
     <None Remove="Plugins\openvr_api.dll" />
     <None Remove="Plugins\OVRGamepad.dll" />
     <None Remove="Plugins\OVRPlugin.dll" />
+    <None Remove="Plugins\ShockWaveIMU.dll" />
+    <None Remove="Plugins\ShockwaveManager.dll" />
     <None Remove="Plugins\SteamVR.dll" />
     <None Remove="Plugins\SteamVR_Actions.dll" />
   </ItemGroup>
@@ -44,10 +48,14 @@
     <EmbeddedResource Include="Binds\binding_vive_pro.json" />
     <EmbeddedResource Include="Binds\binding_vive_tracker_camera.json" />
     <EmbeddedResource Include="Plugins\AudioPluginOculusSpatializer.dll" />
+    <EmbeddedResource Include="Plugins\BHaptics.dll" />
+    <EmbeddedResource Include="Plugins\bhaptics_library.dll" />
     <EmbeddedResource Include="Plugins\LIV_Bridge.dll" />
     <EmbeddedResource Include="Plugins\openvr_api.dll" />
     <EmbeddedResource Include="Plugins\OVRGamepad.dll" />
     <EmbeddedResource Include="Plugins\OVRPlugin.dll" />
+    <EmbeddedResource Include="Plugins\ShockWaveIMU.dll" />
+    <EmbeddedResource Include="Plugins\ShockwaveManager.dll" />
     <EmbeddedResource Include="Plugins\SteamVR.dll" />
     <EmbeddedResource Include="Plugins\SteamVR_Actions.dll" />
   </ItemGroup>
