@@ -41,7 +41,7 @@ namespace VRMod.Haptics
 
             if (!ShockwaveManager.Instance.Ready)
             {
-                VRMod.StaticLogger.LogError("Could not initialize Shockwave Suit!");
+                VRMod.StaticLogger.LogError("Could not initialize Shockwave suit!");
             }
         }
 

@@ -20,8 +20,7 @@
     <None Remove="Binds\binding_vive_pro.json" />
     <None Remove="Binds\binding_vive_tracker_camera.json" />
     <None Remove="Plugins\AudioPluginOculusSpatializer.dll" />
-    <None Remove="Plugins\BHaptics.dll" />
-    <None Remove="Plugins\bhaptics_library.dll" />
+    <None Remove="Plugins\Bhaptics.Tact.dll" />
     <None Remove="Plugins\LIV_Bridge.dll" />
     <None Remove="Plugins\openvr_api.dll" />
     <None Remove="Plugins\OVRGamepad.dll" />
@@ -48,8 +47,7 @@
     <EmbeddedResource Include="Binds\binding_vive_pro.json" />
     <EmbeddedResource Include="Binds\binding_vive_tracker_camera.json" />
     <EmbeddedResource Include="Plugins\AudioPluginOculusSpatializer.dll" />
-    <EmbeddedResource Include="Plugins\BHaptics.dll" />
-    <EmbeddedResource Include="Plugins\bhaptics_library.dll" />
+    <EmbeddedResource Include="Plugins\Bhaptics.Tact.dll" />
     <EmbeddedResource Include="Plugins\LIV_Bridge.dll" />
     <EmbeddedResource Include="Plugins\openvr_api.dll" />
     <EmbeddedResource Include="Plugins\OVRGamepad.dll" />

@@ -23,8 +23,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="BHaptics">
-      <HintPath>..\VREnabler\Plugins\BHaptics.dll</HintPath>
+    <Reference Include="Bhaptics.Tact">
+      <HintPath>..\VREnabler\Plugins\Bhaptics.Tact.dll</HintPath>
     </Reference>
     <Reference Include="Decalicious">
       <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\stubs\Decalicious-nstrip.dll</HintPath>

@@ -13,7 +13,7 @@ namespace VRMod.Haptics
         {
             if (ModConfig.HapticsSuit.Value == "Shockwave")
                 hapticsController = new ShockwaveController();
-            else if (ModConfig.HapticsSuit.Value == "bHaptics")
+            else if (ModConfig.HapticsSuit.Value == "Bhaptics")
                 hapticsController = new BHapticsController();
             else
                 return;

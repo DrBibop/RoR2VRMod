@@ -285,7 +285,8 @@ namespace VRMod
                         string[] choiceStrings = new string[]
                         {
                             "None",
-                            "Shockwave"
+                            "Shockwave",
+                            "Bhaptics"
                         };
 
                         for (int i = 0; i < choiceStrings.Length; i++)
