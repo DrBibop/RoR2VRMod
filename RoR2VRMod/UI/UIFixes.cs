@@ -35,7 +35,7 @@ namespace VRMod
 
         private static GameObject pickerCanvasPrefab;
 
-        private static GameObject queuedKickDialog;
+        internal static GameObject queuedKickDialog;
 
         private static Transform voidFiendCorruptionMeter;
 

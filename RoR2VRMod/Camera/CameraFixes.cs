@@ -474,6 +474,14 @@ namespace VRMod
             RoR2Application.instance.mainCanvas.worldCamera = self.uiCam;
 
             if (FocusChecker.instance) FocusChecker.instance.UpdateCameraRig(self);
+
+            if (UIFixes.queuedKickDialog)
+            {
+                Canvas dialogCanvas = UIFixes.queuedKickDialog.GetComponentInChildren<Canvas>();
+
+                if (dialogCanvas)
+                    dialogCanvas.worldCamera = self.uiCam;
+            }
         }
 
         private static void GetVRLookInput(ILContext il)

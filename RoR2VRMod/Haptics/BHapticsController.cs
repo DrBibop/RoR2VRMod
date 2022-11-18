@@ -97,7 +97,7 @@ namespace VRMod.Haptics
             flatDirection.Normalize();
             float angle = flatDirection == Vector3.zero ? 0f : ((-Vector3.SignedAngle(Vector3.forward, flatDirection, Vector3.up) + 360) % 360);
 
-            ScaleOption scaleOption = new ScaleOption(0.2f + healthPercent * 0.8f, 2 + healthPercent * 14);
+            ScaleOption scaleOption = new ScaleOption(0.3f + healthPercent * 0.7f, 2 + healthPercent * 14);
             RotationOption rotationOption = new RotationOption(angle, reverseDirection.y / 2);
 
             hapticPlayer.SubmitRegisteredVestRotation("Damage", "Damage", rotationOption, scaleOption);
