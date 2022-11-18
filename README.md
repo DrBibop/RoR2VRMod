@@ -31,7 +31,7 @@ Shoutout to laila, HutchyBen, Skarl1n, Geb, Popzix and Terrorcotta211 for helpin
 ## Inputs for mods
 The VR Mod uses the SteamVR binding system to bind controls. Some binds have been added to support certain mods.
 
-### Currently supported mods:
+### Currently supported inputs for mods:
 [**ExtraSkillSlots**](https://thunderstore.io/package/KingEnderBrine/ExtraSkillSlots/): Skills 1-4\
 [**VoiceChat**](https://thunderstore.io/package/Evaisa/Voicechat/): Push-to-talk\
 [**SkillsPlusPlus**](https://thunderstore.io/package/Volvary/SkillsPlusPlus_UnofficialRelease/): Buy menu\
@@ -40,9 +40,11 @@ The VR Mod uses the SteamVR binding system to bind controls. Some binds have bee
 # Custom characters
 Custom characters can receive full VR support using the [VRAPI](https://thunderstore.io/package/DrBibop/VRAPI/). You should still be able to play any custom characters without the API and aim with your dominant hand but the default pointer will be used for the hand model.
 
-### List of fully VR supported custom characters as of June 2022:
+### List of fully VR supported custom characters as of November 2022:
 - [Samus](https://thunderstore.io/package/dgosling/dgoslings_Samus_Mod/) by dgosling
-- [Enforcer](https://thunderstore.io/package/EnforcerGang/Enforcer/) by EnforcerGang
+- [Enforcer and Nemesis Enforcer](https://thunderstore.io/package/EnforcerGang/Enforcer/) by EnforcerGang
+- [Paladin](https://thunderstore.io/package/Paladin_Alliance/PaladinMod/) by Paladin_Alliance
+- [Tesla Trooper](https://thunderstore.io/package/TheTimesweeper/Tesla_Trooper/) by TheTimesweeper
 
 # FAQ
 
@@ -335,3 +337,9 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - Removed FixPluginTypesSerialization dependency as it is now included with BepInEx.
 - Railgunner's scope crosshair texture is no longer affected by graphic settings.
 - Fixed some animations on Bandit's revolver when using the Bandit Tweaks mod.
+
+### 2.9.0
+- Added haptic feedback for Bhaptics and Shockwave suits.
+	- Features directional feedback and other stimulating patterns.
+	- A new setting has been added to select which haptic suit is being used. Scroll to the bottom of the VR settings menu to select your suit then restart the game.
+- Fixed a bug where kick messages couldn't be interacted with in the main menu.
