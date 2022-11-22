@@ -353,3 +353,6 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 	- Features directional feedback and other stimulating patterns.
 	- A new setting has been added to select which haptic suit is being used. Scroll to the bottom of the VR settings menu to select your suit then restart the game.
 - Fixed a bug where kick messages couldn't be interacted with in the main menu.
+
+### 2.9.1
+- Fixed the VR patching system that was incomplete in the last update.
