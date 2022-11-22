@@ -46,6 +46,16 @@ Custom characters can receive full VR support using the [VRAPI](https://thunders
 - [Paladin](https://thunderstore.io/package/Paladin_Alliance/PaladinMod/) by Paladin_Alliance
 - [Tesla Trooper](https://thunderstore.io/package/TheTimesweeper/Tesla_Trooper/) by TheTimesweeper
 
+# Haptics
+The mod supports the Bhaptics and Shockwave suits which provide more immersive gameplay.
+
+Follow these steps to enable haptics for your suit:
+1. Open the game with the VR mod installed.
+2. Open the settings menu and navigate to the VR tab.
+3. Scroll to the very bottom to find the "Haptics suit" setting.
+4. Click the arrows to select the suit you're wearing.
+5. Relaunch the game.
+
 # FAQ
 
 ### Wouldn't it be nauseating to play in VR?
