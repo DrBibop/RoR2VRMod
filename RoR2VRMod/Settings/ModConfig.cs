@@ -137,19 +137,19 @@ namespace VRMod
             MercSwingSpeedThreshold = configFile.Bind<float>(
                 "Survivor Settings",
                 "Mercenary: Swing speed threshold",
-                22,
+                20,
                 "The sword tip speed required to trigger an attack."
             );
             LoaderSwingSpeedThreshold = configFile.Bind<float>(
                 "Survivor Settings",
                 "Loader: Swing speed threshold",
-                16,
+                12,
                 "The mech fist speed required to trigger an attack."
             );
             AcridSwingSpeedThreshold = configFile.Bind<float>(
                 "Survivor Settings",
                 "Acrid: Swing speed threshold",
-                12,
+                10,
                 "The claw tip speed required to trigger an attack."
             );
             RailgunnerWeaponGripSnapAngle = configFile.Bind<float>(
