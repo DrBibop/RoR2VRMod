@@ -3,7 +3,7 @@
     "AuthorName": "DrBibop",
     "Name": "DrBibop-VRAPI",
     "DisplayName": "VRAPI",
-    "Version": "1.1.0",
+    "Version": "1.1.1",
     "Licence": "MIT",
     "WebsiteURL": "https://github.com/DrBibop/RoR2VRMod",
     "Description": "Modding API for VR-compatible mods. Now with custom skin support!",

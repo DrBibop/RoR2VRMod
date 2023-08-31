@@ -1,6 +1,6 @@
 ﻿{
     "name": "VRAPI",
-    "version_number": "1.1.0",
+    "version_number": "1.1.1",
     "website_url": "https://github.com/DrBibop/RoR2VRMod",
     "description": "Modding API for VR-compatible mods. Now with custom skin support!",
     "dependencies": [

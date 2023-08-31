@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
+using Valve.VR;
 
 namespace VRMod
 {
@@ -139,11 +140,28 @@ namespace VRMod
             if (transform.parent != Camera.main.transform.parent)
                 transform.SetParent(Camera.main.transform.parent);
 
-            Vector3 handPosition = InputTracking.GetLocalPosition(xrNode);
-            Quaternion handRotation = InputTracking.GetLocalRotation(xrNode);
+            Vector3 handPosition = Vector3.zero;
+            Quaternion handRotation = Quaternion.identity;
 
-            if (!ModConfig.InitialOculusModeValue)
+            if (ModConfig.InitialOculusModeValue)
             {
+                handPosition = InputTracking.GetLocalPosition(xrNode);
+                handRotation = InputTracking.GetLocalRotation(xrNode);
+            }
+            else
+            {
+                InputDevice device = InputDevices.GetDeviceAtXRNode(xrNode);
+
+                if (device.TryGetFeatureValue(CommonUsages.devicePosition, out Vector3 controllerPosition))
+                {
+                    handPosition = controllerPosition;
+                }
+
+                if (device.TryGetFeatureValue(CommonUsages.deviceRotation, out Quaternion controllerRotation))
+                {
+                    handRotation = controllerRotation;
+                }
+
                 handRotation *= Quaternion.Euler(Vector3.right * 40);
                 handPosition += handRotation * Vector3.down * 0.03f;
                 handPosition += handRotation * Vector3.back * 0.05f;

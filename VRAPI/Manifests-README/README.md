@@ -20,3 +20,6 @@ You can also watch the [video tutorials](https://www.youtube.com/playlist?list=P
 - Added custom skin support.
 - Added the onHandPairSet event that triggers when hands for the player character are loaded.
 - AddSkillRemap has been deprecated and replaced by AddSkillBindingOverride where you can directly assign skills to buttons.
+
+### 1.1.1
+- Fixed errors occuring in the Utils methods.

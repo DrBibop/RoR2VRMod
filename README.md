@@ -339,7 +339,7 @@ You can ask for help in our [Discord server](https://discord.gg/eQ7Fwac). You ca
 - Fixed a bug that prevented the difficulty icon, stage count, enemy level and simulacrum waves from appearing on the right watch HUD.
 
 ### 2.8.1
-- Replaced the "Player height in meters" setting with a simpler "Height multiplier" setting. Increasing the new slider will make you fell taller.
+- Replaced the "Player height in meters" setting with a simpler "Height multiplier" setting. Increasing the new slider will make you feel taller.
 - Replaced the "Roomscale tracking space" setting with a "Seated mode" setting to better communicate its functionality.
 - Fixed a bug that forced the physics update rate to match the headset's refresh rate when using SteamVR which impacted performance.
 

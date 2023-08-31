@@ -5,21 +5,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VREnabler\VRPatcher.csproj" />
+    <PackageReference Include="BepInEx.Core" Version="5.4.21" />
+    <PackageReference Include="RiskOfRain2.GameLibs" Version="1.2.4-r.0" />
+    <PackageReference Include="UnityEngine.Modules" Version="2019.4.26" />
+    <PackageReference Include="MMHOOK.RoR2" Version="2022.9.20">
+      <NoWarn>NU1701</NoWarn>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="BepInEx.Analyzers" Version="1.0.*">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="BepInEx.Core" Version="5.4.19" />
-    <PackageReference Include="RiskOfRain2.GameLibs" Version="1.2.3.1-r.0" />
-    <PackageReference Include="UnityEngine.Modules" Version="2019.4.26" />
-    <PackageReference Include="MMHOOK.RoR2" Version="2022.4.19">
-      <NoWarn>NU1701</NoWarn>
-    </PackageReference>
-    <PackageReference Include="R2API" Version="4.3.5" />
+    <ProjectReference Include="..\VREnabler\VRPatcher.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,9 +23,6 @@
     </Reference>
     <Reference Include="Decalicious">
       <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\stubs\Decalicious-nstrip.dll</HintPath>
-    </Reference>
-    <Reference Include="MMHOOK_RoR2">
-      <HintPath>..\..\MMHOOK_RoR2.dll</HintPath>
     </Reference>
     <Reference Include="ShockwaveManager">
       <HintPath>..\VREnabler\Plugins\ShockwaveManager.dll</HintPath>
@@ -62,7 +54,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;C:\Users\olipo\Desktop\VRMod\VR Mod\$(TargetFileName)&quot;" />
+    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;C:\Users\olipo\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\Default\BepInEx\plugins\DrBibop-VRMod\$(TargetFileName)&quot;" />
   </Target>
 
 </Project>
