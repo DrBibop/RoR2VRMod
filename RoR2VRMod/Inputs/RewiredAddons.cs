@@ -115,7 +115,7 @@ namespace VRMod
 
             CustomController customController = ReInput.controllers.CreateCustomController(newController.id);
 
-            customController.useUpdateCallbacks = false;
+            customController.fmBTlFnPYkQjybJbRMoAzyIqIRr = false; //useUpdateCallback
 
             return customController;
         }
@@ -191,7 +191,7 @@ namespace VRMod
                 newElementMap.invert = elementMap.invert;
             }
 
-            return ReInput.UserData.aHYIuJhXpYLorVzIjNgjtAekfzf(categoryId, controllerId, 0);
+            return ReInput.UserData.kxLAVoHIxZMRJkGWhlwcKYnRDUeK(categoryId, controllerId, 0); //Some sort of baking thing
         }
     }
 }

@@ -1,8 +1,11 @@
-﻿using RoR2;
+﻿using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using RoR2;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.UI;
 using UnityEngine.XR;
 
@@ -91,7 +94,7 @@ namespace VRMod
 
             On.RoR2.CharacterBody.OnInventoryChanged += OnInventoryChanged;
 
-            On.RoR2.CharacterModel.InitMaterials += ShrinkShieldEffects;
+            RoR2Application.onLoad += ShrinkShieldEffects;
 
             handControllerPrefab = VRMod.VRAssetBundle.LoadAsset<GameObject>("VRHand");
 
@@ -131,6 +134,8 @@ namespace VRMod
             foreach (string prefabName in prefabNames)
             {
                 GameObject prefab = VRMod.VRAssetBundle.LoadAsset<GameObject>(prefabName);
+
+                if (!prefab) continue;
 
                 if (prefabName == "BanditRifle")
                 {
@@ -175,19 +180,14 @@ namespace VRMod
                     railgunnerMainHand.snapAngle = ModConfig.RailgunnerWeaponGripSnapAngle.Value;
                 }
 
-                if (prefab)
-                {
-                    AddHandPrefab(prefab);
-                }
+                AddHandPrefab(prefab);
             }
 
             isBanditTweaksInstalled = BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.Moffein.BanditTweaks");
         }
 
-        private static void ShrinkShieldEffects(On.RoR2.CharacterModel.orig_InitMaterials orig)
+        private static void ShrinkShieldEffects()
         {
-            orig();
-
             CharacterModel.energyShieldMaterial.SetFloat("_OffsetAmount", 0.01f);
             CharacterModel.energyShieldMaterial.SetFloat("_AlphaBoost", 0.5f);
 

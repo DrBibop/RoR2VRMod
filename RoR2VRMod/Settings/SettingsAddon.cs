@@ -193,11 +193,7 @@ namespace VRMod
             headerInfo.tmpHeaderText = headerInstance.GetComponentInChildren<HGTextMeshProUGUI>();
             headerInfo.headerRoot = subPanelInstance;
 
-            List<HGHeaderNavigationController.Header> headerList = controller.headers.ToList();
-
-            headerList.Add(headerInfo);
-
-            controller.headers = headerList.ToArray();
+            controller.headers.Add(headerInfo);
         }
 
         private static GameObject SetupSubPanel(Transform parent)

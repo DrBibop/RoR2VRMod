@@ -143,29 +143,21 @@ namespace VRMod
             Vector3 handPosition = Vector3.zero;
             Quaternion handRotation = Quaternion.identity;
 
-            if (ModConfig.InitialOculusModeValue)
+            InputDevice device = InputDevices.GetDeviceAtXRNode(xrNode);
+
+            if (device.TryGetFeatureValue(CommonUsages.devicePosition, out Vector3 controllerPosition))
             {
-                handPosition = InputTracking.GetLocalPosition(xrNode);
-                handRotation = InputTracking.GetLocalRotation(xrNode);
+                handPosition = controllerPosition;
             }
-            else
+
+            if (device.TryGetFeatureValue(CommonUsages.deviceRotation, out Quaternion controllerRotation))
             {
-                InputDevice device = InputDevices.GetDeviceAtXRNode(xrNode);
-
-                if (device.TryGetFeatureValue(CommonUsages.devicePosition, out Vector3 controllerPosition))
-                {
-                    handPosition = controllerPosition;
-                }
-
-                if (device.TryGetFeatureValue(CommonUsages.deviceRotation, out Quaternion controllerRotation))
-                {
-                    handRotation = controllerRotation;
-                }
-
-                handRotation *= Quaternion.Euler(Vector3.right * 40);
-                handPosition += handRotation * Vector3.down * 0.03f;
-                handPosition += handRotation * Vector3.back * 0.05f;
+                handRotation = controllerRotation;
             }
+
+            handRotation *= Quaternion.Euler(Vector3.right * 40);
+            handPosition += handRotation * Vector3.down * 0.03f;
+            handPosition += handRotation * Vector3.back * 0.05f;
 
             if (!uiMode && stabilisePosition)
             {

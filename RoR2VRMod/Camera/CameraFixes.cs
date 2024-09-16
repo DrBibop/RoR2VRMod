@@ -59,7 +59,7 @@ namespace VRMod
             IL.RoR2.CameraRigController.SetCameraState += RemoveFOVChange;
             On.RoR2.CameraRigController.SetCameraState += SetCameraStateOverride;
 
-            IL.RoR2.CameraRigController.Update += UpdateLIVHUDTargetMaster;
+            IL.RoR2.CameraRigController.LateUpdate += UpdateLIVHUDTargetMaster;
 
             IL.RoR2.CameraModes.CameraModePlayerBasic.CollectLookInputInternal += GetVRLookInput;
             IL.RoR2.CameraModes.CameraModePlayerBasic.UpdateInternal += RemoveRecoilAndCameraPitch;
@@ -188,7 +188,7 @@ namespace VRMod
             c.GotoNext(x => x.MatchCallvirt(typeof(RoR2.UI.HUD), "set_targetMaster"));
 
             c.Index++;
-            c.Emit(OpCodes.Ldloc_S, (byte)5);
+            c.Emit(OpCodes.Ldloc_S, (byte)3);
             c.EmitDelegate<Action<CharacterMaster>>((master) => 
             {
                 if (UIFixes.livHUD) UIFixes.livHUD.targetMaster = master;
@@ -539,9 +539,9 @@ namespace VRMod
             c.RemoveRange(4);
 
             //Adding snap turn code
-            c.GotoNext(x => x.MatchLdflda(typeof(RoR2.CameraModes.CameraModeBase.CollectLookInputResult), "lookInput"));
+            c.GotoNext(x => x.MatchLdflda(typeof(RoR2.CameraModes.CameraModeBase.CameraInfo), "previousCameraState"));
 
-            c.Index--;
+            c.Index -= 5;
 
             int snapTurnIndex = c.Index;
 

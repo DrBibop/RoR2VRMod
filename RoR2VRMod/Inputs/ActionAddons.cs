@@ -35,7 +35,7 @@ namespace VRMod
                 }
             }
 
-            var userDataInit = typeof(UserData).GetMethod("wVZZKoPFwEvodLvLcYNvVAPKpUj", BindingFlags.NonPublic | BindingFlags.Instance);
+            var userDataInit = typeof(UserData).GetMethod("gLOOAxUFAvrvUufkVjaYyZoeLbLE", BindingFlags.NonPublic | BindingFlags.Instance);
             new Hook(userDataInit, (Action<Action<UserData>, UserData>)AddCustomActions);
 
             On.RoR2.SaveSystem.LoadUserProfiles += AddBindingsToLoadedProfiles;
@@ -92,7 +92,7 @@ namespace VRMod
                 if (!actionElementMaps.Exists((x) => x.actionId == map.actionId))
                 {
                     profile.joystickMap.BakeElementMap(map);
-                    profile.joystickMap.HAkHHEgGXinZoFxIBONQnfAEbQcy(map);
+                    profile.joystickMap.YIHWTDQSbIqJbYOqOkQhWAtbyqVF(map);
                     hasAddedBind = true;
                 }
             }
@@ -103,7 +103,7 @@ namespace VRMod
                 if (!actionElementMaps.Exists((x) => x.actionId == map.actionId))
                 {
                     profile.keyboardMap.BakeElementMap(map);
-                    profile.keyboardMap.HAkHHEgGXinZoFxIBONQnfAEbQcy(map);
+                    profile.keyboardMap.NldBMnbsNdlFSDEGKYoPsQLMTgldb(map);
                     hasAddedBind = true;
                 }
             }

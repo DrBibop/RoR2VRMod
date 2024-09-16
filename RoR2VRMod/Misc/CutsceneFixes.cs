@@ -187,39 +187,37 @@ namespace VRMod
 
         private static void FixIntroCanvas(CameraRigController cameraRig)
         {
-            GameObject canvasObject = GameObject.Find("Canvas");
+            Transform fade = GameObject.Find("Fade").transform;
 
-            if (canvasObject)
-            {
-                GameObject fadeObject = new GameObject("Black Fade");
-                fadeObject.layer = LayerIndex.ui.intVal;
-                Canvas fadeCanvas = fadeObject.AddComponent<Canvas>();
-                fadeCanvas.renderMode = RenderMode.ScreenSpaceCamera;
-                fadeCanvas.worldCamera = cameraRig.uiCam;
-                fadeCanvas.planeDistance = 13;
-                fadeObject.AddComponent<CanvasScaler>();
+            GameObject canvasObject = fade.parent.parent.gameObject;
 
-                Transform fade = canvasObject.transform.Find("MainArea/Fade");
-                fade.SetParent(fadeObject.transform);
-                fade.localPosition = Vector3.zero;
-                fade.localRotation = Quaternion.identity;
-                fade.localScale = Vector3.one * 3;
+            GameObject fadeObject = new GameObject("Black Fade");
+            fadeObject.layer = LayerIndex.ui.intVal;
+            Canvas fadeCanvas = fadeObject.AddComponent<Canvas>();
+            fadeCanvas.renderMode = RenderMode.ScreenSpaceCamera;
+            fadeCanvas.worldCamera = cameraRig.uiCam;
+            fadeCanvas.planeDistance = 13;
+            fadeObject.AddComponent<CanvasScaler>();
+            
+            fade.SetParent(fadeObject.transform);
+            fade.localPosition = Vector3.zero;
+            fade.localRotation = Quaternion.identity;
+            fade.localScale = Vector3.one * 3;
 
-                Canvas canvas = canvasObject.GetComponent<Canvas>();
-                canvas.renderMode = RenderMode.WorldSpace;
-                canvas.worldCamera = cameraRig.uiCam;
-                RectTransform rectTransform = canvasObject.transform as RectTransform;
-                rectTransform.sizeDelta = new Vector2(1200, 1000);
-                rectTransform.localScale = new Vector3(0.01f, 0.01f, 0.01f); ;
-                rectTransform.SetParent(cameraRig.uiCam.transform);
-                rectTransform.localRotation = Quaternion.identity;
-                rectTransform.localPosition = new Vector3(0, 0, 12.35f);
-                rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            Canvas canvas = canvasObject.GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.WorldSpace;
+            canvas.worldCamera = cameraRig.uiCam;
+            RectTransform rectTransform = canvasObject.transform as RectTransform;
+            rectTransform.sizeDelta = new Vector2(1200, 1000);
+            rectTransform.localScale = new Vector3(0.01f, 0.01f, 0.01f); ;
+            rectTransform.SetParent(cameraRig.uiCam.transform);
+            rectTransform.localRotation = Quaternion.identity;
+            rectTransform.localPosition = new Vector3(0, 0, 12.35f);
+            rectTransform.pivot = new Vector2(0.5f, 0.5f);
 
-                canvasObject.AddComponent<SmoothHUD>().Init(cameraRig.uiCam.transform);
+            canvasObject.AddComponent<SmoothHUD>().Init(cameraRig.uiCam.transform);
 
-                canvasObject.transform.Find("MainArea/BlackBarParent").gameObject.SetActive(false);
-            }
+            canvasObject.transform.Find("MainArea/BlackBarParent").gameObject.SetActive(false);
         }
     }
 }

@@ -8,22 +8,20 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
 
 namespace VRPatcher
 {
-    //Class by MrPurple, adapted by DrBibop
-
-    /// <summary>
-    /// A patcher which runs ahead of UnityPlayer to enable VR in the Global Game Manager.
-    /// </summary>
-    public static class VREnabler
+    public static class VRDependenciesPatcher
     {
         internal static string VRPatcherPath => Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         internal static string ManagedPath => Paths.ManagedPath;
-        internal static string PluginsPath => Path.Combine(VREnabler.ManagedPath, "../Plugins");
-        internal static string SteamVRPath => Path.Combine(VREnabler.ManagedPath, "../StreamingAssets/SteamVR");
+        internal static string PluginsPath => Path.Combine(ManagedPath, "../Plugins/x86_64");
+        internal static string SubsystemsPath => Path.Combine(ManagedPath, "../UnitySubsystems");
+        internal static string OpenVRSubsystemsPath => Path.Combine(SubsystemsPath, "XRSDKOpenVR");
+        internal static string OculusSubsystemsPath => Path.Combine(SubsystemsPath, "OculusXRPlugin");
 
-        private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("VREnabler");
+        private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("VRDependenciesPatcher");
         
 
         /// <summary>
@@ -33,6 +31,92 @@ namespace VRPatcher
         [Obsolete("Should not be used!", true)]
         public static void Initialize()
         {
+            if (!Directory.Exists(SubsystemsPath))
+                Directory.CreateDirectory(SubsystemsPath);
+
+            if (!Directory.Exists(OpenVRSubsystemsPath))
+                Directory.CreateDirectory(OpenVRSubsystemsPath);
+
+            if (!Directory.Exists(OculusSubsystemsPath))
+                Directory.CreateDirectory(OculusSubsystemsPath);
+
+            Logger.LogInfo("Copying subsystems...");
+
+            string openVRSubsystemPath = Path.Combine(OpenVRSubsystemsPath, "UnitySubsystemsManifest.json");
+            byte[] openVRSubsystemFile = Properties.Resources.OpenVRSubsystems;
+
+            if (!CopyFile(openVRSubsystemPath, openVRSubsystemFile, true))
+            {
+                Logger.LogInfo("OpenVR subsystems already present.");
+            }
+            else
+            {
+                Logger.LogInfo("OpenVR subsystems successfully copied.");
+            }
+
+            string oculusSubsystemPath = Path.Combine(OculusSubsystemsPath, "UnitySubsystemsManifest.json");
+            byte[] oculusSubsystemFile = Properties.Resources.OculusSubsystems;
+
+            if (!CopyFile(oculusSubsystemPath, oculusSubsystemFile, true))
+            {
+                Logger.LogInfo("Oculus subsystems already present.");
+            }
+            else
+            {
+                Logger.LogInfo("Oculus subsystems successfully copied.");
+            }
+
+            Logger.LogInfo("Copying libraries...");
+
+            string oculusXRPluginPath = Path.Combine(PluginsPath, "OculusXRPlugin.dll");
+            byte[] oculusXRPluginFile = Properties.Resources.OculusXRPlugin;
+
+            if (!CopyFile(oculusXRPluginPath, oculusXRPluginFile, false))
+            {
+                Logger.LogInfo("Oculus XR plugin already present.");
+            }
+            else
+            {
+                Logger.LogInfo("Oculus XR plugin successfully copied.");
+            }
+
+            string ovrPluginPath = Path.Combine(PluginsPath, "OVRPlugin.dll");
+            byte[] ovrPluginFile = Properties.Resources.OVRPlugin;
+
+            if (!CopyFile(ovrPluginPath, ovrPluginFile, false))
+            {
+                Logger.LogInfo("OVR plugin already present.");
+            }
+            else
+            {
+                Logger.LogInfo("OVR plugin successfully copied.");
+            }
+
+            string openVRAPIPath = Path.Combine(PluginsPath, "openvr_api.dll");
+            byte[] openVRAPIFile = Properties.Resources.openvr_api;
+
+            if (!CopyFile(openVRAPIPath, openVRAPIFile, false))
+            {
+                Logger.LogInfo("OpenVR API already present.");
+            }
+            else
+            {
+                Logger.LogInfo("OpenVR API successfully copied.");
+            }
+
+            string xrSDKOpenVRPath = Path.Combine(PluginsPath, "XRSDKOpenVR.dll");
+            byte[] xrSDKOpenVRFile = Properties.Resources.XRSDKOpenVR;
+
+            if (!CopyFile(xrSDKOpenVRPath, xrSDKOpenVRFile, false))
+            {
+                Logger.LogInfo("XRSDK OpenVR already present.");
+            }
+            else
+            {
+                Logger.LogInfo("XRSDK OpenVR successfully copied.");
+            }
+
+            /*
             if (!VREnabler.EnableVROptions(Path.Combine(VREnabler.ManagedPath, "../globalgamemanagers")))
             {
                 return;
@@ -107,14 +191,41 @@ namespace VRPatcher
             if (CopyFiles(SteamVRPath, bindingFiles, "Binds.", true))
                 VREnabler.Logger.LogInfo("Successfully copied binding files!");
             else
-                VREnabler.Logger.LogInfo("Binding files already present");
+                VREnabler.Logger.LogInfo("Binding files already present");*/
+        }
+
+        private static bool CopyFile(string destination, byte[] data, bool replaceIfDifferent)
+        {
+            if (File.Exists(destination))
+            {
+                if (replaceIfDifferent)
+                {
+                    SHA256 sha = SHA256.Create();
+
+                    byte[] sourceHash = sha.ComputeHash(data);
+                    byte[] destHash = sha.ComputeHash(File.ReadAllBytes(destination));
+
+                    if (sourceHash.SequenceEqual(destHash))
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            File.WriteAllBytes(destination, data);
+
+            return true;
         }
 
         private static bool EnableVROptions(string path)
         {
             AssetsManager assetsManager = new AssetsManager();
             AssetsFileInstance assetsFileInstance = assetsManager.LoadAssetsFile(path, false, "");
-            assetsManager.LoadClassDatabase(Path.Combine(VREnabler.VRPatcherPath, "cldb.dat"));
+            assetsManager.LoadClassDatabase(Path.Combine(VRPatcherPath, "cldb.dat"));
             int num = 0;
             while ((long)num < (long)((ulong)assetsFileInstance.table.assetFileInfoCount))
             {
@@ -173,7 +284,7 @@ namespace VRPatcher
                 }
                 num++;
             }
-            VREnabler.Logger.LogError("VR enable location not found!");
+            Logger.LogError("VR enable location not found!");
             return false;
         }
 
@@ -195,7 +306,7 @@ namespace VRPatcher
                     {
                         using (FileStream fileStream = new FileStream(Path.Combine(directoryInfo.FullName, fileName), FileMode.Create, FileAccess.ReadWrite, FileShare.Delete))
                         {
-                            VREnabler.Logger.LogInfo("Copying " + fileName);
+                            Logger.LogInfo("Copying " + fileName);
                             manifestResourceStream.CopyTo(fileStream);
                         }
                     }
@@ -217,7 +328,7 @@ namespace VRPatcher
                     if (resourceFileContent != installedFileContent)
                     {
                         flag = true;
-                        VREnabler.Logger.LogInfo("Overwriting " + fileName);
+                        Logger.LogInfo("Overwriting " + fileName);
                         File.WriteAllText(installedFile.FullName, resourceFileContent);
                     }
                 }

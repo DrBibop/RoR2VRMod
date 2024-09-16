@@ -5,7 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="UnityEngine.Modules" Version="2019.4.26" />
+    <PackageReference Include="UnityEngine.Modules" Version="2021.3.33">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="BepInEx.Core" Version="5.4.21" />
   </ItemGroup>
 
@@ -24,6 +27,13 @@
     <None Remove="Binds\binding_vive_cosmos.json" />
     <None Remove="Binds\binding_vive_pro.json" />
     <None Remove="Binds\binding_vive_tracker_camera.json" />
+    <None Remove="Dependencies\OculusSubsystems.json" />
+    <None Remove="Dependencies\OculusXRPlugin.dll" />
+    <None Remove="Dependencies\OpenVRSubsystems.json" />
+    <None Remove="Dependencies\openvr_api.dll" />
+    <None Remove="Dependencies\OVRPlugin.dll" />
+    <None Remove="Dependencies\Unity.XR.OpenVR.dll" />
+    <None Remove="Dependencies\XRSDKOpenVR.dll" />
     <None Remove="Plugins\AudioPluginOculusSpatializer.dll" />
     <None Remove="Plugins\Bhaptics.Tact.dll" />
     <None Remove="Plugins\LIV_Bridge.dll" />
@@ -40,17 +50,14 @@
     <EmbeddedResource Include="Binds\actions.json" />
     <EmbeddedResource Include="Binds\bindings_holographic_controller.json" />
     <EmbeddedResource Include="Binds\bindings_knuckles.json" />
-    <EmbeddedResource Include="Binds\bindings_logitech_stylus.json" />
     <EmbeddedResource Include="Binds\bindings_oculus_touch.json" />
     <EmbeddedResource Include="Binds\bindings_vive_controller.json" />
     <EmbeddedResource Include="Binds\bindings_vive_cosmos_controller.json" />
-    <EmbeddedResource Include="Binds\binding_holographic_hmd.json" />
-    <EmbeddedResource Include="Binds\binding_index_hmd.json" />
-    <EmbeddedResource Include="Binds\binding_rift.json" />
-    <EmbeddedResource Include="Binds\binding_vive.json" />
-    <EmbeddedResource Include="Binds\binding_vive_cosmos.json" />
-    <EmbeddedResource Include="Binds\binding_vive_pro.json" />
-    <EmbeddedResource Include="Binds\binding_vive_tracker_camera.json" />
+    <EmbeddedResource Include="Dependencies\OculusXRPlugin.dll" />
+    <EmbeddedResource Include="Dependencies\OpenVRSubsystems.json" />
+    <EmbeddedResource Include="Dependencies\OVRPlugin.dll" />
+    <EmbeddedResource Include="Dependencies\Unity.XR.OpenVR.dll" />
+    <EmbeddedResource Include="Dependencies\XRSDKOpenVR.dll" />
     <EmbeddedResource Include="Plugins\AudioPluginOculusSpatializer.dll" />
     <EmbeddedResource Include="Plugins\Bhaptics.Tact.dll" />
     <EmbeddedResource Include="Plugins\LIV_Bridge.dll" />
@@ -67,6 +74,26 @@
     <Reference Include="AssetsTools.NET">
       <HintPath>..\..\AssetsTools.NET.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Dependencies\OculusSubsystems.json" />
+    <EmbeddedResource Include="Dependencies\openvr_api.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

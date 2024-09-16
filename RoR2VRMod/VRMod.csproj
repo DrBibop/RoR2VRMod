@@ -1,16 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="BepInEx.Core" Version="5.4.21" />
-    <PackageReference Include="RiskOfRain2.GameLibs" Version="1.2.4-r.0" />
-    <PackageReference Include="UnityEngine.Modules" Version="2019.4.26" />
-    <PackageReference Include="MMHOOK.RoR2" Version="2022.9.20">
-      <NoWarn>NU1701</NoWarn>
-    </PackageReference>
+    <PackageReference Include="MMHOOK.RoR2" Version="2024.9.5" />
+    <PackageReference Include="RiskOfRain2.GameLibs" Version="1.3.2-r.1" />
+    <PackageReference Include="UnityEngine.Modules" Version="2021.3.33" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,13 +26,22 @@
       <HintPath>..\VREnabler\Plugins\ShockwaveManager.dll</HintPath>
     </Reference>
     <Reference Include="SteamVR">
-      <HintPath>..\..\..\Unity\risk of rain 2\build\risk of rain 2_Data\Managed\SteamVR.dll</HintPath>
+      <HintPath>..\VREnabler\Dependencies\SteamVR.dll</HintPath>
     </Reference>
     <Reference Include="SteamVR_Actions">
-      <HintPath>..\..\..\Unity\risk of rain 2\build\risk of rain 2_Data\Managed\SteamVR_Actions.dll</HintPath>
+      <HintPath>..\VREnabler\Dependencies\SteamVR_Actions.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Postprocessing.Runtime">
       <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\Unity.Postprocessing.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.XR.Management">
+      <HintPath>..\VREnabler\Dependencies\Unity.XR.Management-nstrip.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.XR.Oculus">
+      <HintPath>..\VREnabler\Dependencies\Unity.XR.Oculus.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.XR.OpenVR">
+      <HintPath>..\VREnabler\Dependencies\Unity.XR.OpenVR.dll</HintPath>
     </Reference>
   </ItemGroup>
 

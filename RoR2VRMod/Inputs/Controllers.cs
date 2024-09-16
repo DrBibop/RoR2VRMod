@@ -1,12 +1,16 @@
-﻿using Mono.Cecil.Cil;
+﻿using HarmonyLib;
+using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using MonoMod.RuntimeDetour;
 using Rewired;
+using Rewired.Data;
 using RoR2;
 using RoR2.GamepadVibration;
 using RoR2.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.XR;
 using Valve.VR;
@@ -247,7 +251,7 @@ namespace VRMod
         {
             ILCursor c = new ILCursor(il);
 
-            c.GotoNext(x => x.MatchStloc(5));
+            c.GotoNext(x => x.MatchStloc(6));
             c.EmitDelegate<Func<Transform, Transform>>((headTransform) =>
             {
                 if (!ModConfig.ControllerMovementDirection.Value) return headTransform;
@@ -264,10 +268,9 @@ namespace VRMod
                 }
             });
 
-            c.GotoNext(x => x.MatchLdloca(6));
-            c.GotoNext(x => x.MatchLdloca(6));
+            c.GotoNext(x => x.MatchLdloca(8));
 
-            c.Emit(OpCodes.Ldloc_S, (byte)6);
+            c.Emit(OpCodes.Ldloc_S, (byte)7);
             c.EmitDelegate<Func<Vector2, Vector2>>((vector) =>
             {
                 if (!ModConfig.ControllerMovementDirection.Value || MotionControls.HandsReady) return vector;
@@ -282,7 +285,7 @@ namespace VRMod
 
                 return Quaternion.Euler(new Vector3(0, 0, angleDifference)) * vector;
             });
-            c.Emit(OpCodes.Stloc_S, (byte)6);
+            c.Emit(OpCodes.Stloc_S, (byte)7);
 
             c.GotoNext(x => x.MatchCallvirt<Transform>("get_right"));
             c.Index += 1;

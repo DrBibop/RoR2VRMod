@@ -56,9 +56,9 @@ namespace VRMod
             }
         }
 
-        private static void MatchTooltipToCanvas(On.RoR2.UI.TooltipController.orig_SetTooltip orig, MPEventSystem eventSystem, TooltipProvider newTooltipProvider, Vector2 tooltipPosition)
+        private static void MatchTooltipToCanvas(On.RoR2.UI.TooltipController.orig_SetTooltip orig, MPEventSystem eventSystem, TooltipProvider newTooltipProvider, Vector2 tooltipPosition, RectTransform rectTransformToDisplayAt)
         {
-            orig(eventSystem, newTooltipProvider, tooltipPosition);
+            orig(eventSystem, newTooltipProvider, tooltipPosition, rectTransformToDisplayAt);
 
             if (!eventSystem.currentTooltip || !lastHitCanvas) return;
 

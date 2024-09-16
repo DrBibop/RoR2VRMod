@@ -1,7 +1,9 @@
 ﻿using RoR2;
 using RoR2.UI;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.XR;
 
 namespace VRMod
 {
@@ -26,10 +28,21 @@ namespace VRMod
         {
             if (!Run.instance || PauseManager.isPaused)
             {
-                if (ModConfig.InitialOculusModeValue)
-                    UnityEngine.XR.InputTracking.Recenter();
+                /*if (ModConfig.InitialOculusModeValue)
+                {*/
+                    List<XRInputSubsystem> xrSubsystems = new List<XRInputSubsystem>();
+                    SubsystemManager.GetInstances(xrSubsystems);
+
+                    foreach (XRInputSubsystem xrSubsystem in xrSubsystems)
+                    {
+                        xrSubsystem.TryRecenter();
+                    }
+                /*}
                 else
+                {
                     Valve.VR.OpenVR.Chaperone.ResetZeroPose(ModConfig.InitialRoomscaleValue ? Valve.VR.ETrackingUniverseOrigin.TrackingUniverseStanding : Valve.VR.ETrackingUniverseOrigin.TrackingUniverseSeated);
+                }*/
+                    
             }
         }
     }
