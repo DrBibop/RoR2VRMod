@@ -120,7 +120,7 @@ namespace VRMod
             beamOffset.localPosition = new Vector3(0, 0, 0.1f);
             beamOffset.localScale = new Vector3(0.6f, 0.6f, 1);
 
-            IL.RoR2.PlayerCharacterMasterController.FixedUpdate += SprintBreakDirection;
+            IL.RoR2.PlayerCharacterMasterController.PollButtonInput += SprintBreakDirection;
             On.RoR2.PlayerCharacterMasterController.CheckPinging += PingFromHand;
             On.RoR2.CameraRigController.ModifyAimRayIfApplicable += CancelModifyIfLocal;
             On.RoR2.EquipmentSlot.GetAimRay += GetLeftAimRay;
@@ -1024,7 +1024,7 @@ namespace VRMod
                 x => x.MatchCallvirt<InputBankTest>("get_aimDirection")
                 );
 
-            c.RemoveRange(4);
+            c.RemoveRange(3);
 
             c.Emit(OpCodes.Ldloc_S, (byte)11);
             c.EmitDelegate<Func<CameraRigController, Vector3>>((rig) =>
@@ -1032,7 +1032,6 @@ namespace VRMod
                 return rig.sceneCam.transform.forward;
             }
             );
-            c.Emit(OpCodes.Stloc_S, (byte)14);
 
             for (int i = 0; i < 4; i++)
             {
