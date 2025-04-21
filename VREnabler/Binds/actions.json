@@ -190,38 +190,6 @@
     {
       "controller_type": "vive_cosmos_controller",
       "binding_url": "bindings_vive_cosmos_controller.json"
-    },
-    {
-      "controller_type": "logitech_stylus",
-      "binding_url": "bindings_logitech_stylus.json"
-    },
-    {
-      "controller_type": "vive_cosmos",
-      "binding_url": "binding_vive_cosmos.json"
-    },
-    {
-      "controller_type": "vive",
-      "binding_url": "binding_vive.json"
-    },
-    {
-      "controller_type": "indexhmd",
-      "binding_url": "binding_index_hmd.json"
-    },
-    {
-      "controller_type": "vive_pro",
-      "binding_url": "binding_vive_pro.json"
-    },
-    {
-      "controller_type": "rift",
-      "binding_url": "binding_rift.json"
-    },
-    {
-      "controller_type": "holographic_hmd",
-      "binding_url": "binding_holographic_hmd.json"
-    },
-    {
-      "controller_type": "vive_tracker_camera",
-      "binding_url": "binding_vive_tracker_camera.json"
     }
   ],
   "localization": [

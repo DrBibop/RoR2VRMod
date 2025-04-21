@@ -1,5 +1,6 @@
 ﻿using RoR2;
 using System;
+using System.Collections;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
@@ -82,46 +83,50 @@ namespace VRMod
 
         private static void SetupIntro(On.RoR2.StartEvent.orig_Start orig, StartEvent self)
         {
+            orig(self);
+
             if (self.GetComponent<IntroCutsceneController>() != null)
             {
-                GameObject cameraRigObject = GameObject.Find("Menu Main Camera");
-
-                if (cameraRigObject)
+                RoR2Application.onNextUpdate += () =>
                 {
-                    cameraRigObject.transform.localScale /= 6;
+                    GameObject cameraRigObject = GameObject.Find("Menu Main Camera");
 
-                    CameraRigController cameraRig = cameraRigObject.GetComponent<CameraRigController>();
-
-                    Vector3 offset = new Vector3(-0.3387751f, 0.1797891f, -0.5321155f) * 5 / 6;
-
-                    if (ModConfig.InitialRoomscaleValue) offset.y -= 0.3f;
-
-                    cameraRig.desiredCameraState = new CameraState
+                    if (cameraRigObject)
                     {
-                        position = offset,
-                        rotation = Quaternion.Euler(3.899f, -180, 0)
-                    };
+                        cameraRigObject.transform.localScale /= 6;
 
-                    cameraRig.currentCameraState = cameraRig.desiredCameraState;
+                        CameraRigController cameraRig = cameraRigObject.GetComponent<CameraRigController>();
 
-                    GameObject.Destroy(cameraRig.sceneCam.GetComponent<MatchCamera>());
+                        Vector3 offset = new Vector3(-0.3387751f, 0.1797891f, -0.5321155f) * 5 / 6;
 
-                    Transform cameraParent = cameraRig.sceneCam.transform.parent;
-                    GameObject newSceneCamObject = GameObject.Instantiate(cameraRig.sceneCam.gameObject, cameraParent.position, cameraParent.rotation, cameraParent);
-                    GameObject.Destroy(cameraRig.sceneCam.gameObject);
+                        if (ModConfig.InitialRoomscaleValue) offset.y -= 0.3f;
 
-                    Camera newCam = newSceneCamObject.GetComponent<Camera>();
-                    newCam.cullingMask = newCam.cullingMask & ~(1 << LayerIndex.ui.intVal);
-                    cameraRig.sceneCam = newCam;
-                    cameraRig.sprintingParticleSystem = newSceneCamObject.GetComponentInChildren<ParticleSystem>();
+                        cameraRig.desiredCameraState = new CameraState
+                        {
+                            position = offset,
+                            rotation = Quaternion.Euler(3.899f, -180, 0)
+                        };
 
-                    if (CameraFixes.liv) CameraFixes.liv.HMDCamera = newCam;
+                        cameraRig.currentCameraState = cameraRig.desiredCameraState;
 
-                    FixIntroCanvas(cameraRig);
-                    AdjustIntroElements();
-                }
+                        GameObject.Destroy(cameraRig.sceneCam.GetComponent<MatchCamera>());
+
+                        Transform cameraParent = cameraRig.sceneCam.transform.parent;
+                        GameObject newSceneCamObject = GameObject.Instantiate(cameraRig.sceneCam.gameObject, cameraParent.position, cameraParent.rotation, cameraParent);
+                        GameObject.Destroy(cameraRig.sceneCam.gameObject);
+
+                        Camera newCam = newSceneCamObject.GetComponent<Camera>();
+                        newCam.cullingMask = newCam.cullingMask & ~(1 << LayerIndex.ui.intVal);
+                        cameraRig.sceneCam = newCam;
+                        cameraRig.sprintingParticleSystem = newSceneCamObject.GetComponentInChildren<ParticleSystem>();
+
+                        if (CameraFixes.liv) CameraFixes.liv.HMDCamera = newCam;
+
+                        FixIntroCanvas(cameraRig);
+                        AdjustIntroElements();
+                    }
+                };
             }
-            orig(self);
         }
 
         private static void AdjustIntroElements()

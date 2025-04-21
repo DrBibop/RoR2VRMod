@@ -34,14 +34,20 @@
     <Reference Include="Unity.Postprocessing.Runtime">
       <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\Unity.Postprocessing.Runtime.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.XR.CoreUtils">
+      <HintPath>..\VREnabler\Dependencies\Unity.XR.CoreUtils.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.XR.Management">
       <HintPath>..\VREnabler\Dependencies\Unity.XR.Management-nstrip.dll</HintPath>
     </Reference>
     <Reference Include="Unity.XR.Oculus">
-      <HintPath>..\VREnabler\Dependencies\Unity.XR.Oculus.dll</HintPath>
+      <HintPath>..\VREnabler\Dependencies\Unity.XR.Oculus-nstrip.dll</HintPath>
     </Reference>
     <Reference Include="Unity.XR.OpenVR">
       <HintPath>..\VREnabler\Dependencies\Unity.XR.OpenVR.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.SpatialTracking">
+      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\UnityEngine.SpatialTracking.dll</HintPath>
     </Reference>
   </ItemGroup>
 

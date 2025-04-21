@@ -154,10 +154,10 @@ namespace VRMod
             {
                 handRotation = controllerRotation;
             }
-
+            /*
             handRotation *= Quaternion.Euler(Vector3.right * 40);
             handPosition += handRotation * Vector3.down * 0.03f;
-            handPosition += handRotation * Vector3.back * 0.05f;
+            handPosition += handRotation * Vector3.back * 0.05f;*/
 
             if (!uiMode && stabilisePosition)
             {
@@ -189,8 +189,8 @@ namespace VRMod
 
             if (ray.gameObject.activeSelf)
             {
-                ray.SetPosition(0, (uiMode ? uiHand.currentMuzzle.transform : muzzle).position);
-                ray.SetPosition(1, GetRayHitPosition());
+                ray.transform.position = (uiMode ? uiHand.currentMuzzle.transform : muzzle).position;
+                ray.SetPosition(1, ray.transform.InverseTransformPoint(GetRayHitPosition()));
             }
         }
 
@@ -215,14 +215,14 @@ namespace VRMod
 
                 if (hand.bodyName == bodyName)
                 {
-                    Hand newHand = Object.Instantiate(handPrefab, transform).GetComponent<Hand>();
+                    Hand newHand = Instantiate(handPrefab, transform).GetComponent<Hand>();
                     SetCurrentHand(newHand);
 
                     return;
                 }
             }
 
-            VRMod.StaticLogger.LogWarning(string.Format("Could not find hand with name \'{0}\'. This character is likely not VR supported and some abilities might not work as intended. Using default pointer.", bodyName));
+            VRMod.StaticLogger.LogWarning($"Could not find hand with name \'{bodyName}\'. This character is likely not VR supported and some abilities might not work as intended. Using default pointer.");
         }
 
         internal void SetPrefabs(List<GameObject> prefabs)
@@ -236,7 +236,7 @@ namespace VRMod
         private void SetCurrentHand(Hand hand)
         {
             if (currentHand)
-                GameObject.Destroy(currentHand.gameObject);
+                Destroy(currentHand.gameObject);
 
             currentHand = hand;
             currentHand.gameObject.SetActive(true);

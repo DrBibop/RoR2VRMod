@@ -79,7 +79,7 @@ namespace VRMod
                 orig(self);
                 CanvasToWorldSpace(self.gameObject, hdResolution, menuPosition, menuScale, true);
             };
-            On.RoR2.UI.CharacterSelectController.Awake += (orig, self) =>
+            On.RoR2.UI.CharacterSelectController.OnEnable += (orig, self) =>
             {
                 orig(self);
 
@@ -91,7 +91,8 @@ namespace VRMod
                 if (bottomSideFade)
                     bottomSideFade.gameObject.SetActive(false);
 
-                CanvasToWorldSpace(self.gameObject, hdResolution, characterSelectPosition, characterSelectScale, true);
+                // Needs to be done next frame for some reason. An outside source seems to be setting it back to camera screen space.
+                RoR2Application.onNextUpdate += () => CanvasToWorldSpace(self.gameObject, hdResolution, characterSelectPosition, characterSelectScale, true);
             };
             On.RoR2.UI.PauseScreenController.OnEnable += (orig, self) =>
             {

@@ -9,6 +9,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.SpatialTracking;
 
 namespace VRMod
 {
@@ -427,6 +428,16 @@ namespace VRMod
 
             if (self.gameObject.scene.name == "intro" && self.sceneCam.cullingMask == (self.sceneCam.cullingMask | (1 << LayerIndex.ui.intVal)))
                 self.sceneCam.cullingMask &= ~(1 << LayerIndex.ui.intVal);
+
+            TrackedPoseDriver sceneCamPose = self.sceneCam.gameObject.AddComponent<TrackedPoseDriver>();
+            sceneCamPose.SetPoseSource(TrackedPoseDriver.DeviceType.GenericXRDevice, TrackedPoseDriver.TrackedPose.Head);
+            sceneCamPose.trackingType = TrackedPoseDriver.TrackingType.RotationAndPosition;
+            sceneCamPose.updateType = TrackedPoseDriver.UpdateType.UpdateAndBeforeRender;
+
+            TrackedPoseDriver uiCamPose = self.uiCam.gameObject.AddComponent<TrackedPoseDriver>();
+            uiCamPose.SetPoseSource(TrackedPoseDriver.DeviceType.GenericXRDevice, TrackedPoseDriver.TrackedPose.Head);
+            uiCamPose.trackingType = TrackedPoseDriver.TrackingType.RotationAndPosition;
+            uiCamPose.updateType = TrackedPoseDriver.UpdateType.UpdateAndBeforeRender;
 
             if (Run.instance && ModConfig.UseConfortVignette.Value)
             {

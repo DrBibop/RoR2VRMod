@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using UnityEngine.XR.Management;
 using Unity.XR.OpenVR;
 using Unity.XR.Oculus;
+using System;
+using UnityEngine.XR;
 
 [module: UnverifiableCode]
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -48,9 +50,28 @@ namespace VRMod
                 RecenterController.Init();
                 UIPointer.Init();
                 Haptics.HapticsManager.Init();
-                Controllers.Init();
-                ControllerGlyphs.Init();
+                RoR2.RoR2Application.onNextUpdate += InitSteamVR;
+                RoR2.RoR2Application.onNextUpdate += InitControllers;
             };
+        }
+
+        private void InitSteamVR()
+        {
+            if (ModConfig.InitialOculusModeValue) return;
+
+            SteamVR_Settings.instance.trackingSpace = ModConfig.InitialRoomscaleValue ? ETrackingUniverseOrigin.TrackingUniverseStanding : ETrackingUniverseOrigin.TrackingUniverseSeated;
+            SteamVR_Settings.instance.pauseGameWhenDashboardVisible = false;
+            SteamVR_Settings.instance.lockPhysicsUpdateRateToRenderFrequency = false;
+            SteamVR.Initialize();
+            SteamVR_Input.IdentifyActionsFile();
+            SteamVR_Actions.gameplay.Activate();
+            SteamVR_Actions.ui.Activate();
+        }
+
+        private void InitControllers()
+        {
+            Controllers.Init();
+            ControllerGlyphs.Init();
         }
 
         private void InitVR()
@@ -73,6 +94,7 @@ namespace VRMod
                 OculusSettings.s_Settings.m_StereoRenderingModeDesktop = OculusSettings.StereoRenderingModeDesktop.MultiPass;
                 OculusSettings.s_Settings.DepthSubmission = false;
 
+                NativeMethods.LoadOVRPlugin("");
                 generalSettings.InitXRSDK();
                 generalSettings.StartXRSDK();
             }
@@ -84,16 +106,17 @@ namespace VRMod
                 OpenVRSettings.s_Settings = ScriptableObject.CreateInstance<OpenVRSettings>();
                 OpenVRSettings.s_Settings.StereoRenderingMode = OpenVRSettings.StereoRenderingModes.MultiPass;
                 OpenVRSettings.s_Settings.InitializationType = OpenVRSettings.InitializationTypes.Scene;
-                OpenVRSettings.s_Settings.MirrorView = OpenVRSettings.MirrorViewModes.None;
 
                 generalSettings.InitXRSDK();
+                generalSettings.StartXRSDK();
+            }
 
-                SteamVR_Settings.instance.trackingSpace = ModConfig.InitialRoomscaleValue ? ETrackingUniverseOrigin.TrackingUniverseStanding : ETrackingUniverseOrigin.TrackingUniverseSeated;
-                SteamVR_Settings.instance.pauseGameWhenDashboardVisible = false;
-                SteamVR_Settings.instance.lockPhysicsUpdateRateToRenderFrequency = false;
-                SteamVR.Initialize();
-                SteamVR_Actions.gameplay.Activate();
-                SteamVR_Actions.ui.Activate();
+            List<XRInputSubsystem> xrSubsystems = new List<XRInputSubsystem>();
+            SubsystemManager.GetInstances(xrSubsystems);
+
+            foreach (XRInputSubsystem xrSubsystem in xrSubsystems)
+            {
+                xrSubsystem.TrySetTrackingOriginMode(ModConfig.InitialRoomscaleValue ? TrackingOriginModeFlags.Floor : TrackingOriginModeFlags.Device);
             }
 
             /*

@@ -1,4 +1,5 @@
 ﻿using RoR2;
+using Unity.XR.CoreUtils;
 using UnityEngine;
 
 namespace VRMod
@@ -23,6 +24,10 @@ namespace VRMod
             {
                 CameraFixes.liv.stage = transform;
             }
+
+            XROrigin xrOrigin = gameObject.AddComponent<XROrigin>();
+            xrOrigin.Origin = gameObject;
+            xrOrigin.RequestedTrackingOriginMode = ModConfig.InitialRoomscaleValue ? XROrigin.TrackingOriginMode.Floor : XROrigin.TrackingOriginMode.Device;
         }
 
         internal void UpdateRotation(CameraState cameraState)
