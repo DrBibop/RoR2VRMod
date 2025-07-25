@@ -118,22 +118,13 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="OculusSubsystems" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Dependencies\OculusSubsystems.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="openxr_loader" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Dependencies\openxr_loader.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="OculusXRPlugin" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Dependencies\OculusXRPlugin.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="UnityOpenXR" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Dependencies\UnityOpenXR.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="OpenVRSubsystems" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Dependencies\OpenVRSubsystems.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="openvr_api" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Dependencies\openvr_api.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="OVRPlugin" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Dependencies\OVRPlugin.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="XRSDKOpenVR" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Dependencies\XRSDKOpenVR.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="UnitySubsystemsManifest" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Dependencies\UnitySubsystemsManifest.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

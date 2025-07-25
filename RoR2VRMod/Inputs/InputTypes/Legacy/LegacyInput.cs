@@ -16,11 +16,7 @@ namespace VRMod.Inputs.Legacy
             }
         }
 
-        internal override string BindingString => "";
-
-        internal override bool IsBound => true;
-
-        internal LegacyInput(bool leftController, int inputIndex, params int[] inputIDs)
+        internal LegacyInput(bool leftController, int inputIndex, params int[] inputIDs) : base(UnityEngine.XR.XRNode.CenterEye)
         {
             this.leftController = leftController;
             this.inputIndex = inputIndex;

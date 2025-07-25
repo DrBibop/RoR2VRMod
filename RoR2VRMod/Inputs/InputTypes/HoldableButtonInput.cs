@@ -1,21 +1,29 @@
 ﻿using Rewired;
 using UnityEngine;
-using Valve.VR;
+using UnityEngine.XR;
+using UnityEngine.XR.Interaction.Toolkit;
 
 namespace VRMod.Inputs
 {
     internal class HoldableButtonInput : ButtonInput
     {
-        private SteamVR_Action_Boolean holdableButtonAction;
+        private float holdablePressTime;
+        private bool prevHoldableValue;
 
-        internal HoldableButtonInput(SteamVR_Action_Boolean buttonAction, int buttonID, SteamVR_Action_Boolean holdableButtonAction) : base(buttonAction, buttonID)
-        {
-            this.holdableButtonAction = holdableButtonAction;
-        }
+        internal HoldableButtonInput(XRNode deviceNode, InputHelpers.Button button, int buttonID) : base(deviceNode, button, buttonID) { }
 
         internal override void UpdateValues(CustomController vrController)
         {
-            vrController.SetButtonValueById(buttonID, buttonAction.state || (holdableButtonAction.state && Time.realtimeSinceStartup - holdableButtonAction.changedTime > 0.4f));
+            if (!CheckDevice()) return;
+
+            bool holdableValue = PollButtonState();
+
+            if (holdableValue && !prevHoldableValue)
+                holdablePressTime = Time.realtimeSinceStartup;
+
+            vrController.SetButtonValueById(buttonID, holdableValue && Time.realtimeSinceStartup - holdablePressTime > 0.4f);
+
+            prevHoldableValue = holdableValue;
         }
     }
 }

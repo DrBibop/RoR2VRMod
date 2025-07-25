@@ -1,26 +1,33 @@
 ﻿using Rewired;
-using Valve.VR;
+using UnityEngine.XR;
+using UnityEngine.XR.Interaction.Toolkit;
 
 namespace VRMod.Inputs
 {
     internal class ButtonInput : BaseInput
     {
-        protected SteamVR_Action_Boolean buttonAction;
+        protected InputHelpers.Button button;
         protected int buttonID;
 
-        internal override string BindingString => buttonAction.localizedOriginName;
-
-        internal override bool IsBound => buttonAction.activeBinding;
-
-        internal ButtonInput(SteamVR_Action_Boolean buttonAction, int buttonID)
+        internal ButtonInput(XRNode deviceNode, InputHelpers.Button button, int buttonID) : base(deviceNode)
         {
-            this.buttonAction = buttonAction;
+            this.button = button;
             this.buttonID = buttonID;
+        }
+
+        protected bool PollButtonState()
+        {
+            if (device.IsPressed(button, out bool value))
+                return value;
+
+            return false;
         }
 
         internal override void UpdateValues(CustomController vrController)
         {
-            vrController.SetButtonValueById(buttonID, buttonAction.state);
+            if (!CheckDevice()) return;
+
+            vrController.SetButtonValueById(buttonID, PollButtonState());
         }
     }
 }

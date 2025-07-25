@@ -1,13 +1,9 @@
 ﻿using Rewired;
 using RoR2;
 using RoR2.UI;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using TMPro;
 using UnityEngine.XR;
-using Valve.VR;
 
 namespace VRMod
 {
@@ -142,37 +138,29 @@ namespace VRMod
 
             glyphsSpriteAsset = VRMod.VRAssetBundle.LoadAsset<TMP_SpriteAsset>("sprVRGlyphs");
 
-            if (ModConfig.InitialOculusModeValue)
-            {
-                currentGlyphs = standardGlyphs;
-                return;
-            }
-
             RoR2Application.onUpdate += FindControllerType;
         }
 
         private static void FindControllerType()
         {
-            uint index = OpenVR.System.GetTrackedDeviceIndexForControllerRole(ETrackedControllerRole.RightHand);
+            InputDevice controllerDevice = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
 
-            StringBuilder result = new StringBuilder();
-            ETrackedPropertyError error = ETrackedPropertyError.TrackedProp_Success;
-            OpenVR.System.GetStringTrackedDeviceProperty(index, ETrackedDeviceProperty.Prop_ControllerType_String, result, 64, ref error);
-            if (error == ETrackedPropertyError.TrackedProp_Success)
-            {
-                string resultString = result.ToString();
+            if (controllerDevice == null || controllerDevice.name == null)
+                return;
 
-                if (resultString == "") return;
+            string controllerName = controllerDevice.name.ToLower();
 
-                if (resultString.Contains("vive_controller"))
-                    currentGlyphs = viveGlyphs;
-                else if (resultString.Contains("holographic_controller"))
-                    currentGlyphs = wmrGlyphs;
-                else
-                    currentGlyphs = standardGlyphs;
+            if (controllerName == "")
+                return;
 
-                RoR2Application.onUpdate -= FindControllerType;
-            }
+            if (controllerName.Contains("htc vive controller"))
+                currentGlyphs = viveGlyphs;
+            else if (controllerName.Contains("windows mr controller"))
+                currentGlyphs = wmrGlyphs;
+            else
+                currentGlyphs = standardGlyphs;
+
+            RoR2Application.onUpdate -= FindControllerType;
         }
 
         private static string GetCustomGlyphString(On.RoR2.Glyphs.orig_GetGlyphString_MPEventSystem_string_AxisRange_InputSource orig, MPEventSystem eventSystem, string actionName, AxisRange axisRange, MPEventSystem.InputSource currentInputSource)

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
-using Valve.VR;
 
 namespace VRMod
 {
@@ -94,6 +93,8 @@ namespace VRMod
 
         private List<GameObject> handPrefabs;
 
+        private InputDevice inputDevice;
+
         private void Awake()
         {
             SetCurrentHand(pointerHand);
@@ -130,7 +131,7 @@ namespace VRMod
         private void OnDestroy()
         {
             if(uiHand)
-                GameObject.Destroy(uiHand.gameObject);
+                Destroy(uiHand.gameObject);
         }
 
         private void Update()
@@ -139,25 +140,26 @@ namespace VRMod
 
             if (transform.parent != Camera.main.transform.parent)
                 transform.SetParent(Camera.main.transform.parent);
-
+            /*
             Vector3 handPosition = Vector3.zero;
             Quaternion handRotation = Quaternion.identity;
 
-            InputDevice device = InputDevices.GetDeviceAtXRNode(xrNode);
+            if (inputDevice == null)
+                inputDevice = InputDevices.GetDeviceAtXRNode(xrNode);
 
-            if (device.TryGetFeatureValue(CommonUsages.devicePosition, out Vector3 controllerPosition))
+            if (inputDevice.TryGetFeatureValue(CommonUsages.devicePosition, out Vector3 controllerPosition))
             {
                 handPosition = controllerPosition;
             }
 
-            if (device.TryGetFeatureValue(CommonUsages.deviceRotation, out Quaternion controllerRotation))
+            if (inputDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out Quaternion controllerRotation))
             {
                 handRotation = controllerRotation;
             }
-            /*
+            
             handRotation *= Quaternion.Euler(Vector3.right * 40);
             handPosition += handRotation * Vector3.down * 0.03f;
-            handPosition += handRotation * Vector3.back * 0.05f;*/
+            handPosition += handRotation * Vector3.back * 0.05f;
 
             if (!uiMode && stabilisePosition)
             {
@@ -175,7 +177,10 @@ namespace VRMod
             uiHand.transform.rotation = handRotation;
 
             lastPosition = handPosition;
-            lastRotation = handRotation;
+            lastRotation = handRotation;*/
+
+            uiHand.transform.position = transform.localPosition;
+            uiHand.transform.rotation = transform.localRotation;
         }
 
         private void LateUpdate()

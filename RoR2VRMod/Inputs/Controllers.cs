@@ -1,21 +1,17 @@
-﻿using HarmonyLib;
-using Mono.Cecil.Cil;
+﻿using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using Rewired;
-using Rewired.Data;
 using RoR2;
 using RoR2.GamepadVibration;
 using RoR2.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using UnityEngine;
 using UnityEngine.XR;
-using Valve.VR;
+using UnityEngine.XR.Interaction.Toolkit;
 using VRMod.Inputs;
-using VRMod.Inputs.Legacy;
 
 namespace VRMod
 {
@@ -45,6 +41,8 @@ namespace VRMod
 
         internal static void Init()
         {
+            new Hook(typeof(UnityEngine.InputSystem.InputManager).GetMethod("OnNativeDeviceDiscovered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance), (Action<Action<UnityEngine.InputSystem.InputManager, int, string>, UnityEngine.InputSystem.InputManager, int, string>)DisableInputManager);
+
             ReInput.InputSourceUpdateEvent += UpdateVRInputs;
 
             RoR2Application.onUpdate += Update;
@@ -71,6 +69,11 @@ namespace VRMod
             SetupControllerInputs();
         }
 
+        private static void DisableInputManager(Action<UnityEngine.InputSystem.InputManager, int, string> orig, UnityEngine.InputSystem.InputManager self, int deviceId, string deviceDescriptor)
+        {
+            return;
+        }
+
         private static void VRHaptics(On.RoR2.GamepadVibration.GamepadVibrationManager.orig_Update orig)
         {
             orig();
@@ -84,32 +87,24 @@ namespace VRMod
 
             float motorValue = context.CalcCamDisplacementMagnitude() * context.userVibrationScale;
 
-            if (ModConfig.InitialOculusModeValue)
+            InputDevice leftHand = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
+            InputDevice rightHand = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
+
+            HapticCapabilities capabilities;
+
+            if (leftHand.TryGetHapticCapabilities(out capabilities))
             {
-                InputDevice leftHand = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
-                InputDevice rightHand = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
-
-                HapticCapabilities capabilities;
-
-                if (leftHand.TryGetHapticCapabilities(out capabilities))
+                if (capabilities.supportsImpulse)
                 {
-                    if (capabilities.supportsImpulse)
-                    {
-                        leftHand.SendHapticImpulse(0, motorValue, Time.deltaTime);
-                    }
-                }
-                if (rightHand.TryGetHapticCapabilities(out capabilities))
-                {
-                    if (capabilities.supportsImpulse)
-                    {
-                        rightHand.SendHapticImpulse(0, motorValue, Time.deltaTime);
-                    }
+                    leftHand.SendHapticImpulse(0, motorValue, Time.deltaTime);
                 }
             }
-            else
+            if (rightHand.TryGetHapticCapabilities(out capabilities))
             {
-                SteamVR_Actions.gameplay_Haptic.Execute(0, 0, 80, motorValue, SteamVR_Input_Sources.LeftHand);
-                SteamVR_Actions.gameplay_Haptic.Execute(0, 0, 80, motorValue, SteamVR_Input_Sources.RightHand);
+                if (capabilities.supportsImpulse)
+                {
+                    rightHand.SendHapticImpulse(0, motorValue, Time.deltaTime);
+                }
             }
         }
 
@@ -341,7 +336,7 @@ namespace VRMod
             vrControllers = RewiredAddons.CreateRewiredController();
             vrUIMap = RewiredAddons.CreateUIMap(vrControllers.id);
             vrGameplayMap = RewiredAddons.CreateGameplayMap(vrControllers.id);
-
+            /*
             if (ModConfig.InitialOculusModeValue)
             {
                 inputs = new BaseInput[]
@@ -411,7 +406,55 @@ namespace VRMod
                 {
                     modInputs.Add(new ButtonInput(SteamVR_Actions.ui_ProperSaveLoad, 32));
                 }
+            }*/
+
+            inputs = new BaseInput[]
+            {
+                new VectorInput(XRNode.LeftHand, InputHelpers.Axis2D.PrimaryAxis2D, 0, 1),
+                new VectorInput(XRNode.RightHand, InputHelpers.Axis2D.PrimaryAxis2D, 2, 3),
+                new VectorInput(XRNode.LeftHand, InputHelpers.Axis2D.PrimaryAxis2D, 4, 5),
+                new ButtonInput(XRNode.RightHand, InputHelpers.Button.PrimaryButton, 6),
+                new ButtonInput(XRNode.RightHand, InputHelpers.Button.SecondaryButton, 7),
+                new ButtonInput(XRNode.RightHand, InputHelpers.Button.TriggerButton, 8),
+                new ButtonInput(XRNode.LeftHand, InputHelpers.Button.TriggerButton, 9),
+                new ButtonInput(XRNode.LeftHand, InputHelpers.Button.GripButton, 10),
+                new ButtonInput(XRNode.RightHand, InputHelpers.Button.GripButton, 11),
+                new ButtonInput(XRNode.LeftHand, InputHelpers.Button.PrimaryButton, 12),
+                new ButtonInput(XRNode.LeftHand, InputHelpers.Button.Primary2DAxisClick, 13),
+                new ButtonInput(XRNode.RightHand, InputHelpers.Button.Primary2DAxisClick, 14),
+                new HoldableButtonInput(XRNode.LeftHand, InputHelpers.Button.SecondaryButton, 15),
+                new ButtonInput(XRNode.RightHand, InputHelpers.Button.TriggerButton, 17),
+                new ButtonInput(XRNode.RightHand, InputHelpers.Button.SecondaryButton, 18),
+                /*new ButtonInput(SteamVR_Actions.ui_ReadyAndContinue, 19),
+                new ButtonInput(SteamVR_Actions.ui_TabLeft, 20),
+                new ButtonInput(SteamVR_Actions.ui_TabRight, 21),
+                new ButtonInput(SteamVR_Actions.ui_SubmenuLeft, 22),
+                new ButtonInput(SteamVR_Actions.ui_SubmenuRight, 23),*/
+                new ReleaseButtonInput(XRNode.LeftHand, InputHelpers.Button.SecondaryButton, 24),
+                new ButtonInput(XRNode.RightHand, InputHelpers.Button.Primary2DAxisClick, 25)
+            };
+            /*
+            var plugins = BepInEx.Bootstrap.Chainloader.PluginInfos;
+
+            if (plugins.ContainsKey("com.KingEnderBrine.ExtraSkillSlots"))
+            {
+                modInputs.Add(new ButtonInput(SteamVR_Actions.gameplay_ExtraSkill1, 26));
+                modInputs.Add(new ButtonInput(SteamVR_Actions.gameplay_ExtraSkill2, 27));
+                modInputs.Add(new ButtonInput(SteamVR_Actions.gameplay_ExtraSkill3, 28));
+                modInputs.Add(new ButtonInput(SteamVR_Actions.gameplay_ExtraSkill4, 29));
             }
+            if (plugins.ContainsKey("com.evaisa.r2voicechat"))
+            {
+                modInputs.Add(new ButtonInput(SteamVR_Actions.gameplay_PushToTalk, 30));
+            }
+            if (plugins.ContainsKey("com.cwmlolzlz.skills"))
+            {
+                modInputs.Add(new ButtonInput(SteamVR_Actions.gameplay_BuySkill, 31));
+            }
+            if (plugins.ContainsKey("com.KingEnderBrine.ProperSave"))
+            {
+                modInputs.Add(new ButtonInput(SteamVR_Actions.ui_ProperSaveLoad, 32));
+            }*/
         }
 
         private static void Update()

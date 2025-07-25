@@ -43,20 +43,30 @@ namespace VRMod.Haptics
 
             Vector3 flatHeadVector = Vector3.Cross(camTransform.right, Vector3.up);
 
-            Vector3 flatLeftVector = MotionControls.GetHandBySide(true).transform.position - camTransform.position;
-            flatLeftVector.y = 0;
+            HandController leftHand = MotionControls.GetHandBySide(true);
+            HandController rightHand = MotionControls.GetHandBySide(false);
 
-            Vector3 flatRightVector = MotionControls.GetHandBySide(false).transform.position - camTransform.position;
-            flatRightVector.y = 0;
+            if (leftHand != null && rightHand != null)
+            {
+                Vector3 flatLeftVector = leftHand.transform.position - camTransform.position;
+                flatLeftVector.y = 0;
 
-            float leftAngle = Vector3.SignedAngle(flatHeadVector, flatLeftVector, Vector3.up);
-            float rightAngle = Vector3.SignedAngle(flatHeadVector, flatRightVector, Vector3.up);
+                Vector3 flatRightVector = rightHand.transform.position - camTransform.position;
+                flatRightVector.y = 0;
 
-            Vector3 eulerOffset = new Vector3(0, (leftAngle + rightAngle) / 3, 0);
+                float leftAngle = Vector3.SignedAngle(flatHeadVector, flatLeftVector, Vector3.up);
+                float rightAngle = Vector3.SignedAngle(flatHeadVector, flatRightVector, Vector3.up);
 
-            Vector3 newLookRotation = Quaternion.Euler(eulerOffset) * flatHeadVector;
+                Vector3 eulerOffset = new Vector3(0, (leftAngle + rightAngle) / 3, 0);
 
-            approximateChestRotation = Quaternion.LookRotation(newLookRotation).eulerAngles;
+                Vector3 newLookRotation = Quaternion.Euler(eulerOffset) * flatHeadVector;
+
+                approximateChestRotation = Quaternion.LookRotation(newLookRotation).eulerAngles;
+            }
+            else
+            {
+                approximateChestRotation = Quaternion.LookRotation(flatHeadVector).eulerAngles;
+            }
         }
 
         private static void CheckForHealthCost(On.RoR2.PurchaseInteraction.orig_OnInteractionBegin orig, PurchaseInteraction self, Interactor activator)

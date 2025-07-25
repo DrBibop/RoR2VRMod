@@ -189,7 +189,7 @@ namespace VRMod
             c.GotoNext(x => x.MatchCallvirt(typeof(RoR2.UI.HUD), "set_targetMaster"));
 
             c.Index++;
-            c.Emit(OpCodes.Ldloc_S, (byte)3);
+            c.Emit(OpCodes.Ldloc_S, (byte)6);
             c.EmitDelegate<Action<CharacterMaster>>((master) => 
             {
                 if (UIFixes.livHUD) UIFixes.livHUD.targetMaster = master;

@@ -1,29 +1,38 @@
 ﻿using Rewired;
-using Valve.VR;
+using UnityEngine;
+using UnityEngine.XR;
+using UnityEngine.XR.Interaction.Toolkit;
 
 namespace VRMod.Inputs
 {
     internal class VectorInput : BaseInput
     {
-        protected SteamVR_Action_Vector2 vectorAction;
+        protected InputHelpers.Axis2D vector;
         protected int xAxisID;
         protected int yAxisID;
 
-        internal override string BindingString => vectorAction.localizedOriginName;
-
-        internal override bool IsBound => vectorAction.activeBinding;
-
-        internal VectorInput(SteamVR_Action_Vector2 vectorAction, int xAxisID, int yAxisID)
+        internal VectorInput(XRNode deviceNode, InputHelpers.Axis2D vector, int xAxisID, int yAxisID) : base(deviceNode)
         {
-            this.vectorAction = vectorAction;
+            this.vector = vector;
             this.xAxisID = xAxisID;
             this.yAxisID = yAxisID;
         }
 
+        protected Vector2 PollVector()
+        {
+            if (device.TryReadAxis2DValue(vector, out Vector2 value))
+                return value;
+
+            return Vector2.zero;
+        }
+
         internal override void UpdateValues(CustomController vrController)
         {
-            vrController.SetAxisValueById(xAxisID, vectorAction.axis.x);
-            vrController.SetAxisValueById(yAxisID, vectorAction.axis.y);
+            if (!CheckDevice()) return;
+
+            Vector2 value = PollVector();
+            vrController.SetAxisValueById(xAxisID, value.x);
+            vrController.SetAxisValueById(yAxisID, value.y);
         }
     }
 }

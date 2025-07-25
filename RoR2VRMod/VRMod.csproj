@@ -20,16 +20,13 @@
       <HintPath>..\VREnabler\Plugins\Bhaptics.Tact.dll</HintPath>
     </Reference>
     <Reference Include="Decalicious">
-      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\stubs\Decalicious-nstrip.dll</HintPath>
+      <HintPath>..\VREnabler\Dependencies\Decalicious-nstrip.dll</HintPath>
     </Reference>
     <Reference Include="ShockwaveManager">
       <HintPath>..\VREnabler\Plugins\ShockwaveManager.dll</HintPath>
     </Reference>
-    <Reference Include="SteamVR">
-      <HintPath>..\VREnabler\Dependencies\SteamVR.dll</HintPath>
-    </Reference>
-    <Reference Include="SteamVR_Actions">
-      <HintPath>..\VREnabler\Dependencies\SteamVR_Actions.dll</HintPath>
+    <Reference Include="Unity.InputSystem">
+      <HintPath>..\VREnabler\Dependencies\Unity.InputSystem-nstrip.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Postprocessing.Runtime">
       <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\Unity.Postprocessing.Runtime.dll</HintPath>
@@ -37,17 +34,17 @@
     <Reference Include="Unity.XR.CoreUtils">
       <HintPath>..\VREnabler\Dependencies\Unity.XR.CoreUtils.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.XR.Interaction.Toolkit">
+      <HintPath>..\VREnabler\Dependencies\Unity.XR.Interaction.Toolkit.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.XR.Management">
       <HintPath>..\VREnabler\Dependencies\Unity.XR.Management-nstrip.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.XR.Oculus">
-      <HintPath>..\VREnabler\Dependencies\Unity.XR.Oculus-nstrip.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.XR.OpenVR">
-      <HintPath>..\VREnabler\Dependencies\Unity.XR.OpenVR.dll</HintPath>
+    <Reference Include="Unity.XR.OpenXR">
+      <HintPath>..\VREnabler\Dependencies\Unity.XR.OpenXR.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.SpatialTracking">
-      <HintPath>D:\SteamLibrary\steamapps\common\Risk of Rain 2\Risk of Rain 2_Data\Managed\UnityEngine.SpatialTracking.dll</HintPath>
+      <HintPath>..\VREnabler\Dependencies\UnityEngine.SpatialTracking-nstrip.dll</HintPath>
     </Reference>
   </ItemGroup>
 

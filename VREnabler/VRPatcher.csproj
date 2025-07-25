@@ -13,72 +13,33 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Binds\actions.json" />
-    <None Remove="Binds\bindings_holographic_controller.json" />
-    <None Remove="Binds\bindings_knuckles.json" />
-    <None Remove="Binds\bindings_logitech_stylus.json" />
-    <None Remove="Binds\bindings_oculus_touch.json" />
-    <None Remove="Binds\bindings_vive_controller.json" />
-    <None Remove="Binds\bindings_vive_cosmos_controller.json" />
-    <None Remove="Binds\binding_holographic_hmd.json" />
-    <None Remove="Binds\binding_index_hmd.json" />
-    <None Remove="Binds\binding_rift.json" />
-    <None Remove="Binds\binding_vive.json" />
-    <None Remove="Binds\binding_vive_cosmos.json" />
-    <None Remove="Binds\binding_vive_pro.json" />
-    <None Remove="Binds\binding_vive_tracker_camera.json" />
     <None Remove="Dependencies\OculusSubsystems.json" />
     <None Remove="Dependencies\OculusXRPlugin.dll" />
     <None Remove="Dependencies\OpenVRSubsystems.json" />
     <None Remove="Dependencies\openvr_api.dll" />
-    <None Remove="Dependencies\OVRPlugin.dll" />
-    <None Remove="Dependencies\Unity.XR.OpenVR.dll" />
-    <None Remove="Dependencies\XRSDKOpenVR.dll" />
-    <None Remove="Plugins\AudioPluginOculusSpatializer.dll" />
+    <None Remove="Dependencies\openxr_loader.dll" />
+    <None Remove="Dependencies\UnityOpenXR.dll" />
+    <None Remove="Dependencies\UnitySubsystemsManifest.json" />
     <None Remove="Plugins\Bhaptics.Tact.dll" />
     <None Remove="Plugins\LIV_Bridge.dll" />
-    <None Remove="Plugins\openvr_api.dll" />
-    <None Remove="Plugins\OVRGamepad.dll" />
-    <None Remove="Plugins\OVRPlugin.dll" />
     <None Remove="Plugins\ShockWaveIMU.dll" />
     <None Remove="Plugins\ShockwaveManager.dll" />
-    <None Remove="Plugins\SteamVR.dll" />
-    <None Remove="Plugins\SteamVR_Actions.dll" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Binds\actions.json" />
-    <EmbeddedResource Include="Binds\bindings_holographic_controller.json" />
-    <EmbeddedResource Include="Binds\bindings_knuckles.json" />
-    <EmbeddedResource Include="Binds\bindings_oculus_touch.json" />
-    <EmbeddedResource Include="Binds\bindings_vive_controller.json" />
-    <EmbeddedResource Include="Binds\bindings_vive_cosmos_controller.json" />
-    <EmbeddedResource Include="Dependencies\OculusXRPlugin.dll" />
-    <EmbeddedResource Include="Dependencies\OpenVRSubsystems.json" />
-    <EmbeddedResource Include="Dependencies\OVRPlugin.dll" />
-    <EmbeddedResource Include="Dependencies\Unity.XR.OpenVR.dll" />
-    <EmbeddedResource Include="Dependencies\XRSDKOpenVR.dll" />
-    <EmbeddedResource Include="Plugins\AudioPluginOculusSpatializer.dll" />
+    <EmbeddedResource Include="Dependencies\openxr_loader.dll" />
+    <EmbeddedResource Include="Dependencies\UnityOpenXR.dll" />
+    <EmbeddedResource Include="Dependencies\UnitySubsystemsManifest.json" />
     <EmbeddedResource Include="Plugins\Bhaptics.Tact.dll" />
     <EmbeddedResource Include="Plugins\LIV_Bridge.dll" />
-    <EmbeddedResource Include="Plugins\openvr_api.dll" />
-    <EmbeddedResource Include="Plugins\OVRGamepad.dll" />
-    <EmbeddedResource Include="Plugins\OVRPlugin.dll" />
     <EmbeddedResource Include="Plugins\ShockWaveIMU.dll" />
     <EmbeddedResource Include="Plugins\ShockwaveManager.dll" />
-    <EmbeddedResource Include="Plugins\SteamVR.dll" />
-    <EmbeddedResource Include="Plugins\SteamVR_Actions.dll" />
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="AssetsTools.NET">
       <HintPath>..\..\AssetsTools.NET.dll</HintPath>
     </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Dependencies\OculusSubsystems.json" />
-    <EmbeddedResource Include="Dependencies\openvr_api.dll" />
   </ItemGroup>
 
   <ItemGroup>

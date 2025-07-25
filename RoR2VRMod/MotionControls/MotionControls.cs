@@ -1,11 +1,9 @@
-﻿using Mono.Cecil.Cil;
-using MonoMod.Cil;
-using RoR2;
+﻿using RoR2;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.SpatialTracking;
 using UnityEngine.UI;
 using UnityEngine.XR;
 
@@ -94,7 +92,7 @@ namespace VRMod
 
             On.RoR2.CharacterBody.OnInventoryChanged += OnInventoryChanged;
 
-            RoR2Application.onLoad += ShrinkShieldEffects;
+            //RoR2Application.onLoad += ShrinkShieldEffects;
 
             handControllerPrefab = VRMod.VRAssetBundle.LoadAsset<GameObject>("VRHand");
 
@@ -582,9 +580,19 @@ namespace VRMod
             Vector3 mirroredScale = leftHand.transform.localScale;
             mirroredScale.x = -mirroredScale.x;
             leftHand.transform.localScale = mirroredScale;
+            TrackedPoseDriver leftHandTracker = leftHand.gameObject.AddComponent<TrackedPoseDriver>();
+            leftHandTracker.deviceType = TrackedPoseDriver.DeviceType.GenericXRController;
+            leftHandTracker.poseSource = TrackedPoseDriver.TrackedPose.LeftPose;
+            leftHandTracker.trackingType = TrackedPoseDriver.TrackingType.RotationAndPosition;
+            leftHandTracker.updateType = TrackedPoseDriver.UpdateType.UpdateAndBeforeRender;
 
             HandController rightHand = GameObject.Instantiate(handControllerPrefab).GetComponent<HandController>();
             rightHand.xrNode = XRNode.RightHand;
+            TrackedPoseDriver rightHandTracker = rightHand.gameObject.AddComponent<TrackedPoseDriver>();
+            rightHandTracker.deviceType = TrackedPoseDriver.DeviceType.GenericXRController;
+            rightHandTracker.poseSource = TrackedPoseDriver.TrackedPose.RightPose;
+            rightHandTracker.trackingType = TrackedPoseDriver.TrackingType.RotationAndPosition;
+            rightHandTracker.updateType = TrackedPoseDriver.UpdateType.UpdateAndBeforeRender;
 
             dominantHand = ModConfig.LeftDominantHand.Value ? leftHand : rightHand;
             nonDominantHand = ModConfig.LeftDominantHand.Value ? rightHand : leftHand;

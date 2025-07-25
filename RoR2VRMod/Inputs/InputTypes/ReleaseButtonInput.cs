@@ -1,28 +1,39 @@
 ﻿using Rewired;
 using UnityEngine;
-using Valve.VR;
+using UnityEngine.XR;
+using UnityEngine.XR.Interaction.Toolkit;
 
 namespace VRMod.Inputs
 {
     internal class ReleaseButtonInput : ButtonInput
     {
         private bool canRelease = false;
+        private bool prevState;
+        private float pressTime;
 
-        internal ReleaseButtonInput(SteamVR_Action_Boolean buttonAction, int buttonID) : base(buttonAction, buttonID) { }
+        internal ReleaseButtonInput(XRNode deviceNode, InputHelpers.Button button, int buttonID) : base(deviceNode, button, buttonID) { }
 
         internal override void UpdateValues(CustomController vrController)
         {
+            if (!CheckDevice()) return;
+
             bool isReleasing = false;
-            if (buttonAction.state)
+            bool state = PollButtonState();
+            if (state)
             {
-                canRelease = Time.realtimeSinceStartup - buttonAction.changedTime < 0.4f;
+                if (!prevState)
+                    pressTime = Time.realtimeSinceStartup;
+
+                canRelease = Time.realtimeSinceStartup - pressTime < 0.4f;
             }
             else
             {
-                isReleasing = canRelease && Time.realtimeSinceStartup - buttonAction.changedTime < 0.1f;
+                isReleasing = canRelease && Time.realtimeSinceStartup - pressTime < 0.1f;
             }
 
             vrController.SetButtonValueById(buttonID, isReleasing);
+
+            prevState = state;
         }
     }
 }

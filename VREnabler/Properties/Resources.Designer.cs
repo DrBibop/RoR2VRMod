@@ -63,9 +63,9 @@ namespace VRPatcher.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] OculusSubsystems {
+        internal static byte[] openxr_loader {
             get {
-                object obj = ResourceManager.GetObject("OculusSubsystems", resourceCulture);
+                object obj = ResourceManager.GetObject("openxr_loader", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -73,9 +73,9 @@ namespace VRPatcher.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] OculusXRPlugin {
+        internal static byte[] UnityOpenXR {
             get {
-                object obj = ResourceManager.GetObject("OculusXRPlugin", resourceCulture);
+                object obj = ResourceManager.GetObject("UnityOpenXR", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -83,39 +83,9 @@ namespace VRPatcher.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] openvr_api {
+        internal static byte[] UnitySubsystemsManifest {
             get {
-                object obj = ResourceManager.GetObject("openvr_api", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] OpenVRSubsystems {
-            get {
-                object obj = ResourceManager.GetObject("OpenVRSubsystems", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] OVRPlugin {
-            get {
-                object obj = ResourceManager.GetObject("OVRPlugin", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] XRSDKOpenVR {
-            get {
-                object obj = ResourceManager.GetObject("XRSDKOpenVR", resourceCulture);
+                object obj = ResourceManager.GetObject("UnitySubsystemsManifest", resourceCulture);
                 return ((byte[])(obj));
             }
         }

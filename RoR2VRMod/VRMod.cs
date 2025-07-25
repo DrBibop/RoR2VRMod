@@ -3,13 +3,11 @@ using System.Security;
 using System.Security.Permissions;
 using BepInEx.Logging;
 using UnityEngine;
-using Valve.VR;
 using System.Collections.Generic;
 using UnityEngine.XR.Management;
-using Unity.XR.OpenVR;
-using Unity.XR.Oculus;
 using System;
 using UnityEngine.XR;
+using UnityEngine.XR.OpenXR;
 
 [module: UnverifiableCode]
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -50,22 +48,8 @@ namespace VRMod
                 RecenterController.Init();
                 UIPointer.Init();
                 Haptics.HapticsManager.Init();
-                RoR2.RoR2Application.onNextUpdate += InitSteamVR;
                 RoR2.RoR2Application.onNextUpdate += InitControllers;
             };
-        }
-
-        private void InitSteamVR()
-        {
-            if (ModConfig.InitialOculusModeValue) return;
-
-            SteamVR_Settings.instance.trackingSpace = ModConfig.InitialRoomscaleValue ? ETrackingUniverseOrigin.TrackingUniverseStanding : ETrackingUniverseOrigin.TrackingUniverseSeated;
-            SteamVR_Settings.instance.pauseGameWhenDashboardVisible = false;
-            SteamVR_Settings.instance.lockPhysicsUpdateRateToRenderFrequency = false;
-            SteamVR.Initialize();
-            SteamVR_Input.IdentifyActionsFile();
-            SteamVR_Actions.gameplay.Activate();
-            SteamVR_Actions.ui.Activate();
         }
 
         private void InitControllers()
@@ -83,32 +67,28 @@ namespace VRMod
 
             ((List<XRLoader>)managerSettings.activeLoaders).Clear();
 
-            XRLoader xrLoader = null;
+            XRLoader xrLoader = ScriptableObject.CreateInstance<OpenXRLoader>();
 
-            if (ModConfig.InitialOculusModeValue)
+            OpenXRSettings.Instance.renderMode = OpenXRSettings.RenderMode.MultiPass;
+
+            managerSettings.m_Loaders.Add(xrLoader);
+
+            managerSettings.InitializeLoaderSync();
+
+            if (managerSettings.activeLoader == null)
             {
-                xrLoader = ScriptableObject.CreateInstance<OculusLoader>();
-                managerSettings.m_Loaders.Add(xrLoader);
-
-                OculusSettings.s_Settings = ScriptableObject.CreateInstance<OculusSettings>();
-                OculusSettings.s_Settings.m_StereoRenderingModeDesktop = OculusSettings.StereoRenderingModeDesktop.MultiPass;
-                OculusSettings.s_Settings.DepthSubmission = false;
-
-                NativeMethods.LoadOVRPlugin("");
-                generalSettings.InitXRSDK();
-                generalSettings.StartXRSDK();
+                StaticLogger.LogError("Failed to initialize OpenXR Loader. Is the VR headset ready?");
+                return;
             }
-            else
+
+            managerSettings.StartSubsystems();
+
+            bool init = managerSettings.activeLoader.Initialize();
+            bool start = managerSettings.activeLoader.Start();
+
+            if (!init || !start)
             {
-                xrLoader = ScriptableObject.CreateInstance<OpenVRLoader>();
-                managerSettings.m_Loaders.Add(xrLoader);
-
-                OpenVRSettings.s_Settings = ScriptableObject.CreateInstance<OpenVRSettings>();
-                OpenVRSettings.s_Settings.StereoRenderingMode = OpenVRSettings.StereoRenderingModes.MultiPass;
-                OpenVRSettings.s_Settings.InitializationType = OpenVRSettings.InitializationTypes.Scene;
-
-                generalSettings.InitXRSDK();
-                generalSettings.StartXRSDK();
+                StaticLogger.LogError("Failed to start OpenXR.");
             }
 
             List<XRInputSubsystem> xrSubsystems = new List<XRInputSubsystem>();
@@ -118,32 +98,6 @@ namespace VRMod
             {
                 xrSubsystem.TrySetTrackingOriginMode(ModConfig.InitialRoomscaleValue ? TrackingOriginModeFlags.Floor : TrackingOriginModeFlags.Device);
             }
-
-            /*
-            XRSettings.LoadDeviceByName(useOculus ? "Oculus" : "OpenVR");
-            yield return null;
-            if (XRSettings.loadedDeviceName != (useOculus ? "Oculus" : "OpenVR")) yield break;
-            
-            XRSettings.enabled = true;
-            List<XRInputSubsystem> xrSubsystems = new List<XRInputSubsystem>();
-            SubsystemManager.GetInstances(xrSubsystems);
-
-            foreach (XRInputSubsystem xrSubsystem in xrSubsystems)
-            {
-                xrSubsystem.TrySetTrackingOriginMode(ModConfig.InitialRoomscaleValue ? TrackingOriginModeFlags.Floor : TrackingOriginModeFlags.Device);
-            }
-
-            if (!useOculus)
-            {
-                //SteamVR_Settings.instance.trackingSpace = ModConfig.InitialRoomscaleValue ? ETrackingUniverseOrigin.TrackingUniverseStanding : ETrackingUniverseOrigin.TrackingUniverseSeated;
-                SteamVR_Settings.instance.pauseGameWhenDashboardVisible = false;
-                SteamVR_Settings.instance.lockPhysicsUpdateRateToRenderFrequency = false;
-                SteamVR.Initialize();
-                SteamVR_Actions.gameplay.Activate();
-                SteamVR_Actions.ui.Activate();
-            }
-            Controllers.Init();
-            ControllerGlyphs.Init();*/
         }
     }
 }

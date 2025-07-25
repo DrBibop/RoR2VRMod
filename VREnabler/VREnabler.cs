@@ -18,8 +18,7 @@ namespace VRPatcher
         internal static string ManagedPath => Paths.ManagedPath;
         internal static string PluginsPath => Path.Combine(ManagedPath, "../Plugins/x86_64");
         internal static string SubsystemsPath => Path.Combine(ManagedPath, "../UnitySubsystems");
-        internal static string OpenVRSubsystemsPath => Path.Combine(SubsystemsPath, "XRSDKOpenVR");
-        internal static string OculusSubsystemsPath => Path.Combine(SubsystemsPath, "OculusXRPlugin");
+        internal static string OpenXRSubsystemsPath => Path.Combine(SubsystemsPath, "UnityOpenXR");
 
         private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("VRDependenciesPatcher");
         
@@ -34,86 +33,47 @@ namespace VRPatcher
             if (!Directory.Exists(SubsystemsPath))
                 Directory.CreateDirectory(SubsystemsPath);
 
-            if (!Directory.Exists(OpenVRSubsystemsPath))
-                Directory.CreateDirectory(OpenVRSubsystemsPath);
-
-            if (!Directory.Exists(OculusSubsystemsPath))
-                Directory.CreateDirectory(OculusSubsystemsPath);
+            if (!Directory.Exists(OpenXRSubsystemsPath))
+                Directory.CreateDirectory(OpenXRSubsystemsPath);
 
             Logger.LogInfo("Copying subsystems...");
 
-            string openVRSubsystemPath = Path.Combine(OpenVRSubsystemsPath, "UnitySubsystemsManifest.json");
-            byte[] openVRSubsystemFile = Properties.Resources.OpenVRSubsystems;
+            string openXRSubsystemPath = Path.Combine(OpenXRSubsystemsPath, "UnitySubsystemsManifest.json");
+            byte[] openXRSubsystemFile = Properties.Resources.UnitySubsystemsManifest;
 
-            if (!CopyFile(openVRSubsystemPath, openVRSubsystemFile, true))
+            if (!CopyFile(openXRSubsystemPath, openXRSubsystemFile, true))
             {
-                Logger.LogInfo("OpenVR subsystems already present.");
+                Logger.LogInfo("OpenXR subsystems already present.");
             }
             else
             {
-                Logger.LogInfo("OpenVR subsystems successfully copied.");
-            }
-
-            string oculusSubsystemPath = Path.Combine(OculusSubsystemsPath, "UnitySubsystemsManifest.json");
-            byte[] oculusSubsystemFile = Properties.Resources.OculusSubsystems;
-
-            if (!CopyFile(oculusSubsystemPath, oculusSubsystemFile, true))
-            {
-                Logger.LogInfo("Oculus subsystems already present.");
-            }
-            else
-            {
-                Logger.LogInfo("Oculus subsystems successfully copied.");
+                Logger.LogInfo("OpenXR subsystems successfully copied.");
             }
 
             Logger.LogInfo("Copying libraries...");
 
-            string oculusXRPluginPath = Path.Combine(PluginsPath, "OculusXRPlugin.dll");
-            byte[] oculusXRPluginFile = Properties.Resources.OculusXRPlugin;
+            string openXRPluginPath = Path.Combine(PluginsPath, "UnityOpenXR.dll");
+            byte[] openXRPluginFile = Properties.Resources.UnityOpenXR;
 
-            if (!CopyFile(oculusXRPluginPath, oculusXRPluginFile, false))
+            if (!CopyFile(openXRPluginPath, openXRPluginFile, false))
             {
-                Logger.LogInfo("Oculus XR plugin already present.");
+                Logger.LogInfo("OpenXR plugin already present.");
             }
             else
             {
-                Logger.LogInfo("Oculus XR plugin successfully copied.");
+                Logger.LogInfo("OpenXR plugin successfully copied.");
             }
 
-            string ovrPluginPath = Path.Combine(PluginsPath, "OVRPlugin.dll");
-            byte[] ovrPluginFile = Properties.Resources.OVRPlugin;
+            string openXRLoaderPath = Path.Combine(PluginsPath, "openxr_loader.dll");
+            byte[] openXRLoaderFile = Properties.Resources.openxr_loader;
 
-            if (!CopyFile(ovrPluginPath, ovrPluginFile, false))
+            if (!CopyFile(openXRLoaderPath, openXRLoaderFile, false))
             {
-                Logger.LogInfo("OVR plugin already present.");
-            }
-            else
-            {
-                Logger.LogInfo("OVR plugin successfully copied.");
-            }
-
-            string openVRAPIPath = Path.Combine(PluginsPath, "openvr_api.dll");
-            byte[] openVRAPIFile = Properties.Resources.openvr_api;
-
-            if (!CopyFile(openVRAPIPath, openVRAPIFile, false))
-            {
-                Logger.LogInfo("OpenVR API already present.");
+                Logger.LogInfo("OpenXR loader already present.");
             }
             else
             {
-                Logger.LogInfo("OpenVR API successfully copied.");
-            }
-
-            string xrSDKOpenVRPath = Path.Combine(PluginsPath, "XRSDKOpenVR.dll");
-            byte[] xrSDKOpenVRFile = Properties.Resources.XRSDKOpenVR;
-
-            if (!CopyFile(xrSDKOpenVRPath, xrSDKOpenVRFile, false))
-            {
-                Logger.LogInfo("XRSDK OpenVR already present.");
-            }
-            else
-            {
-                Logger.LogInfo("XRSDK OpenVR successfully copied.");
+                Logger.LogInfo("OpenXR loader successfully copied.");
             }
 
             /*
