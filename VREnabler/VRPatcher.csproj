@@ -20,20 +20,12 @@
     <None Remove="Dependencies\openxr_loader.dll" />
     <None Remove="Dependencies\UnityOpenXR.dll" />
     <None Remove="Dependencies\UnitySubsystemsManifest.json" />
-    <None Remove="Plugins\Bhaptics.Tact.dll" />
-    <None Remove="Plugins\LIV_Bridge.dll" />
-    <None Remove="Plugins\ShockWaveIMU.dll" />
-    <None Remove="Plugins\ShockwaveManager.dll" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Dependencies\openxr_loader.dll" />
-    <EmbeddedResource Include="Dependencies\UnityOpenXR.dll" />
+    <EmbeddedResource Include="Plugins\openxr_loader.dll" />
+    <EmbeddedResource Include="Plugins\UnityOpenXR.dll" />
     <EmbeddedResource Include="Dependencies\UnitySubsystemsManifest.json" />
-    <EmbeddedResource Include="Plugins\Bhaptics.Tact.dll" />
-    <EmbeddedResource Include="Plugins\LIV_Bridge.dll" />
-    <EmbeddedResource Include="Plugins\ShockWaveIMU.dll" />
-    <EmbeddedResource Include="Plugins\ShockwaveManager.dll" />
   </ItemGroup>
 
   <ItemGroup>

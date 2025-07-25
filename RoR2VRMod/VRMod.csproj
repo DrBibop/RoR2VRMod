@@ -17,13 +17,13 @@
 
   <ItemGroup>
     <Reference Include="Bhaptics.Tact">
-      <HintPath>..\VREnabler\Plugins\Bhaptics.Tact.dll</HintPath>
+      <HintPath>..\VREnabler\Dependencies\Bhaptics.Tact.dll</HintPath>
     </Reference>
     <Reference Include="Decalicious">
       <HintPath>..\VREnabler\Dependencies\Decalicious-nstrip.dll</HintPath>
     </Reference>
     <Reference Include="ShockwaveManager">
-      <HintPath>..\VREnabler\Plugins\ShockwaveManager.dll</HintPath>
+      <HintPath>..\VREnabler\Dependencies\ShockwaveManager.dll</HintPath>
     </Reference>
     <Reference Include="Unity.InputSystem">
       <HintPath>..\VREnabler\Dependencies\Unity.InputSystem-nstrip.dll</HintPath>
