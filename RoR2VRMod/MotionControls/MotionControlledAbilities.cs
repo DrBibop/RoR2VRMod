@@ -262,11 +262,9 @@ namespace VRMod
             }
         }
 
-        private static Ray GetGrappleArmRay(On.RoR2.Projectile.ProjectileGrappleController.BaseState.orig_GetOwnerAimRay orig, EntityStates.BaseState self)
+        private static Ray GetGrappleArmRay(On.RoR2.Projectile.ProjectileGrappleController.BaseState.orig_GetOwnerAimRay orig, RoR2.Projectile.ProjectileGrappleController.BaseState self)
         {
-            RoR2.Projectile.ProjectileGrappleController.BaseState state = self as RoR2.Projectile.ProjectileGrappleController.BaseState;
-
-            CharacterBody body = state.owner.characterBody;
+            CharacterBody body = self.owner.characterBody;
 
             if (body && body.IsLocalBody() && body.gameObject.name.Contains("LoaderBody"))
             {
