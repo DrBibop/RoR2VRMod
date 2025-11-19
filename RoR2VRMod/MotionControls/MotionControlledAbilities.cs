@@ -1024,7 +1024,7 @@ namespace VRMod
 
             c.RemoveRange(3);
 
-            c.Emit(OpCodes.Ldloc_S, (byte)11);
+            c.Emit(OpCodes.Ldloc_S, (byte)14);
             c.EmitDelegate<Func<CameraRigController, Vector3>>((rig) =>
             {
                 return rig.sceneCam.transform.forward;

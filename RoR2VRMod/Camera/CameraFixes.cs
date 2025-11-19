@@ -85,7 +85,6 @@ namespace VRMod
                 On.RoR2.HealingFollowerController.OnStartClient += HideWoodsprite;
 
                 IL.RoR2.CharacterBody.UpdateSingleTemporaryVisualEffect_refTemporaryVisualEffect_GameObject_float_bool_string += HideTempEffect;
-                IL.RoR2.CharacterBody.UpdateSingleTemporaryVisualEffect_refTemporaryVisualEffect_string_float_bool_string += HideTempEffect;
 
                 On.EntityStates.VagrantNovaItem.BaseVagrantNovaItemState.OnEnter += HideSparks;
 

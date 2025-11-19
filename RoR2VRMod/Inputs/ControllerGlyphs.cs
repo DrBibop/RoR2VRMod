@@ -128,7 +128,7 @@ namespace VRMod
 
         internal static void Init()
         {
-            On.RoR2.Glyphs.GetGlyphString_MPEventSystem_string_AxisRange_InputSource += GetCustomGlyphString;
+            On.RoR2.Glyphs.GetGlyphString_MPEventSystem_string_AxisRange_InputSource_bool += GetCustomGlyphString;
 
             On.RoR2.InputBindingDisplayController.Awake += ApplyInputDisplaySpriteAsset;
 
@@ -163,7 +163,7 @@ namespace VRMod
             RoR2Application.onUpdate -= FindControllerType;
         }
 
-        private static string GetCustomGlyphString(On.RoR2.Glyphs.orig_GetGlyphString_MPEventSystem_string_AxisRange_InputSource orig, MPEventSystem eventSystem, string actionName, AxisRange axisRange, MPEventSystem.InputSource currentInputSource)
+        private static string GetCustomGlyphString(On.RoR2.Glyphs.orig_GetGlyphString_MPEventSystem_string_AxisRange_InputSource_bool orig, MPEventSystem eventSystem, string actionName, AxisRange axisRange, MPEventSystem.InputSource currentInputSource, bool useLastActiveControllerOnly)
         {
             if (!eventSystem)
             {
@@ -184,7 +184,7 @@ namespace VRMod
                 }
             }
 
-            return orig(eventSystem, actionName, axisRange, currentInputSource);
+            return orig(eventSystem, actionName, axisRange, currentInputSource, useLastActiveControllerOnly);
         }
 
         private static void ChangedToCustom(On.RoR2.UI.MPEventSystem.orig_OnLastActiveControllerChanged orig, MPEventSystem self, Player player, Controller controller)
