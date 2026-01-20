@@ -111,6 +111,15 @@ namespace VRMod
             RoR2Application.onLoad += ReplaceLoaderSmokeRampTextures;
 
             new Hook(typeof(PostProcessProfile).GetMethod("OnEnable", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance), (Action<Action<PostProcessProfile>, PostProcessProfile>)RemoveDepthOfField);
+
+            On.RoR2.SceneCamera.Awake += AddStereoProjectionFix;
+        }
+
+        private static void AddStereoProjectionFix(On.RoR2.SceneCamera.orig_Awake orig, SceneCamera self)
+        {
+            self.gameObject.AddComponent<StereoProjectionFix>();
+
+            orig(self);
         }
 
         private static void RemoveDepthOfField(Action<PostProcessProfile> orig, PostProcessProfile self)

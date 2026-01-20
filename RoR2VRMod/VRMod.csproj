@@ -41,7 +41,7 @@
       <HintPath>..\VREnabler\Dependencies\Unity.XR.Management-nstrip.dll</HintPath>
     </Reference>
     <Reference Include="Unity.XR.OpenXR">
-      <HintPath>..\VREnabler\Dependencies\Unity.XR.OpenXR.dll</HintPath>
+      <HintPath>..\VREnabler\Dependencies\Unity.XR.OpenXR-nstrip.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.SpatialTracking">
       <HintPath>..\VREnabler\Dependencies\UnityEngine.SpatialTracking-nstrip.dll</HintPath>

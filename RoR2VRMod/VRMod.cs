@@ -8,6 +8,7 @@ using UnityEngine.XR.Management;
 using System;
 using UnityEngine.XR;
 using UnityEngine.XR.OpenXR;
+using UnityEngine.XR.OpenXR.Features;
 
 [module: UnverifiableCode]
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -71,6 +72,8 @@ namespace VRMod
 
             OpenXRSettings.Instance.renderMode = OpenXRSettings.RenderMode.MultiPass;
 
+            SetupControllerProfiles();
+
             managerSettings.m_Loaders.Add(xrLoader);
 
             managerSettings.InitializeLoaderSync();
@@ -97,6 +100,61 @@ namespace VRMod
             foreach (XRInputSubsystem xrSubsystem in xrSubsystems)
             {
                 xrSubsystem.TrySetTrackingOriginMode(ModConfig.InitialRoomscaleValue ? TrackingOriginModeFlags.Floor : TrackingOriginModeFlags.Device);
+            }
+        }
+
+        private void SetupControllerProfiles()
+        {
+            StaticLogger.LogInfo("SetupControllerProfiles: Setting up OpenXR controller profiles...");
+            try
+            {
+                var openXRSettings = OpenXRSettings.Instance;
+
+                if (openXRSettings.features.Length > 0) 
+                {
+                    StaticLogger.LogInfo($"SetupControllerProfiles: Features already configured ({openXRSettings.features.Length} features)");
+                    return;
+                }
+
+                // Try to create controller profiles
+                var features = new List<OpenXRFeature>();
+
+                Type[] profileTypes = {
+                    typeof(UnityEngine.XR.OpenXR.Features.Interactions.OculusTouchControllerProfile),
+                    typeof(UnityEngine.XR.OpenXR.Features.Interactions.ValveIndexControllerProfile),
+                    typeof(UnityEngine.XR.OpenXR.Features.Interactions.HTCViveControllerProfile),
+                    typeof(UnityEngine.XR.OpenXR.Features.Interactions.MicrosoftMotionControllerProfile),
+                    typeof(UnityEngine.XR.OpenXR.Features.Interactions.KHRSimpleControllerProfile)
+                };
+
+                foreach (var profileType in profileTypes)
+                {
+                    try
+                    {
+                        var profile = (OpenXRFeature)ScriptableObject.CreateInstance(profileType);
+                        profile.enabled = true;
+                        features.Add(profile);
+                        StaticLogger.LogInfo($"  Created profile: {profileType.Name}");
+                    }
+                    catch (Exception e)
+                    {
+                        StaticLogger.LogWarning($"  Failed to create {profileType.Name}: {e.Message}");
+                    }
+                }
+
+                if (features.Count > 0)
+                {
+                    openXRSettings.features = features.ToArray();
+                    StaticLogger.LogInfo($"SetupControllerProfiles: Added {features.Count} controller profiles");
+                }
+                else
+                {
+                    StaticLogger.LogWarning("SetupControllerProfiles: No controller profiles could be created");
+                }
+            }
+            catch (Exception e)
+            {
+                StaticLogger.LogError($"SetupControllerProfiles failed: {e}");
             }
         }
     }
